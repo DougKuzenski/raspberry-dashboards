@@ -1,0 +1,50 @@
+[
+  {
+    "group": "A",
+    "team": { "id": "MEX", "name": "Mexico", "shortName": "MEX", "flagEmoji": "🇲🇽" },
+    "played": 1, "won": 1, "drawn": 0, "lost": 0,
+    "goalsFor": 1, "goalsAgainst": 0, "goalDifference": 1, "points": 3, "rank": 1
+  },
+  {
+    "group": "A",
+    "team": { "id": "GER", "name": "Germany", "shortName": "GER", "flagEmoji": "🇩🇪" },
+    "played": 0, "won": 0, "drawn": 0, "lost": 0,
+    "goalsFor": 0, "goalsAgainst": 0, "goalDifference": 0, "points": 0, "rank": 2
+  },
+  {
+    "group": "A",
+    "team": { "id": "KOR", "name": "South Korea", "shortName": "KOR", "flagEmoji": "🇰🇷" },
+    "played": 0, "won": 0, "drawn": 0, "lost": 0,
+    "goalsFor": 0, "goalsAgainst": 0, "goalDifference": 0, "points": 0, "rank": 3
+  },
+  {
+    "group": "A",
+    "team": { "id": "RSA", "name": "South Africa", "shortName": "RSA", "flagEmoji": "🇿🇦" },
+    "played": 1, "won": 0, "drawn": 0, "lost": 1,
+    "goalsFor": 0, "goalsAgainst": 1, "goalDifference": -1, "points": 0, "rank": 4
+  },
+  {
+    "group": "B",
+    "team": { "id": "CAN", "name": "Canada", "shortName": "CAN", "flagEmoji": "🇨🇦" },
+    "played": 1, "won": 1, "drawn": 0, "lost": 0,
+    "goalsFor": 2, "goalsAgainst": 1, "goalDifference": 1, "points": 3, "rank": 1
+  },
+  {
+    "group": "B",
+    "team": { "id": "USA", "name": "United States", "shortName": "USA", "flagEmoji": "🇺🇸" },
+    "played": 0, "won": 0, "drawn": 0, "lost": 0,
+    "goalsFor": 0, "goalsAgainst": 0, "goalDifference": 0, "points": 0, "rank": 2
+  },
+  {
+    "group": "B",
+    "team": { "id": "WAL", "name": "Wales", "shortName": "WAL", "flagEmoji": "🏴󠁧󠁢󠁷󠁬󠁳󠁿" },
+    "played": 0, "won": 0, "drawn": 0, "lost": 0,
+    "goalsFor": 0, "goalsAgainst": 0, "goalDifference": 0, "points": 0, "rank": 3
+  },
+  {
+    "group": "B",
+    "team": { "id": "CRO", "name": "Croatia", "shortName": "CRO", "flagEmoji": "🇭🇷" },
+    "played": 1, "won": 0, "drawn": 0, "lost": 1,
+    "goalsFor": 1, "goalsAgainst": 2, "goalDifference": -1, "points": 0, "rank": 4
+  }
+]

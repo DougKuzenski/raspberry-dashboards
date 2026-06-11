@@ -1,0 +1,272 @@
+/* Full-screen dashboard layout. Grid: header / body (hero+today+context) /
+   upcoming strip / footer ticker. Sized so a normal match day needs no scroll. */
+
+.dashboard {
+  width: 100vw;
+  height: 100vh;
+  padding: clamp(10px, 1.4vw, 24px);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: clamp(8px, 1.1vw, 18px);
+  transition: transform 2s ease; /* smooth burn-in nudge */
+}
+
+.dashboard--loading {
+  place-items: center;
+}
+.loading-text {
+  font-size: var(--fs-title);
+  color: var(--text-dim);
+}
+
+/* ---- Header ---- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: clamp(6px, 0.8vw, 14px);
+}
+.header__title {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(10px, 1.4vw, 22px);
+}
+.header__brand {
+  font-size: var(--fs-brand);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.header__phase {
+  font-size: calc(var(--fs-base) * 0.95);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.header__live-pip {
+  color: var(--live);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  animation: pulse 2s infinite;
+}
+.header__clock {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(8px, 1vw, 16px);
+}
+.header__date {
+  color: var(--text-dim);
+  font-size: calc(var(--fs-base) * 1.05);
+}
+.header__time {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Body grid ---- */
+.dashboard__body {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'hero    context'
+    'today   context';
+  gap: clamp(8px, 1.1vw, 18px);
+  min-height: 0;
+}
+.dashboard__hero { grid-area: hero; }
+.dashboard__today { grid-area: today; min-height: 0; }
+.dashboard__context { grid-area: context; min-height: 0; overflow: hidden; }
+
+/* ---- Hero card ---- */
+.hero {
+  background: linear-gradient(140deg, var(--bg-panel-2), var(--bg-panel));
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: clamp(14px, 1.8vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 0.9vw, 16px);
+  height: 100%;
+}
+.hero--live { border-color: var(--live); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.25); }
+.hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: calc(var(--fs-base) * 0.95);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.hero__teams {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.6vw, 28px);
+  font-size: var(--fs-hero);
+  font-weight: 800;
+  line-height: 1.05;
+  flex-wrap: wrap;
+}
+.hero__vs { color: var(--text-dim); font-size: 0.5em; }
+.hero__score { font-variant-numeric: tabular-nums; }
+.hero__score-sep { color: var(--text-dim); }
+.hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--text-dim);
+  font-size: calc(var(--fs-base) * 1.0);
+}
+.hero__countdown {
+  font-size: var(--fs-title);
+  color: var(--accent);
+  font-weight: 700;
+}
+.hero__notes { color: var(--favorite); font-size: calc(var(--fs-base) * 0.95); }
+.hero--empty { justify-content: center; align-items: center; color: var(--text-dim); }
+
+/* ---- Panels (today / standings / bracket) ---- */
+.panel {
+  background: var(--bg-panel);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: clamp(12px, 1.4vw, 24px);
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.panel__title {
+  font-size: calc(var(--fs-base) * 1.05);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin-bottom: clamp(8px, 1vw, 16px);
+  font-weight: 800;
+}
+.panel__empty { color: var(--text-dim); }
+
+/* ---- Match rows (today) ---- */
+.match-list { list-style: none; display: flex; flex-direction: column; gap: clamp(6px, 0.8vw, 12px); }
+.match-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 20px);
+  padding: clamp(6px, 0.8vw, 12px) clamp(8px, 1vw, 14px);
+  background: var(--bg-panel-2);
+  border-radius: 10px;
+  border-left: 5px solid var(--line);
+}
+.match-row--live { border-left-color: var(--live); }
+.match-row--final { border-left-color: var(--final); }
+.match-row--scheduled { border-left-color: var(--accent); }
+.match-row__time { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.match-row__teams { display: flex; align-items: center; gap: clamp(8px, 1vw, 16px); font-weight: 700; }
+.match-row__score { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* ---- Team label ---- */
+.team { display: inline-flex; align-items: center; gap: 0.4em; }
+.team__flag { font-size: 1.1em; }
+.team--favorite .team__name {
+  color: var(--favorite);
+  text-shadow: 0 0 16px rgba(74, 214, 255, 0.35);
+}
+
+/* ---- Status badges ---- */
+.status {
+  font-size: calc(var(--fs-base) * 0.85);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.status--live { background: var(--live); color: #fff; animation: pulse 2s infinite; }
+.status--ht { background: var(--accent); color: #1a1300; }
+.status--pre { background: var(--accent); color: #1a1300; }
+.status--final { background: var(--final); color: #fff; }
+.status--scheduled { background: transparent; color: var(--text-dim); }
+.status--off { background: #5a2a2a; color: #ffd; }
+
+/* ---- Standings ---- */
+.standings { margin-bottom: clamp(8px, 1vw, 16px); }
+.standings__group { color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+.standings__table { width: 100%; border-collapse: collapse; font-size: calc(var(--fs-base) * 0.95); }
+.standings__table th {
+  text-align: right;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 0.3em 0.5em;
+  font-size: 0.85em;
+}
+.standings__table td { text-align: right; padding: 0.35em 0.5em; border-top: 1px solid var(--line); }
+.standings__pos, .standings__team { text-align: left; }
+.standings__team { display: flex; align-items: center; gap: 0.4em; font-weight: 600; }
+.standings__pts { color: var(--accent); font-weight: 800; }
+.standings__row--favorite td { background: rgba(74, 214, 255, 0.1); }
+.standings__row--favorite .standings__team { color: var(--favorite); }
+
+/* ---- Bracket ---- */
+.bracket { display: flex; gap: clamp(10px, 1.4vw, 24px); overflow: hidden; }
+.bracket__col { display: flex; flex-direction: column; justify-content: space-around; gap: clamp(8px, 1vw, 16px); flex: 1; }
+.bracket__round { color: var(--text-dim); font-size: 0.8em; letter-spacing: 0.08em; text-transform: uppercase; }
+.bracket__node {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.bracket__slot { padding: 0.4em 0.6em; font-size: calc(var(--fs-base) * 0.85); }
+.bracket__slot + .bracket__slot { border-top: 1px solid var(--line); }
+
+/* ---- Upcoming strip ---- */
+.upcoming {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 22px);
+  padding: clamp(6px, 0.8vw, 12px) clamp(10px, 1.2vw, 18px);
+  background: var(--bg-panel);
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.upcoming__label { color: var(--accent); font-weight: 800; letter-spacing: 0.1em; font-size: 0.85em; }
+.upcoming__list { list-style: none; display: flex; gap: clamp(12px, 1.8vw, 32px); flex: 1; overflow: hidden; }
+.upcoming__item { display: flex; flex-direction: column; white-space: nowrap; }
+.upcoming__item--favorite .upcoming__teams { color: var(--favorite); font-weight: 700; }
+.upcoming__time { color: var(--text-dim); font-size: 0.8em; }
+
+/* ---- Footer ticker ---- */
+.ticker {
+  background: var(--accent);
+  color: #1a1300;
+  border-radius: 10px;
+  padding: clamp(6px, 0.8vw, 12px) clamp(12px, 1.4vw, 22px);
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ---- Connection status ---- */
+.conn {
+  position: fixed;
+  bottom: 10px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7em;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+.conn__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
+.conn--stale { color: var(--accent); }
+.conn--stale .conn__dot { background: var(--accent); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}

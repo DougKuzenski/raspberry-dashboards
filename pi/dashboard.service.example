@@ -1,0 +1,23 @@
+# systemd USER service for the dashboard server.
+# Install: copy to ~/.config/systemd/user/worldcup-dashboard.service
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now worldcup-dashboard.service
+# Adjust WorkingDirectory if you cloned somewhere other than ~/world-cup-dashboard.
+
+[Unit]
+Description=World Cup Dashboard Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/world-cup-dashboard
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=DATA_PROVIDER=manual
+
+[Install]
+WantedBy=default.target

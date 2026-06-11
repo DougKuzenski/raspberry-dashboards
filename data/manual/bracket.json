@@ -1,0 +1,41 @@
+[
+  {
+    "id": "r16-1",
+    "stage": "round_of_16",
+    "label": "Round of 16 · Match 1",
+    "homeSource": "Winner Group A",
+    "awaySource": "Runner-up Group B",
+    "winnerFeedsTo": "qf-1"
+  },
+  {
+    "id": "r16-2",
+    "stage": "round_of_16",
+    "label": "Round of 16 · Match 2",
+    "homeSource": "Winner Group C",
+    "awaySource": "Runner-up Group D",
+    "winnerFeedsTo": "qf-1"
+  },
+  {
+    "id": "qf-1",
+    "stage": "quarterfinal",
+    "label": "Quarterfinal 1",
+    "homeSource": "Winner R16-1",
+    "awaySource": "Winner R16-2",
+    "winnerFeedsTo": "sf-1"
+  },
+  {
+    "id": "sf-1",
+    "stage": "semifinal",
+    "label": "Semifinal 1",
+    "homeSource": "Winner QF-1",
+    "awaySource": "Winner QF-2",
+    "winnerFeedsTo": "final"
+  },
+  {
+    "id": "final",
+    "stage": "final",
+    "label": "Final",
+    "homeSource": "Winner SF-1",
+    "awaySource": "Winner SF-2"
+  }
+]

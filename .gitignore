@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.local
+.env
+.DS_Store
+npm-debug.log*
+
+# Runtime-generated cache (keep the directory, ignore the file)
+data/cache/dashboard.json

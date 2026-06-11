@@ -1,0 +1,26 @@
+# Optional: run the Chromium kiosk as a systemd user service instead of a desktop
+# autostart entry. Requires a graphical session (X11/Wayland) to already be running.
+# Install: copy to ~/.config/systemd/user/worldcup-kiosk.service
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now worldcup-kiosk.service
+#
+# NOTE: Display/session behavior changes between Raspberry Pi OS releases. If the
+# browser does not appear, prefer the desktop-autostart approach (see README) and
+# confirm whether the Pi is on Wayland or X11.
+
+[Unit]
+Description=World Cup Dashboard Kiosk (Chromium)
+After=worldcup-dashboard.service graphical-session.target
+Wants=worldcup-dashboard.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sh -c 'until curl -sf http://localhost:3000/healthz; do sleep 1; done'
+ExecStart=%h/world-cup-dashboard/pi/chromium-launch.sh
+Restart=always
+RestartSec=5
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical-session.target

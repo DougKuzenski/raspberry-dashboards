@@ -1,0 +1,6 @@
+{
+  "timezone": "America/Los_Angeles",
+  "manualMessage": "Use the Roku remote to switch to FOX One when the next match kicks off.",
+  "favoriteTeams": ["USA", "MEX", "CAN"],
+  "defaultProvider": "manual"
+}

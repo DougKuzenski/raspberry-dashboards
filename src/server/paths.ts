@@ -1,0 +1,11 @@
+import path from 'node:path';
+
+// Data lives at the project root regardless of where the compiled server runs
+// from (tsx in dev, dist/ in prod). The server is always launched with the
+// project root as CWD (npm scripts / systemd WorkingDirectory), so anchor here.
+export const PROJECT_ROOT = process.cwd();
+export const MANUAL_DIR = path.join(PROJECT_ROOT, 'data', 'manual');
+export const CACHE_DIR = path.join(PROJECT_ROOT, 'data', 'cache');
+export const CACHE_FILE = path.join(CACHE_DIR, 'dashboard.json');
+export const SAMPLE_REMOTE_DIR = path.join(PROJECT_ROOT, 'data', 'sample-remote');
+export const CLIENT_DIST = path.join(PROJECT_ROOT, 'dist', 'client');

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "match-001",
+    "stage": "group",
+    "group": "A",
+    "home": { "code": "MEX", "name": "Mexico", "short": "MEX", "flag": "🇲🇽" },
+    "away": { "code": "RSA", "name": "South Africa", "short": "RSA", "flag": "🇿🇦" },
+    "kickoff": "2026-06-11T19:00:00Z",
+    "venue": "Estadio Azteca",
+    "city": "Mexico City",
+    "state": "live",
+    "homeGoals": 1,
+    "awayGoals": 0,
+    "minute": 63
+  },
+  {
+    "id": "match-003",
+    "stage": "group",
+    "group": "B",
+    "home": { "code": "CAN", "name": "Canada", "short": "CAN", "flag": "🇨🇦" },
+    "away": { "code": "CRO", "name": "Croatia", "short": "CRO", "flag": "🇭🇷" },
+    "kickoff": "2026-06-11T16:00:00Z",
+    "venue": "BMO Field",
+    "city": "Toronto",
+    "state": "ft",
+    "homeGoals": 2,
+    "awayGoals": 1,
+    "minute": 90
+  },
+  {
+    "id": "match-004",
+    "stage": "group",
+    "group": "B",
+    "home": { "code": "USA", "name": "United States", "short": "USA", "flag": "🇺🇸" },
+    "away": { "code": "WAL", "name": "Wales", "short": "WAL", "flag": "🏴󠁧󠁢󠁷󠁬󠁳󠁿" },
+    "kickoff": "2026-06-12T00:00:00Z",
+    "venue": "MetLife Stadium",
+    "city": "East Rutherford",
+    "state": "scheduled",
+    "homeGoals": null,
+    "awayGoals": null,
+    "minute": null
+  }
+]

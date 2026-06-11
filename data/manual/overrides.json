@@ -1,0 +1,11 @@
+{
+  "manualMessage": "Manual overrides active — channel notes below are hand-maintained.",
+  "matches": [
+    {
+      "id": "match-001",
+      "tv": "FOX",
+      "stream": "FOX One",
+      "notes": "Host nation opener — kitchen TV: switch to FOX One."
+    }
+  ]
+}
