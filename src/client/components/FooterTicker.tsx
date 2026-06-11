@@ -7,6 +7,20 @@ interface Props {
   message?: string;
 }
 
+function code(m: Match, side: 'home' | 'away'): string {
+  const team = side === 'home' ? m.homeTeam : m.awayTeam;
+  return team.shortName ?? team.id;
+}
+
+// "MEX 1-0 RSA" when a result is known, otherwise "MEX v RSA (FT)" — some sources
+// (e.g. OpenFootball) report a match as finished before the score is published.
+function recentLabel(m: Match): string {
+  const known = m.homeScore != null && m.awayScore != null;
+  return known
+    ? `${code(m, 'home')} ${m.homeScore}-${m.awayScore} ${code(m, 'away')}`
+    : `${code(m, 'home')} v ${code(m, 'away')} (FT)`;
+}
+
 // Footer ticker: a manual message if set, otherwise recent results, otherwise
 // the upcoming schedule (spec §6).
 export function FooterTicker({ upcoming, recent, message }: Props) {
@@ -14,17 +28,13 @@ export function FooterTicker({ upcoming, recent, message }: Props) {
   if (message) {
     content = message;
   } else if (recent.length > 0) {
-    content =
-      'RECENT  ·  ' +
-      recent
-        .map((m) => `${m.homeTeam.shortName ?? m.homeTeam.id} ${m.homeScore}-${m.awayScore} ${m.awayTeam.shortName ?? m.awayTeam.id}`)
-        .join('   ·   ');
+    content = 'RECENT  ·  ' + recent.map(recentLabel).join('   ·   ');
   } else {
     content =
       'UP NEXT  ·  ' +
       upcoming
         .slice(0, 5)
-        .map((m) => `${formatKickoffPacific(m.kickoffUtc)} ${m.homeTeam.shortName ?? m.homeTeam.id} v ${m.awayTeam.shortName ?? m.awayTeam.id}`)
+        .map((m) => `${formatKickoffPacific(m.kickoffUtc)} ${code(m, 'home')} v ${code(m, 'away')}`)
         .join('   ·   ');
   }
 
