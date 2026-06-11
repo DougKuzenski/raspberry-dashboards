@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { DashboardData, TournamentPhase } from '../../shared/types.js';
+import type { DashboardData } from '../../shared/types.js';
 import type { DataProvider } from './providerTypes.js';
 import { MANUAL_DIR } from '../paths.js';
+import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
 import {
   DataValidationError,
   validateMatches,
@@ -27,11 +28,6 @@ async function readJson(file: string): Promise<unknown> {
   }
 }
 
-// Phase is derived from the data: knockout once any non-group match exists.
-function derivePhase(matches: ReturnType<typeof validateMatches>): TournamentPhase {
-  return matches.some((m) => m.stage !== 'group') ? 'knockout' : 'group';
-}
-
 // Reads the four manual JSON files, validates them, and assembles DashboardData.
 export const manualProvider: DataProvider = {
   name: 'manual',
@@ -50,7 +46,7 @@ export const manualProvider: DataProvider = {
 
     return {
       generatedAtUtc: new Date().toISOString(),
-      tournamentPhase: derivePhase(matches),
+      tournamentPhase: deriveTournamentPhase(matches),
       matches,
       standings,
       bracket,

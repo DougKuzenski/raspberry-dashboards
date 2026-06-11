@@ -1,10 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { DashboardData, TournamentPhase } from '../../shared/types.js';
+import type { DashboardData } from '../../shared/types.js';
 import { SAMPLE_REMOTE_DIR } from '../paths.js';
 import { normalizeMatch, type RemoteMatch } from '../normalize/normalizeMatch.js';
 import { calculateStandings } from '../normalize/calculateStandings.js';
 import { applyManualOverrides } from '../normalize/applyManualOverrides.js';
+import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
 
 // Shared body for the external provider stubs. Today this reads sample
 // remote-shaped JSON from disk; a live adapter would fetch + map an API response
@@ -18,10 +19,6 @@ async function loadRemoteMatches(file: string): Promise<RemoteMatch[]> {
   return parsed as RemoteMatch[];
 }
 
-function derivePhase(matches: ReturnType<typeof normalizeMatch>[]): TournamentPhase {
-  return matches.some((m) => m.stage !== 'group') ? 'knockout' : 'group';
-}
-
 export async function buildDashboardFromRemote(
   sourceName: string,
   file: string,
@@ -32,7 +29,7 @@ export async function buildDashboardFromRemote(
 
   let data: DashboardData = {
     generatedAtUtc: new Date().toISOString(),
-    tournamentPhase: derivePhase(matches),
+    tournamentPhase: deriveTournamentPhase(matches),
     matches,
     standings,
     bracket: [],

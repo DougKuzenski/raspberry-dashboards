@@ -38,9 +38,11 @@ manual JSON / external API  ->  DataProvider  ->  normalize + selectDashboardSta
 - **Frontend:** Vite + React + TypeScript, plain CSS sized for 720p (scales up to 1080p).
 - **Backend:** Express (TypeScript), `GET /api/dashboard`, `GET /healthz`, `POST /api/refresh`.
 - **Data providers** (selected by `DATA_PROVIDER`):
-  - `manual` (default) — reads `data/manual/*.json`.
-  - `worldcup_api` / `openfootball` — stubs that read sample remote-shaped JSON from
-    `data/sample-remote/` and normalize it; swap in a real `fetch` later without touching the UI.
+  - `manual` (default) — reads `data/manual/*.json`. No network.
+  - `openfootball` — **live fetch** of [OpenFootball's public-domain `worldcup.json`](https://github.com/openfootball/worldcup.json)
+    (all 104 matches, 48 teams). No API key. Fixtures/groups/schedule are solid; scores appear once the
+    upstream repo publishes them. Match status is inferred from kickoff time, and manual overrides apply on top.
+  - `worldcup_api` — a local sample-remote stub demonstrating the same normalize pipeline (no network).
 - **Manual overrides** (`data/manual/overrides.json`, when `ENABLE_MANUAL_OVERRIDES=true`) let a human
   correct TV channel / stream / notes / kickoff time / team name on top of remote data.
 - **Cache + fallback:** every successful load writes `data/cache/dashboard.json`. On a failed load the
@@ -72,7 +74,7 @@ npm run validate:data
 | `npm run build` | Build client and server to `dist/` |
 | `npm run start` | Run the production server on `:3000` |
 | `npm run validate:data` | Validate manual JSON files |
-| `npm run fetch:data` | Fetch from the active provider and write the cache |
+| `npm run fetch:data` | Fetch from the active provider and write the cache (e.g. `DATA_PROVIDER=openfootball npm run fetch:data`) |
 | `npm test` | Run unit tests (vitest) |
 | `npm run typecheck` | Type-check client and server |
 | `npm run lint` | Lint |

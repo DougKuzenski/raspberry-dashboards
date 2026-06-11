@@ -1,9 +1,20 @@
 // Pure transform from raw DashboardData -> DashboardView (what the UI renders).
 // Lives in shared because the client recomputes it every render against the live
 // clock, so the hero card and "today" buckets stay correct between data fetches.
-import type { DashboardData, DashboardView, Match } from './types.js';
+import type { DashboardData, DashboardView, Match, TournamentPhase } from './types.js';
 import { DEFAULT_TIMEZONE, RECENT_RESULT_WINDOW_HOURS } from './constants.js';
 import { isSameLocalDay } from './time.js';
+
+// The tournament is in its group phase while any group match has yet to finish;
+// once every group game is done (or the dataset has no group games left), we're
+// into the knockout phase. Works whether the data is just the group stage or the
+// full 104-match schedule (which always contains knockout fixtures).
+export function deriveTournamentPhase(matches: Match[]): TournamentPhase {
+  const groupRemaining = matches.some(
+    (m) => m.stage === 'group' && m.status !== 'finished' && m.status !== 'cancelled',
+  );
+  return groupRemaining ? 'group' : 'knockout';
+}
 
 const LIVE_STATUSES = new Set<Match['status']>(['live', 'halftime', 'pre_match']);
 
