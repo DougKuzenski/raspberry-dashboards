@@ -136,6 +136,61 @@ Hard-won on the Pi 2, kept because it's simply the better kiosk design:
   Pi kernel) and `fonts-noto-color-emoji` (so the flag emoji render).
 - cage must run on the **active VT** to be granted the display, so the service does `chvt 1` first.
 
+---
+
+## Deploying updates from your laptop (no SD card, ever again)
+
+The SD card was a one-time thing for the OS. From here on, code travels by git:
+
+```
+laptop: code → commit → push ──► GitHub ──► Pi: git pull → build → restart
+```
+
+**One command from the laptop** — `pi/deploy.sh` SSHes in, pulls, installs,
+builds, restarts the server, and reloads the kiosk. The restart is gated on a
+successful build, so a broken push leaves the old version running:
+
+```bash
+./pi/deploy.sh worldcup            # or: family
+PI_HOST=pi@192.168.1.50 ./pi/deploy.sh family   # override the defaults
+```
+
+**Or let the Pi update itself** — a systemd timer polls GitHub every 10 minutes
+and only rebuilds/restarts when new commits land (polling on purpose: a webhook
+would mean exposing the Pi to the internet):
+
+```bash
+cp pi/auto-update.service.example ~/.config/systemd/user/dashboard-auto-update.service
+cp pi/auto-update.timer.example   ~/.config/systemd/user/dashboard-auto-update.timer
+# edit the service's ExecStart to pick your app (worldcup | family), then:
+systemctl --user daemon-reload
+systemctl --user enable --now dashboard-auto-update.timer
+journalctl --user -u dashboard-auto-update -f    # watch it work
+```
+
+Then "deploying" is just pushing to `main` — the kiosk updates itself within
+~10 minutes, and a broken build never takes the screen down.
+
+> **Reloading the kiosk needs root** (it's a system service on tty1), so both
+> scripts try `sudo systemctl restart <app>-kiosk`. `deploy.sh` uses `ssh -t` so
+> the prompt works; `auto-update.sh` uses `sudo -n` and, if passwordless sudo
+> isn't configured, updates the server and notes that new *client* code loads on
+> the next reboot. The server itself is a `--user` service and always restarts
+> cleanly. To make auto-update reload the kiosk unattended, add a sudoers rule:
+> `<user> ALL=(root) NOPASSWD: /usr/bin/systemctl restart worldcup-kiosk` (or
+> `family-kiosk`).
+
+> Both scripts assume the repo is cloned at `~/raspberry-playground`. If you
+> used a different path (e.g. the older `~/world-cup-dashboard`), set
+> `REPO_DIR=world-cup-dashboard` when invoking them, or re-clone under the new
+> name and update the service `WorkingDirectory`.
+
+For quick experiments without committing: `rsync -av --exclude node_modules ./
+pi@worldcup.local:~/raspberry-playground/` then build/restart by hand — but
+treat it as throwaway; git stays the source of truth.
+
+---
+
 ## Troubleshooting
 
 - **Black screen:** check `sudo journalctl -u worldcup-kiosk -n 50`. Capture the actual output with

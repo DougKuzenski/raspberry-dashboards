@@ -71,9 +71,19 @@ Copy `.env.example` to `.env`. Key vars: `CAL_PROVIDER`, `TIMEZONE`, `HOST`
 
 ## Raspberry Pi
 
-Same kiosk approach as the root app — point Chromium at `http://localhost:3001`
-and run the server as a systemd user service. See the root `pi/SETUP.md`; only
-the port (3001) and `WorkingDirectory` differ.
+Same kiosk approach as the root app — see the root `pi/SETUP.md` walkthrough.
+This app ships its own unit files in `pi/`:
+
+```bash
+cp pi/dashboard.service.example ~/.config/systemd/user/family-dashboard.service
+systemctl --user daemon-reload && systemctl --user enable --now family-dashboard
+./pi/chromium-launch.sh          # kiosk pointed at :3001
+```
+
+Deploys are git-powered, no SD card: from your laptop run
+`./pi/deploy.sh family` (repo root), or install the auto-update timer so the Pi
+pulls, rebuilds, and restarts itself when you push to `main` — see SETUP.md
+§11. Both gate the restart on a successful build.
 
 ## Status
 

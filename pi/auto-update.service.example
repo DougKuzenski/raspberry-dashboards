@@ -1,0 +1,17 @@
+# systemd USER service: one self-update check (run by auto-update.timer).
+# Install (alongside the timer):
+#   cp pi/auto-update.service.example ~/.config/systemd/user/dashboard-auto-update.service
+#   cp pi/auto-update.timer.example   ~/.config/systemd/user/dashboard-auto-update.timer
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now dashboard-auto-update.timer
+# Watch it work:  journalctl --user -u dashboard-auto-update -f
+#
+# Edit ExecStart to pick the app this Pi runs (worldcup | family), and adjust
+# the path if you cloned somewhere other than ~/raspberry-playground.
+
+[Unit]
+Description=Dashboard self-update (git pull + build + restart on new commits)
+
+[Service]
+Type=oneshot
+ExecStart=%h/raspberry-playground/pi/auto-update.sh family

@@ -1,0 +1,13 @@
+# systemd USER timer: check for dashboard updates every 10 minutes.
+# Install instructions are in auto-update.service.example (install both files).
+
+[Unit]
+Description=Check for dashboard updates every 10 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+RandomizedDelaySec=1min
+
+[Install]
+WantedBy=timers.target
