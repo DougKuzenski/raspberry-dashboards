@@ -88,13 +88,21 @@ Copy `.env.example` to `.env`:
 
 ```bash
 PORT=3000
+HOST=127.0.0.1                # loopback by default; set 0.0.0.0 to view from other devices
 DATA_PROVIDER=manual          # manual | openfootball | football_data | worldcup_api
 ENABLE_MANUAL_OVERRIDES=true
 TIMEZONE=America/Los_Angeles
 EXTERNAL_API_BASE_URL=
 EXTERNAL_API_KEY=
 FOOTBALL_DATA_API_KEY=        # required for DATA_PROVIDER=football_data
+REFRESH_TOKEN=                # optional; guards POST /api/refresh when set
 ```
+
+The server **binds to `127.0.0.1` by default** — the on-Pi kiosk only needs
+`localhost`, so nothing is exposed to your network. To open the dashboard on a
+phone/laptop, set `HOST=0.0.0.0`; when you do, also set `REFRESH_TOKEN` so the
+force-refresh endpoint isn't open on the LAN (callers then pass it via an
+`X-Refresh-Token` header or `?token=`).
 
 For live scores, get a free key at https://www.football-data.org/client/register, then:
 

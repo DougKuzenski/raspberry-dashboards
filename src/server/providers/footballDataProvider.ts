@@ -87,6 +87,12 @@ async function fetchMatches(base: string, key: string): Promise<FetchResult> {
 
 export const footballDataProvider: DataProvider = {
   name: 'football_data',
+  // Drop the memo so a forced refresh re-fetches from the API. The rate-limit
+  // cooldown is deliberately left intact so /api/refresh can't be used to hammer
+  // past a 429 backoff.
+  invalidate(): void {
+    memo = null;
+  },
   async fetchDashboardData(): Promise<DashboardData> {
     const now = Date.now();
 

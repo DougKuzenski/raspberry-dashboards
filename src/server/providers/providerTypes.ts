@@ -6,4 +6,10 @@ import type { DashboardData } from '../../shared/types.js';
 export interface DataProvider {
   name: string;
   fetchDashboardData(): Promise<DashboardData>;
+  /**
+   * Drop any in-memory cache so the next fetchDashboardData() hits the source.
+   * Optional — providers without their own cache can omit it. Used by
+   * POST /api/refresh to force a genuine refresh.
+   */
+  invalidate?(): void;
 }

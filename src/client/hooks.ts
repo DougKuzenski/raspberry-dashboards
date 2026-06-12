@@ -1,7 +1,17 @@
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { DashboardData } from '../shared/types.js';
+import { DEFAULT_TIMEZONE } from '../shared/constants.js';
 
 const REFRESH_MS = 60_000;
+
+// The render timezone for the whole dashboard, supplied once from the payload.
+// Components read it via useTimeZone() and pass it to the (pure) time helpers,
+// so changing TIMEZONE / config.json actually moves the wall clock.
+const TimeZoneContext = createContext<string>(DEFAULT_TIMEZONE);
+export const TimeZoneProvider = TimeZoneContext.Provider;
+export function useTimeZone(): string {
+  return useContext(TimeZoneContext);
+}
 
 export interface DashboardFeed {
   data: DashboardData | null;

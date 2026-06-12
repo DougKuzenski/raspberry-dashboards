@@ -8,7 +8,7 @@ export interface StatusBadge {
 }
 
 // Visual-state rules from spec §11.
-export function statusBadge(match: Match): StatusBadge {
+export function statusBadge(match: Match, timeZone?: string): StatusBadge {
   switch (match.status) {
     case 'live':
       return { text: match.minute ? `${match.minute}'` : 'LIVE', variant: 'live' };
@@ -24,7 +24,7 @@ export function statusBadge(match: Match): StatusBadge {
       return { text: 'Cancelled', variant: 'off' };
     case 'scheduled':
     default:
-      return { text: formatTimeOfDay(match.kickoffUtc), variant: 'scheduled' };
+      return { text: formatTimeOfDay(match.kickoffUtc, timeZone), variant: 'scheduled' };
   }
 }
 
