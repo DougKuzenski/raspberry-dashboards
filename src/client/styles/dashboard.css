@@ -197,8 +197,9 @@
 /* ---- Group standings: compact "all groups at once" grid ---- */
 .groups-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
+  /* 4 columns so all 12 WC groups fit in 3 rows without clipping. */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   align-content: start;
   overflow: hidden;
   flex: 1;
@@ -208,7 +209,7 @@
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 8px 9px;
+  padding: 7px 8px;
 }
 .group-card--featured {
   border-color: var(--accent);
