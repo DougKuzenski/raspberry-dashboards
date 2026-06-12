@@ -6,8 +6,9 @@ Future work, captured so we don't re-research it. Nothing here is built yet.
 
 **DONE (2026-06-11):** `football_data` provider wired (football-data.org, free key in
 `FOOTBALL_DATA_API_KEY`). Real status + scores + minute + groups + knockout stages, full WC feed —
-used standalone (no merge needed). 30s in-memory cache keeps us under the 10/min free limit.
-OpenFootball remains the no-key fixtures fallback; manual override still wins over everything.
+used standalone (no merge needed). An adaptive in-memory cache (45s while a match is live/imminent,
+backing off up to 30 min between games) plus rate-limit-header backoff keeps us under the 10/min free
+limit. OpenFootball remains the no-key fixtures fallback; manual override still wins over everything.
 
 Remaining ideas below are alternatives only if football-data proves too laggy/limited.
 
