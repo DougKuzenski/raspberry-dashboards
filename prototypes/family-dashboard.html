@@ -13,10 +13,12 @@
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     overflow:hidden;-webkit-font-smoothing:antialiased}
-  .viewport{position:fixed;inset:0;display:grid;place-items:center}
-  /* fixed design canvas, scaled to fit any screen (same trick as the repo) */
-  .board{width:1280px;height:720px;padding:28px 34px;display:grid;
-    grid-template-rows:auto auto 1fr auto;gap:18px;transform-origin:center}
+  .viewport{position:fixed;inset:0;overflow:hidden}
+  /* fixed design canvas, centered + scaled to fit any screen (same trick as the
+     repo: absolute 50%/50% + translate(-50%,-50%) so an oversized canvas still
+     centers correctly on a narrow phone viewport instead of overflowing off-screen) */
+  .board{position:absolute;top:50%;left:50%;width:1280px;height:720px;padding:28px 34px;
+    display:grid;grid-template-rows:auto auto 1fr auto;gap:18px}
   /* header */
   header{display:flex;justify-content:space-between;align-items:flex-end}
   .today-big{font-size:62px;font-weight:800;line-height:.95;letter-spacing:-1px}
@@ -201,7 +203,7 @@ function fitScale(){
   const s=Math.min(innerWidth/1280, innerHeight/720);
   const step=Math.floor(Date.now()/(10*60*1000))%4;
   const off=[[0,0],[6,4],[-6,6],[4,-4]][step];
-  b.style.transform=`scale(${s}) translate(${off[0]}px,${off[1]}px)`;
+  b.style.transform=`translate(-50%,-50%) scale(${s}) translate(${off[0]}px,${off[1]}px)`;
 }
 const bootMs=Date.now();
 render(); setInterval(tickClock,1000); addEventListener("resize",fitScale);
