@@ -2,6 +2,7 @@ import type { Match } from '../../shared/types.js';
 import { formatTimeOfDay } from '../../shared/time.js';
 import { TeamLabel } from './TeamLabel.js';
 import { statusBadge, scoreText } from './statusText.js';
+import { useTimeZone } from '../hooks.js';
 
 interface Props {
   matches: Match[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function TodayMatches({ matches }: Props) {
+  const tz = useTimeZone();
   return (
     <div className="panel">
       <h2 className="panel__title">TODAY</h2>
@@ -17,10 +19,10 @@ export function TodayMatches({ matches }: Props) {
       ) : (
         <ul className="match-list">
           {matches.map((m) => {
-            const badge = statusBadge(m);
+            const badge = statusBadge(m, tz);
             return (
               <li key={m.id} className={`match-row match-row--${badge.variant}`}>
-                <span className="match-row__time">{formatTimeOfDay(m.kickoffUtc)}</span>
+                <span className="match-row__time">{formatTimeOfDay(m.kickoffUtc, tz)}</span>
                 <span className="match-row__teams">
                   <TeamLabel team={m.homeTeam} short />
                   <span className="match-row__score">{scoreText(m)}</span>

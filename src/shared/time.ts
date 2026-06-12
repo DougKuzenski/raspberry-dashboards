@@ -21,6 +21,14 @@ export function formatTimeOfDay(utc: string, timeZone = DEFAULT_TIMEZONE): strin
   }).format(new Date(utc));
 }
 
+/** "PDT" / "EST" / "GMT+1" — short zone label for the configured timezone. */
+export function timeZoneAbbrev(date: Date, timeZone = DEFAULT_TIMEZONE): string {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'short' }).formatToParts(
+    date,
+  );
+  return parts.find((p) => p.type === 'timeZoneName')?.value ?? '';
+}
+
 /** "Thu Jun 11" — header date line. */
 export function formatHeaderDate(date: Date, timeZone = DEFAULT_TIMEZONE): string {
   return new Intl.DateTimeFormat('en-US', {

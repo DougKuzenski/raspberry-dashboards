@@ -51,6 +51,7 @@ export const manualProvider: DataProvider = {
       standings,
       bracket,
       manualMessage: config.manualMessage,
+      timezone: config.timezone,
       source: 'manual',
     };
   },

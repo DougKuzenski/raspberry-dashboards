@@ -33,11 +33,12 @@ app.get('/api/dashboard', async (_req, res) => {
   }
 });
 
-// Optional force-refresh hook (spec §10). Stateless here — the dashboard refetch
-// already pulls fresh data — but kept so a button/automation can ping it.
+// Force-refresh hook (spec §10): drops the active provider's in-memory cache so
+// the next load re-fetches from the source, then returns the fresh payload. Lets
+// a button/automation pull new data without waiting out the provider's TTL.
 app.post('/api/refresh', async (_req, res) => {
   try {
-    const data = await getDashboard();
+    const data = await getDashboard({ forceRefresh: true });
     res.json({ ok: true, generatedAtUtc: data.generatedAtUtc });
   } catch {
     res.status(500).json({ ok: false });

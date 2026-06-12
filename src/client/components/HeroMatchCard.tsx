@@ -1,7 +1,8 @@
 import type { Match } from '../../shared/types.js';
-import { formatKickoffPacific, formatCountdown } from '../../shared/time.js';
+import { formatKickoffPacific, formatCountdown, timeZoneAbbrev } from '../../shared/time.js';
 import { TeamLabel } from './TeamLabel.js';
 import { statusBadge, hasScore } from './statusText.js';
+import { useTimeZone } from '../hooks.js';
 
 interface Props {
   match?: Match;
@@ -10,6 +11,7 @@ interface Props {
 
 // The big focal card: live match if one exists, otherwise the next upcoming.
 export function HeroMatchCard({ match, now }: Props) {
+  const tz = useTimeZone();
   if (!match) {
     return (
       <div className="hero hero--empty">
@@ -19,7 +21,7 @@ export function HeroMatchCard({ match, now }: Props) {
     );
   }
 
-  const badge = statusBadge(match);
+  const badge = statusBadge(match, tz);
   const live = match.status === 'live' || match.status === 'halftime';
   const countdown = match.status === 'scheduled' ? formatCountdown(match.kickoffUtc, now) : undefined;
   const channel = [match.tv, match.stream].filter(Boolean).join(' / ');
@@ -44,7 +46,7 @@ export function HeroMatchCard({ match, now }: Props) {
       </div>
 
       <div className="hero__meta">
-        <span>{formatKickoffPacific(match.kickoffUtc)} PT</span>
+        <span>{formatKickoffPacific(match.kickoffUtc, tz)} {timeZoneAbbrev(now, tz)}</span>
         {channel && <span>· {channel}</span>}
         {match.venue && <span>· {match.venue}</span>}
       </div>

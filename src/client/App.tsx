@@ -1,5 +1,6 @@
-import { useDashboardFeed, useNow, useFitScale } from './hooks.js';
+import { useDashboardFeed, useNow, useFitScale, TimeZoneProvider } from './hooks.js';
 import { selectDashboardState } from '../shared/selectDashboardState.js';
+import { DEFAULT_TIMEZONE } from '../shared/constants.js';
 import { Header } from './components/Header.js';
 import { HeroMatchCard } from './components/HeroMatchCard.js';
 import { TodayMatches } from './components/TodayMatches.js';
@@ -39,7 +40,8 @@ export function App() {
     );
   }
 
-  const view = selectDashboardState(data, now);
+  const timeZone = data.timezone ?? DEFAULT_TIMEZONE;
+  const view = selectDashboardState(data, now, timeZone);
   const offset = burnInOffset(now);
   const isStale = stale || Boolean(data.stale);
 
@@ -48,6 +50,7 @@ export function App() {
     `translate(-50%, -50%) scale(${scale}) translate(${offset.x}px, ${offset.y}px)`;
 
   return (
+    <TimeZoneProvider value={timeZone}>
     <div className="viewport">
       <div className="dashboard" style={{ transform }}>
       <Header
@@ -86,5 +89,6 @@ export function App() {
       <ConnectionStatus stale={isStale} lastUpdated={lastUpdated} source={data.source} />
       </div>
     </div>
+    </TimeZoneProvider>
   );
 }

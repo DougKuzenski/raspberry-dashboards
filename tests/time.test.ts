@@ -5,6 +5,7 @@ import {
   localDayKey,
   formatKickoffPacific,
   formatUpcomingLabel,
+  timeZoneAbbrev,
 } from '../src/shared/time.js';
 
 describe('time helpers', () => {
@@ -36,5 +37,21 @@ describe('time helpers', () => {
     const now = new Date('2026-06-11T17:24:00Z');
     expect(formatCountdown('2026-06-11T19:00:00Z', now)).toBe('1h 36m');
     expect(formatCountdown('2026-06-11T17:12:00Z', now)).toBe(undefined);
+  });
+
+  it('renders in a non-default timezone when one is supplied', () => {
+    // Same instant: noon PDT == 3:00 PM EDT.
+    const utc = '2026-06-11T19:00:00Z';
+    expect(formatKickoffPacific(utc, 'America/New_York')).toBe('Thu 3:00 PM');
+    // 11:30 PM EDT on the 11th is already the 12th in Pacific.
+    const lateEast = new Date('2026-06-12T03:30:00Z');
+    expect(localDayKey(lateEast, 'America/New_York')).toBe('2026-06-11');
+    expect(localDayKey(lateEast, 'America/Los_Angeles')).toBe('2026-06-11');
+  });
+
+  it('derives a short zone abbreviation for the configured timezone', () => {
+    const summer = new Date('2026-06-11T19:00:00Z');
+    expect(timeZoneAbbrev(summer, 'America/Los_Angeles')).toBe('PDT');
+    expect(timeZoneAbbrev(summer, 'America/New_York')).toBe('EDT');
   });
 });

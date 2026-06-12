@@ -79,6 +79,12 @@ export interface DashboardData {
   standings: Standing[];
   bracket: BracketNode[];
   manualMessage?: string;
+  /**
+   * IANA timezone all kickoff times are rendered in (e.g. "America/Los_Angeles").
+   * Resolved server-side from the TIMEZONE env var or config.json; the client
+   * falls back to DEFAULT_TIMEZONE when this is absent.
+   */
+  timezone?: string;
   /** Name of the provider that produced this payload (e.g. "manual"). */
   source?: string;
   /** True when the server is serving cached/last-good data after a failure. */
