@@ -22,6 +22,15 @@ Budget ~45–60 minutes, most of it waiting on downloads.
 Don't know which Pi you have? The model is printed on the board, or check later with
 `cat /proc/device-tree/model`.
 
+> **On a Pi 2 or older board?** Two differences from the steps below:
+> - **Flash the 32-bit OS, not 64-bit** — the Pi 2/3 32-bit chip won't boot the 64-bit image.
+>   Choose *Raspberry Pi OS (32-bit)*, Desktop.
+> - **No built-in Wi-Fi on the Pi 2.** Use **ethernet for setup** (most reliable). If you have a
+>   USB Wi-Fi dongle, plug it in too, but confirm it connects over ethernet first — old dongles can
+>   need extra firmware, and you don't want to be locked out on a headless Wi-Fi-only first boot.
+> - Good news: the Pi 2 uses a **full-size HDMI** port (normal cable) and **micro-USB power** (5V/2A).
+> - Expect a **slow boot (1–2 min)** and a pokier Chromium. It works; it's just old.
+
 ---
 
 ## 1. Flash a fresh Raspberry Pi OS
@@ -33,13 +42,14 @@ Re-flashing is faster and more reliable than reviving an old install.
 3. In Imager:
    - **Choose Device:** your Pi model
    - **Choose OS:** *Raspberry Pi OS (64-bit)* — the full **Desktop** version (not Lite).
-     Desktop is much easier to debug for a kiosk.
+     Desktop is much easier to debug for a kiosk. **(Pi 2/3: pick the 32-bit version instead.)**
    - **Choose Storage:** your SD card
 4. Click **Next → Edit Settings** (the gear / "would you like to apply customisation"). This is the
    big time-saver — set it all now so the Pi comes up ready:
    - **Hostname:** `worldcup` (then you can reach it at `worldcup.local`)
    - **Username / password:** pick something you'll remember (e.g. user `pi`)
-   - **Wireless LAN:** your Wi-Fi SSID + password + country
+   - **Wireless LAN:** your Wi-Fi SSID + password + country *(Pi 2 with a USB dongle: this may not
+     take effect until the dongle's driver loads — set it, but plan to use ethernet for first boot.)*
    - **Locale / timezone:** `America/Los_Angeles`
    - **Services tab:** ✅ **Enable SSH** → "Use password authentication"
 5. **Write**, wait, eject.
