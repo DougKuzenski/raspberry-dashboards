@@ -1,16 +1,16 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { CalendarData } from '../../shared/types.js';
-import type { CalendarProvider } from './providerTypes.js';
+import type { DataProvider } from './providerTypes.js';
 import { MANUAL_DIR } from '../paths.js';
 import { DEFAULT_TIMEZONE } from '../../shared/constants.js';
 import { DataValidationError, validateManualFile } from './validate.js';
 
 // Default provider: hand-edited data/manual/events.json. No network — the board
 // works out of the box, and you can correct anything by editing the file.
-export const manualProvider: CalendarProvider = {
+export const manualProvider: DataProvider = {
   name: 'manual',
-  async fetchCalendarData(): Promise<CalendarData> {
+  async fetchDashboardData(): Promise<CalendarData> {
     const file = path.join(MANUAL_DIR, 'events.json');
     let raw: unknown;
     try {

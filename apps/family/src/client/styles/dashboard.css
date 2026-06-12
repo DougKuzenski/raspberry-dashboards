@@ -24,6 +24,7 @@
 /* legend */
 .legend { display: flex; gap: 22px; font-size: 18px; color: var(--dim); font-weight: 600; }
 .legend__item { display: flex; align-items: center; gap: 8px; }
+.legend__item--failed { opacity: .45; font-style: italic; }
 .legend__dot { width: 13px; height: 13px; border-radius: 50%; }
 
 /* hero now/next */

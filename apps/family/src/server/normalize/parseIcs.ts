@@ -4,6 +4,7 @@
 // only their base occurrence for now (see BACKLOG).
 import type { CalEvent } from '../../shared/types.js';
 import { DEFAULT_TIMEZONE } from '../../shared/constants.js';
+import { tzOffsetMs } from '../../shared/time.js';
 
 export interface ParseIcsOptions {
   sourceId: string;
@@ -17,27 +18,8 @@ export interface ParseIcsOptions {
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const DAY_MS = 86_400_000;
 
-// Offset (ms) of a timezone at a given instant, via Intl — no tz database dep.
-function tzOffsetMs(instant: number, tz: string): number {
-  const dtf = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz,
-    hourCycle: 'h23',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-  const p: Record<string, number> = {};
-  for (const part of dtf.formatToParts(instant)) {
-    if (part.type !== 'literal') p[part.type] = Number(part.value);
-  }
-  const asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
-  return asUTC - instant;
-}
-
 // A wall-clock time in `tz` -> the UTC instant (ms). DST-correct for our needs.
+// (Offset lookup shared with src/shared/time.ts.)
 function wallToInstant(
   y: number, mo: number, d: number, h: number, mi: number, s: number, tz: string,
 ): number {
@@ -212,8 +194,15 @@ function expandOccurrences(
 
   const occs: Occurrence[] = [];
   let emitted = 0;
-  const hardCap = Math.min(800, (opts.windowEndMs - baseDate.getTime()) / DAY_MS + 2);
-  for (let off = 0; off <= hardCap && emitted < maxOcc; off++) {
+  // Walk day-by-day from DTSTART so COUNT/UNTIL consume occurrences correctly
+  // even when the event predates the window by years — a weekly practice created
+  // in 2024 must still surface in a 2026 window. (Caps relative to DTSTART were a
+  // bug that silently dropped long-lived recurring events.) The walk is plain
+  // integer math, so decades of pre-window scan cost microseconds; maxOcc caps
+  // *emitted* occurrences only, never the scan.
+  const lastOff = Math.ceil((opts.windowEndMs - baseDate.getTime()) / DAY_MS) + 1;
+  const hardCap = Math.min(36_600, lastOff); // ≤ ~100 years; safety valve only
+  for (let off = 0; off <= hardCap && occs.length < maxOcc; off++) {
     const day = new Date(baseDate.getTime() + off * DAY_MS);
     const dow = day.getUTCDay();
     const weeksFromBase = Math.floor((day.getTime() - startOfWeek(baseDate)) / (7 * DAY_MS));

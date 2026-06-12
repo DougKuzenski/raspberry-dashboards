@@ -1,8 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
 import { existsSync } from 'node:fs';
-import { getCalendar } from './dashboardService.js';
+import { getDashboard } from './dashboardService.js';
 import { isRefreshAuthorized } from './refreshAuth.js';
+import { DEFAULT_TIMEZONE } from '../shared/constants.js';
 import { CLIENT_DIST } from './paths.js';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -18,12 +19,12 @@ app.get('/healthz', (_req, res) => {
 
 app.get('/api/dashboard', async (_req, res) => {
   try {
-    res.json(await getCalendar());
+    res.json(await getDashboard());
   } catch (err) {
     console.error('[api] unexpected error building calendar:', err);
     res.status(500).json({
       generatedAtUtc: new Date().toISOString(),
-      timezone: process.env.TIMEZONE || 'America/Los_Angeles',
+      timezone: process.env.TIMEZONE || DEFAULT_TIMEZONE,
       sources: [],
       events: [],
       stale: true,
@@ -39,7 +40,7 @@ app.post('/api/refresh', async (req, res) => {
     return res.status(401).json({ ok: false, error: 'invalid or missing refresh token' });
   }
   try {
-    const data = await getCalendar({ forceRefresh: true });
+    const data = await getDashboard({ forceRefresh: true });
     res.json({ ok: true, generatedAtUtc: data.generatedAtUtc });
   } catch {
     res.status(500).json({ ok: false });

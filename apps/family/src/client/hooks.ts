@@ -11,15 +11,16 @@ export function useTimeZone(): string {
   return useContext(TimeZoneContext);
 }
 
-export interface CalendarFeed {
+export interface DashboardFeed {
   data: CalendarData | null;
   stale: boolean;
   lastUpdated: Date | null;
 }
 
 // Fetch /api/dashboard every 60s. On failure, keep showing the last good data
-// and flag it stale rather than blanking the screen.
-export function useCalendarFeed(): CalendarFeed {
+// and flag it stale rather than blanking the screen. (Named to match the World
+// Cup app's hook — identical semantics keep the future shared-runtime diff clean.)
+export function useDashboardFeed(): DashboardFeed {
   const [data, setData] = useState<CalendarData | null>(null);
   const [stale, setStale] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);

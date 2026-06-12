@@ -1,5 +1,5 @@
-import type { CalEvent, CalendarData, CalSource } from '../../shared/types.js';
-import type { CalendarProvider } from './providerTypes.js';
+import type { CalEvent, CalendarData } from '../../shared/types.js';
+import type { DataProvider } from './providerTypes.js';
 import { parseIcs } from '../normalize/parseIcs.js';
 import { AGENDA_DAYS, DEFAULT_TIMEZONE } from '../../shared/constants.js';
 
@@ -10,15 +10,19 @@ import { AGENDA_DAYS, DEFAULT_TIMEZONE } from '../../shared/constants.js';
 //
 // Config (JSON in env ICAL_SOURCES):
 //   [{"id":"family","label":"Family","color":"#2dd4bf","url":"https://calendar.google.com/calendar/ical/.../basic.ics"}, ...]
-const TTL_MS = 15 * 60_000; // fixtures change slowly; throttle the network
+const TTL_MS = 15 * 60_000; // calendars change slowly; throttle the network
+const RETRY_TTL_MS = 60_000; // a degraded payload retries the failed source soon
 const FETCH_TIMEOUT_MS = 10_000;
 const DAY_MS = 86_400_000;
 
-interface IcalSourceConfig extends CalSource {
+interface IcalSourceConfig {
+  id: string;
+  label: string;
+  color: string;
   url: string;
 }
 
-let memo: { at: number; data: CalendarData } | null = null;
+let memo: { at: number; ttl: number; data: CalendarData } | null = null;
 
 function readSources(): IcalSourceConfig[] {
   const raw = process.env.ICAL_SOURCES;
@@ -51,14 +55,14 @@ async function fetchIcs(url: string): Promise<string> {
   }
 }
 
-export const icalProvider: CalendarProvider = {
+export const icalProvider: DataProvider = {
   name: 'ical',
   invalidate(): void {
     memo = null;
   },
-  async fetchCalendarData(): Promise<CalendarData> {
+  async fetchDashboardData(): Promise<CalendarData> {
     const now = Date.now();
-    if (memo && now - memo.at < TTL_MS) return memo.data;
+    if (memo && now - memo.at < memo.ttl) return memo.data;
 
     const tz = process.env.TIMEZONE || DEFAULT_TIMEZONE;
     const configs = readSources();
@@ -66,7 +70,9 @@ export const icalProvider: CalendarProvider = {
     const windowEndMs = now + (AGENDA_DAYS + 1) * DAY_MS;
 
     const events: CalEvent[] = [];
-    // Fetch sources concurrently; one bad calendar shouldn't sink the rest.
+    // Fetch sources concurrently; one bad calendar shouldn't sink the rest — but
+    // a partial result must be *visible*, not silently passed off as complete.
+    const failed = new Set<string>();
     const results = await Promise.allSettled(
       configs.map(async (c) => {
         const text = await fetchIcs(c.url);
@@ -75,20 +81,32 @@ export const icalProvider: CalendarProvider = {
     );
     results.forEach((r, i) => {
       if (r.status === 'fulfilled') events.push(...r.value);
-      else console.error(`[ical] source "${configs[i].id}" failed:`, r.reason);
+      else {
+        failed.add(configs[i].id);
+        console.error(`[ical] source "${configs[i].id}" failed:`, r.reason);
+      }
     });
-    if (results.every((r) => r.status === 'rejected')) {
+    if (failed.size === configs.length) {
       throw new Error('All iCal sources failed to load.');
     }
 
+    const degraded = failed.size > 0;
     const data: CalendarData = {
       generatedAtUtc: new Date().toISOString(),
       timezone: tz,
-      sources: configs.map(({ id, label, color }) => ({ id, label, color })),
+      sources: configs.map(({ id, label, color }) => ({
+        id,
+        label,
+        color,
+        ...(failed.has(id) ? { failed: true } : {}),
+      })),
       events,
+      ...(degraded ? { degraded: true } : {}),
       source: 'ical',
     };
-    memo = { at: now, data };
+    // Serve a degraded payload (better than blank) but memoize it only briefly
+    // so the failed calendar gets retried soon instead of looking empty for 15m.
+    memo = { at: now, ttl: degraded ? RETRY_TTL_MS : TTL_MS, data };
     return data;
   },
 };

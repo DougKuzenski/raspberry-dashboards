@@ -6,6 +6,8 @@ export interface CalSource {
   id: string;
   label: string;
   color: string;
+  /** True when this source failed to load in the current payload (lane is incomplete). */
+  failed?: boolean;
 }
 
 /**
@@ -21,8 +23,11 @@ export interface CalEvent {
   source: string; // CalSource.id
   title: string;
   allDay: boolean;
-  start?: string; // ISO instant (timed)
-  end?: string; // ISO instant (timed)
+  // ISO instants (timed). The offset form varies by provider — manual data keeps
+  // local offsets, the ical provider emits UTC — so NEVER derive a calendar day
+  // by slicing the string; use dayKey()/zonedDayLabel() with the display zone.
+  start?: string;
+  end?: string;
   date?: string; // YYYY-MM-DD civil date (all-day)
   endDate?: string; // YYYY-MM-DD exclusive end (multi-day all-day)
   location?: string;
@@ -42,6 +47,12 @@ export interface CalendarData {
   source?: string;
   /** True when serving cached/last-good data after a refresh failed. */
   stale?: boolean;
+  /**
+   * True when the payload is incomplete — some (but not all) sources failed.
+   * Degraded payloads are served (better than blank) but never written to the
+   * last-good cache, and the UI surfaces the gap instead of hiding it.
+   */
+  degraded?: boolean;
 }
 
 /** One day's bucket in the week agenda. */

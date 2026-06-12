@@ -16,6 +16,16 @@ function isFuture(e: CalEvent, nowMs: number, todayKey: string): boolean {
   return e.allDay ? e.date! > todayKey : Date.parse(e.start!) > nowMs;
 }
 
+/** Exclusive end date of an all-day event (single-day events end the next day). */
+function allDayEnd(e: CalEvent): string {
+  return e.endDate ?? addDays(e.date!, 1);
+}
+
+/** Whether an all-day event spans the given civil day (multi-day aware). */
+function spansDay(e: CalEvent, key: string): boolean {
+  return e.date! <= key && key < allDayEnd(e);
+}
+
 /** Add `days` to a YYYY-MM-DD key, staying in civil-date space (UTC math). */
 function addDays(dateKey: string, days: number): string {
   const d = new Date(`${dateKey}T00:00:00Z`);
@@ -38,19 +48,28 @@ export function selectCalendarState(
 
   const upNext = events.find((e) => isFuture(e, nowMs, todayKey));
 
-  const todayEvents = events.filter((e) => eventDayKey(e, tz) === todayKey);
+  const todayEvents = events.filter((e) =>
+    e.allDay ? spansDay(e, todayKey) : eventDayKey(e, tz) === todayKey,
+  );
 
-  // Banner: all-day events from today through the agenda window.
+  // Banner: all-day events still ongoing or upcoming within the agenda window.
   const allDayBanner = events.filter(
-    (e) => e.allDay && e.date! >= todayKey && e.date! < windowEnd,
+    (e) => e.allDay && allDayEnd(e) > todayKey && e.date! < windowEnd,
   );
 
   // Week agenda: today + future, grouped by civil day, within the window.
+  // A multi-day all-day event appears on every day it spans.
   const groups = new Map<string, CalEvent[]>();
-  for (const e of events) {
-    const key = eventDayKey(e, tz);
-    if (key < todayKey || key >= windowEnd) continue;
+  const push = (key: string, e: CalEvent) => {
+    if (key < todayKey || key >= windowEnd) return;
     (groups.get(key) ?? groups.set(key, []).get(key)!).push(e);
+  };
+  for (const e of events) {
+    if (!e.allDay) {
+      push(eventDayKey(e, tz), e);
+      continue;
+    }
+    for (let k = e.date!; k < allDayEnd(e); k = addDays(k, 1)) push(k, e);
   }
   const weekDays: DayGroup[] = [...groups.entries()]
     .sort(([a], [b]) => a.localeCompare(b))

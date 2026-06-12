@@ -47,4 +47,26 @@ describe('selectCalendarState', () => {
     const allIds = v.weekDays.flatMap((d) => d.events.map((e) => e.id));
     expect(allIds).not.toContain('old');
   });
+
+  // Regression: endDate (exclusive) was typed but unused — a Jun 13–15 trip only
+  // appeared on Jun 13 and the board looked free mid-trip.
+  it('spans a multi-day all-day event across every day it covers', () => {
+    const multi: CalendarData = {
+      ...data,
+      events: [
+        ...data.events,
+        { id: 'trip', source: 'family', title: 'Cabin', allDay: true, date: '2026-06-13', endDate: '2026-06-15' },
+      ],
+    };
+    const v = selectCalendarState(multi, now);
+    const daysWithTrip = v.weekDays.filter((d) => d.events.some((e) => e.id === 'trip')).map((d) => d.key);
+    expect(daysWithTrip).toEqual(['2026-06-13', '2026-06-14']); // exclusive end
+    expect(v.allDayBanner.some((e) => e.id === 'trip')).toBe(true);
+
+    // ...and an ongoing multi-day event counts as "today", not gone.
+    const duringTrip = new Date('2026-06-14T17:30:00Z'); // Jun 14, 10:30 AM PDT
+    const v2 = selectCalendarState(multi, duringTrip);
+    expect(v2.todayEvents.some((e) => e.id === 'trip')).toBe(true);
+    expect(v2.allDayBanner.some((e) => e.id === 'trip')).toBe(true);
+  });
 });

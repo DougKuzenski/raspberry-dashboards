@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { civilLabel, dayKey, formatTime, sortInstant, timeZoneAbbrev } from '../src/shared/time.js';
+import { civilLabel, dayKey, formatTime, sortInstant, timeZoneAbbrev, zonedDayLabel } from '../src/shared/time.js';
 
 describe('time helpers', () => {
   it('formats a timed instant in the display zone', () => {
@@ -24,5 +24,15 @@ describe('time helpers', () => {
 
   it('derives a short zone abbreviation', () => {
     expect(timeZoneAbbrev(new Date('2026-06-17T19:30:00Z'), 'America/Los_Angeles')).toBe('PDT');
+  });
+
+  // Regression: the day label must be identical for the same instant regardless
+  // of which offset form the provider emitted (manual keeps local offsets, ical
+  // emits UTC). Slicing the string labeled a Friday-evening event "Sat".
+  it('labels a timed instant by display-zone day, independent of offset form', () => {
+    const utcForm = '2026-06-13T01:30:00.000Z'; // Fri 6:30 PM PDT
+    const offsetForm = '2026-06-12T18:30:00-07:00'; // same instant
+    expect(zonedDayLabel(utcForm, 'America/Los_Angeles')).toBe('Fri, Jun 12');
+    expect(zonedDayLabel(offsetForm, 'America/Los_Angeles')).toBe('Fri, Jun 12');
   });
 });

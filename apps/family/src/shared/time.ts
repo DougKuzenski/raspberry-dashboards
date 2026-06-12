@@ -50,13 +50,23 @@ export function timeZoneAbbrev(d: Date, tz = DEFAULT_TIMEZONE): string {
   return parts.find((p) => p.type === 'timeZoneName')?.value ?? '';
 }
 
+/**
+ * "Fri, Jun 12" — the display-zone day label for a timed instant. Never derive
+ * this by slicing the ISO string: providers emit different offset forms (manual
+ * keeps local offsets, ical emits UTC), and slicing a UTC string mislabels an
+ * evening event as the next day.
+ */
+export function zonedDayLabel(iso: string, tz = DEFAULT_TIMEZONE): string {
+  return civilLabel(dayKey(new Date(iso), tz));
+}
+
 /** The day-bucket key for any event (timed -> zone day; all-day -> its date). */
 export function eventDayKey(e: CalEvent, tz = DEFAULT_TIMEZONE): string {
   return e.allDay ? e.date! : dayKey(new Date(e.start!), tz);
 }
 
 // Offset (ms) of a timezone at an instant, via Intl — no tz database dependency.
-function tzOffsetMs(instant: number, tz: string): number {
+export function tzOffsetMs(instant: number, tz: string): number {
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: tz, hourCycle: 'h23',
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
