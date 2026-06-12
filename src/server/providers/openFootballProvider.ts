@@ -13,6 +13,14 @@ const DEFAULT_URL =
   'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 const FETCH_TIMEOUT_MS = 8_000;
 
+// The fixtures file is hand-maintained (~monthly) — there's no reason to re-pull
+// the full ~104-match document every ~60s of kiosk polling. Cache the raw fetch
+// for 15 min as a network throttle, but always re-derive matches/standings below
+// so kickoff-inferred status (scheduled -> live -> finished) stays fresh on every
+// request even while the download is cached.
+const RAW_TTL_MS = 15 * 60_000;
+let rawMemo: { at: number; file: OpenFootballFile } | null = null;
+
 async function fetchOpenFootball(url: string): Promise<OpenFootballFile> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -28,11 +36,23 @@ async function fetchOpenFootball(url: string): Promise<OpenFootballFile> {
   }
 }
 
+async function getFile(url: string): Promise<OpenFootballFile> {
+  const now = Date.now();
+  if (rawMemo && now - rawMemo.at < RAW_TTL_MS) return rawMemo.file;
+  const file = await fetchOpenFootball(url);
+  rawMemo = { at: now, file };
+  return file;
+}
+
 export const openFootballProvider: DataProvider = {
   name: 'openfootball',
+  // Drop the cached fixtures file so a forced refresh re-downloads it.
+  invalidate(): void {
+    rawMemo = null;
+  },
   async fetchDashboardData(): Promise<DashboardData> {
     const url = process.env.EXTERNAL_API_BASE_URL || DEFAULT_URL;
-    const file = await fetchOpenFootball(url);
+    const file = await getFile(url);
     const matches = parseOpenFootball(file);
     const standings = calculateStandings(matches);
 
