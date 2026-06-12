@@ -4,6 +4,7 @@ import {
   isSameLocalDay,
   localDayKey,
   formatKickoffPacific,
+  formatUpcomingLabel,
 } from '../src/shared/time.js';
 
 describe('time helpers', () => {
@@ -21,6 +22,14 @@ describe('time helpers', () => {
     const a = new Date('2026-06-11T19:00:00Z'); // noon PT
     const b = new Date('2026-06-12T05:59:00Z'); // 10:59 PM PT same day
     expect(isSameLocalDay(a, b)).toBe(true);
+  });
+
+  it('drops the weekday for an upcoming match that is today (Pacific)', () => {
+    const now = new Date('2026-06-11T17:00:00Z'); // ~10am PT June 11
+    // Same Pacific day -> time only.
+    expect(formatUpcomingLabel('2026-06-11T19:00:00Z', now)).toBe('12:00 PM');
+    // Different Pacific day -> weekday + time.
+    expect(formatUpcomingLabel('2026-06-12T16:00:00Z', now)).toBe('Fri 9:00 AM');
   });
 
   it('formats a countdown and returns undefined for past times', () => {

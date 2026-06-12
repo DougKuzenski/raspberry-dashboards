@@ -73,6 +73,7 @@ export function App() {
         upcoming={view.upcomingMatches}
         recent={view.recentResults}
         message={data.manualMessage}
+        now={now}
       />
 
       <ConnectionStatus stale={isStale} lastUpdated={lastUpdated} source={data.source} />

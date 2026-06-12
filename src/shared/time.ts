@@ -59,6 +59,22 @@ export function isSameLocalDay(a: Date, b: Date, timeZone = DEFAULT_TIMEZONE): b
 }
 
 /**
+ * Label for an upcoming kickoff: just the time ("5:00 PM") when it's today in
+ * the target zone, otherwise weekday + time ("Fri 9:00 AM"). Keeps today's
+ * matches reading as imminent rather than buried under a redundant weekday.
+ */
+export function formatUpcomingLabel(
+  utc: string,
+  now: Date = new Date(),
+  timeZone = DEFAULT_TIMEZONE,
+): string {
+  const kickoff = new Date(utc);
+  return isSameLocalDay(kickoff, now, timeZone)
+    ? formatTimeOfDay(utc, timeZone)
+    : formatKickoffPacific(utc, timeZone);
+}
+
+/**
  * Human countdown to a future instant: "1h 36m", "12m", or "now".
  * Returns undefined when the instant is in the past.
  */

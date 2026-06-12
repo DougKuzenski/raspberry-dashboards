@@ -1,10 +1,11 @@
 import type { Match } from '../../shared/types.js';
-import { formatKickoffPacific } from '../../shared/time.js';
+import { formatUpcomingLabel } from '../../shared/time.js';
 
 interface Props {
   upcoming: Match[];
   recent: Match[];
   message?: string;
+  now: Date;
 }
 
 function code(m: Match, side: 'home' | 'away'): string {
@@ -23,7 +24,7 @@ function recentLabel(m: Match): string {
 
 // Footer ticker: a manual message if set, otherwise recent results, otherwise
 // the upcoming schedule (spec §6).
-export function FooterTicker({ upcoming, recent, message }: Props) {
+export function FooterTicker({ upcoming, recent, message, now }: Props) {
   let content: string;
   if (message) {
     content = message;
@@ -34,7 +35,7 @@ export function FooterTicker({ upcoming, recent, message }: Props) {
       'UP NEXT  ·  ' +
       upcoming
         .slice(0, 5)
-        .map((m) => `${formatKickoffPacific(m.kickoffUtc)} ${code(m, 'home')} v ${code(m, 'away')}`)
+        .map((m) => `${formatUpcomingLabel(m.kickoffUtc, now)} ${code(m, 'home')} v ${code(m, 'away')}`)
         .join('   ·   ');
   }
 

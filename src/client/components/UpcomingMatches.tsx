@@ -1,5 +1,5 @@
 import type { Match } from '../../shared/types.js';
-import { formatKickoffPacific } from '../../shared/time.js';
+import { formatUpcomingLabel } from '../../shared/time.js';
 import { isFavoriteTeam } from '../../shared/constants.js';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 }
 
 // A compact strip of the next few matches, shown between the main grid and footer.
-export function UpcomingMatches({ matches }: Props) {
+export function UpcomingMatches({ matches, now }: Props) {
   const next = matches.slice(0, 5);
   if (next.length === 0) return null;
 
@@ -23,7 +23,7 @@ export function UpcomingMatches({ matches }: Props) {
               <span className="upcoming__teams">
                 {m.homeTeam.shortName ?? m.homeTeam.id} v {m.awayTeam.shortName ?? m.awayTeam.id}
               </span>
-              <span className="upcoming__time">{formatKickoffPacific(m.kickoffUtc)}</span>
+              <span className="upcoming__time">{formatUpcomingLabel(m.kickoffUtc, now)}</span>
             </li>
           );
         })}
