@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Family Dashboard — prototype</title>
+<style>
+  :root{
+    --bg:#0b1120; --panel:#111a2e; --panel2:#0e1626; --ink:#f5f7fb; --dim:#93a4c3;
+    --fam:#2dd4bf; --school:#f59e0b; --line:#1f2c47; --hi:#fb7185;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;-webkit-font-smoothing:antialiased}
+  .viewport{position:fixed;inset:0;display:grid;place-items:center}
+  /* fixed design canvas, scaled to fit any screen (same trick as the repo) */
+  .board{width:1280px;height:720px;padding:28px 34px;display:grid;
+    grid-template-rows:auto auto 1fr auto;gap:18px;transform-origin:center}
+  /* header */
+  header{display:flex;justify-content:space-between;align-items:flex-end}
+  .today-big{font-size:62px;font-weight:800;line-height:.95;letter-spacing:-1px}
+  .today-sub{font-size:24px;color:var(--dim);margin-top:6px;font-weight:600}
+  .clock{text-align:right}
+  .clock .t{font-size:58px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .clock .legend{margin-top:10px;font-size:18px;color:var(--dim);display:flex;gap:18px;justify-content:flex-end}
+  .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:7px;vertical-align:middle}
+  .muted{opacity:.5}
+  /* hero / now-next strip */
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 22px}
+  .card .eyebrow{font-size:16px;letter-spacing:2px;color:var(--dim);font-weight:700}
+  .card .title{font-size:30px;font-weight:800;margin-top:6px;line-height:1.05}
+  .card .meta{font-size:20px;color:var(--dim);margin-top:8px}
+  .card.now{border-color:var(--fam);box-shadow:0 0 0 1px var(--fam) inset}
+  .card.now .eyebrow{color:var(--fam)}
+  .pulse{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--fam);margin-right:9px;
+    animation:p 2s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+  /* all-day banner */
+  .allday{display:flex;gap:10px;flex-wrap:wrap;min-height:0}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--fam);
+    border-radius:9px;padding:8px 13px;font-size:18px;font-weight:600}
+  .chip .d{font-size:14px;color:var(--dim);margin-right:8px;text-transform:uppercase;letter-spacing:1px}
+  /* main: today | week */
+  main{display:grid;grid-template-columns:0.95fr 1.05fr;gap:18px;min-height:0}
+  .panel-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 20px;overflow:hidden;display:flex;flex-direction:column}
+  .panel-box h2{margin:0 0 12px;font-size:18px;letter-spacing:3px;color:var(--dim);font-weight:800}
+  .ev{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:11px 0;border-top:1px solid var(--line)}
+  .ev:first-of-type{border-top:none}
+  .ev .time{font-size:21px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+  .ev .time small{display:block;font-size:14px;color:var(--dim);font-weight:600}
+  .ev .name{font-size:22px;font-weight:700;line-height:1.12;border-left:4px solid var(--fam);padding-left:12px}
+  .ev .where{font-size:16px;color:var(--dim);font-weight:600;margin-top:3px}
+  .ev.tentative .name{font-style:italic;opacity:.78}
+  .ev.flight .name{border-left-color:#60a5fa}
+  .ev.hi .name{border-left-color:var(--hi)}
+  .ev.past{opacity:.4}
+  .daygroup{margin-bottom:6px}
+  .daygroup .dh{font-size:15px;font-weight:800;letter-spacing:2px;color:var(--dim);
+    margin:10px 0 4px;text-transform:uppercase}
+  .wk .ev{grid-template-columns:84px 1fr;padding:7px 0}
+  .wk .ev .time{font-size:18px}
+  .wk .ev .name{font-size:18px;font-weight:700}
+  .empty{color:var(--dim);font-size:18px;font-style:italic;padding:10px 0}
+  /* footer ticker */
+  footer{display:flex;justify-content:space-between;align-items:center;color:var(--dim);font-size:18px}
+  .ticker b{color:var(--ink)}
+  .conn{display:flex;align-items:center;gap:8px;font-size:15px}
+  .conn .g{width:10px;height:10px;border-radius:50%;background:#34d399}
+</style>
+</head>
+<body>
+<div class="viewport"><div class="board" id="board"></div></div>
+<script>
+// ---- pinned "now" so the demo always looks alive (Fri Jun 12 2026, 10:24 AM PT) ----
+const TZ = "America/Los_Angeles";
+const NOW = new Date("2026-06-12T10:24:00-07:00");
+
+const SOURCES = { family:{label:"Family",color:"#2dd4bf"}, school:{label:"School",color:"#f59e0b"} };
+
+// Normalized events (from the real Family calendar; School is empty = summer break).
+const EVENTS = [
+  {id:"fam-1", src:"family", title:"3rd grade field trip — Maple Leaf Park (Courtney chaperoning)", start:"2026-06-12T09:00:00-07:00", end:"2026-06-12T13:00:00-07:00", tentative:true},
+  {id:"fam-2", src:"family", title:"Courtney: pick up wine from 8 Bells", date:"2026-06-13", allDay:true},
+  {id:"fam-3", src:"family", title:"Handing out fliers (maybe w/ Kinley)", start:"2026-06-13T09:45:00-07:00", end:"2026-06-13T10:45:00-07:00"},
+  {id:"fam-4", src:"family", title:"Build-A-Bear??", start:"2026-06-13T16:00:00-07:00", end:"2026-06-13T17:00:00-07:00", tentative:true},
+  {id:"fam-5", src:"family", title:"Vipers party", where:"Maple Leaf Reservoir Park", start:"2026-06-14T16:00:00-07:00", end:"2026-06-14T17:45:00-07:00"},
+  {id:"fam-6", src:"family", title:"Flight AS 1385 · SEA → SFO", where:"SEA", start:"2026-06-14T16:36:00-07:00", end:"2026-06-14T18:48:00-07:00", kind:"flight"},
+  {id:"fam-7", src:"family", title:"Kindergarten field trip — Golden Gardens (Courtney chaperoning)", start:"2026-06-15T09:00:00-07:00", end:"2026-06-15T14:00:00-07:00", tentative:true},
+  {id:"fam-8", src:"family", title:"Kinley kindergarten graduation 🎓", start:"2026-06-17T12:30:00-07:00", end:"2026-06-17T13:15:00-07:00", highlight:true},
+  {id:"fam-9", src:"family", title:"Flight AS 758 · SFO → SEA", where:"SFO", start:"2026-06-17T17:38:00-07:00", end:"2026-06-17T19:47:00-07:00", kind:"flight"},
+  {id:"fam-10", src:"family", title:"Courtney taking kids to Everett", date:"2026-06-18", allDay:true},
+];
+
+// ---- helpers (all rendered through the one display zone) ----
+const fmtTime = (iso)=>new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit"}).format(new Date(iso));
+const dayKey  = (d)=>new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"}).format(d);
+const dowDate = (d)=>new Intl.DateTimeFormat("en-US",{timeZone:TZ,weekday:"long",month:"long",day:"numeric"}).format(d);
+const dowShort= (d)=>new Intl.DateTimeFormat("en-US",{timeZone:TZ,weekday:"short",month:"short",day:"numeric"}).format(d);
+// An all-day event's civil date -> a key WITHOUT tz conversion (the real gotcha:
+// Google sends all-day as UTC-midnight; converting it shifts the day in Pacific).
+const allDayKey = (ymd)=>ymd; // already YYYY-MM-DD civil date
+
+function startInstant(e){ return e.allDay ? new Date(e.date+"T00:00:00-07:00") : new Date(e.start); }
+function keyOf(e){ return e.allDay ? allDayKey(e.date) : dayKey(new Date(e.start)); }
+
+function render(){
+  const board = document.getElementById("board");
+  const todayKey = dayKey(NOW);
+  const nowMs = NOW.getTime();
+
+  // buckets
+  const timed = EVENTS.filter(e=>!e.allDay);
+  const allday = EVENTS.filter(e=>e.allDay);
+  const todayEvents = timed.filter(e=>dayKey(new Date(e.start))===todayKey).sort((a,b)=>new Date(a.start)-new Date(b.start));
+  const todayAllDay = allday.filter(e=>e.date===todayKey);
+
+  // now / next across the whole feed
+  const live = timed.find(e=> new Date(e.start)<=NOW && new Date(e.end)>=NOW );
+  const upNext = EVENTS.filter(e=>startInstant(e).getTime()>nowMs).sort((a,b)=>startInstant(a)-startInstant(b))[0];
+
+  // week agenda (future, grouped by day) excluding what's already in "today" list
+  const future = EVENTS.filter(e=> startInstant(e).getTime() >= new Date(todayKey+"T00:00:00-07:00").getTime() );
+  const groups = {};
+  future.forEach(e=>{ const k=keyOf(e); (groups[k]=groups[k]||[]).push(e); });
+  const dayKeys = Object.keys(groups).sort();
+
+  const heroNow = live
+    ? `<div class="card now"><div class="eyebrow"><span class="pulse"></span>HAPPENING NOW</div>
+         <div class="title">${live.title}</div>
+         <div class="meta">until ${fmtTime(live.end)}${live.where?` · ${live.where}`:""}</div></div>`
+    : `<div class="card"><div class="eyebrow">NOTHING ON RIGHT NOW</div>
+         <div class="title">Free until the next thing</div><div class="meta">enjoy it</div></div>`;
+
+  const heroNext = upNext
+    ? `<div class="card"><div class="eyebrow">UP NEXT</div>
+         <div class="title">${upNext.title}</div>
+         <div class="meta">${upNext.allDay ? dowShort(startInstant(upNext))+" · all day"
+            : dowShort(new Date(upNext.start))+" · "+fmtTime(upNext.start)}${upNext.where?` · ${upNext.where}`:""}</div></div>`
+    : "";
+
+  const chips = allday.map(e=>`<div class="chip"><span class="d">${dowShort(startInstant(e)).split(" ").slice(0,1)}</span>${e.title}</div>`).join("");
+
+  const evRow = (e)=>{
+    const past = !e.allDay && new Date(e.end)<NOW;
+    const cls = ["ev", e.tentative?"tentative":"", e.kind==="flight"?"flight":"", e.highlight?"hi":"", past?"past":""].join(" ");
+    const time = e.allDay ? `All<small>day</small>` : `${fmtTime(e.start)}<small>${fmtTime(e.end)}</small>`;
+    return `<div class="${cls}"><div class="time">${time}</div>
+      <div><div class="name">${e.title}</div>${e.where?`<div class="where">${e.where}</div>`:""}</div></div>`;
+  };
+
+  const todayPanel = (todayAllDay.concat(todayEvents)).length
+    ? (todayAllDay.concat(todayEvents)).map(evRow).join("")
+    : `<div class="empty">No events today.</div>`;
+
+  const weekPanel = dayKeys.map(k=>{
+    const d = new Date(k+"T12:00:00-07:00");
+    const label = k===todayKey ? "Today" : dowShort(d);
+    return `<div class="daygroup"><div class="dh">${label}</div>${groups[k].map(evRow).join("")}</div>`;
+  }).join("");
+
+  board.innerHTML = `
+    <header>
+      <div><div class="today-big">${dowDate(NOW)}</div>
+        <div class="today-sub">Family week · Jun 12 – Jun 18</div></div>
+      <div class="clock"><div class="t" id="clk"></div>
+        <div class="legend">
+          <span><span class="dot" style="background:${SOURCES.family.color}"></span>Family</span>
+          <span class="muted"><span class="dot" style="background:${SOURCES.school.color}"></span>School — summer break ☀️</span>
+        </div></div>
+    </header>
+
+    <div class="hero">${heroNow}${heroNext}</div>
+
+    ${chips?`<div class="allday">${chips}</div>`:`<div></div>`}
+
+    <main>
+      <div class="panel-box"><h2>TODAY</h2><div>${todayPanel}</div></div>
+      <div class="panel-box wk"><h2>THE WEEK AHEAD</h2><div style="overflow:hidden">${weekPanel}</div></div>
+    </main>
+
+    <footer>
+      <div class="ticker">⭐ <b>Kinley's kindergarten graduation</b> — Wed 12:30 PM · &nbsp; ✈️ SF trip Sun–Wed</div>
+      <div class="conn"><span class="g"></span>Live · synced ${fmtTime(NOW.toISOString())}</div>
+    </footer>`;
+
+  fitScale();
+}
+
+// live header clock (ticks from the pinned NOW so the demo feels alive)
+function tickClock(){
+  const el=document.getElementById("clk"); if(!el) return;
+  const drift = Date.now() - bootMs;
+  const t = new Date(NOW.getTime()+drift);
+  el.textContent = new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit"}).format(t);
+}
+// scale-to-fit + gentle burn-in nudge
+function fitScale(){
+  const b=document.getElementById("board");
+  const s=Math.min(innerWidth/1280, innerHeight/720);
+  const step=Math.floor(Date.now()/(10*60*1000))%4;
+  const off=[[0,0],[6,4],[-6,6],[4,-4]][step];
+  b.style.transform=`scale(${s}) translate(${off[0]}px,${off[1]}px)`;
+}
+const bootMs=Date.now();
+render(); setInterval(tickClock,1000); addEventListener("resize",fitScale);
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "generatedAtUtc": "2026-06-12T17:24:00Z",
+  "timezone": "America/Los_Angeles",
+  "weekStart": "2026-06-12",
+  "sources": [
+    { "id": "family", "label": "Family", "color": "#2dd4bf" },
+    { "id": "school", "label": "School", "color": "#f59e0b" }
+  ],
+  "events": [
+    { "id": "fam-1",  "source": "family", "title": "3rd grade field trip to Maple Leaf Park — Courtney chaperoning", "start": "2026-06-12T09:00:00-07:00", "end": "2026-06-12T13:00:00-07:00", "allDay": false, "tentative": true },
+    { "id": "fam-2",  "source": "family", "title": "Courtney: pick up wine from 8 Bells", "date": "2026-06-13", "allDay": true },
+    { "id": "fam-3",  "source": "family", "title": "Handing out fliers (maybe w/ Kinley)", "start": "2026-06-13T09:45:00-07:00", "end": "2026-06-13T10:45:00-07:00", "allDay": false },
+    { "id": "fam-4",  "source": "family", "title": "Build-A-Bear??", "start": "2026-06-13T16:00:00-07:00", "end": "2026-06-13T17:00:00-07:00", "allDay": false, "tentative": true },
+    { "id": "fam-5",  "source": "family", "title": "Vipers party", "location": "Maple Leaf Reservoir Park", "start": "2026-06-14T16:00:00-07:00", "end": "2026-06-14T17:45:00-07:00", "allDay": false },
+    { "id": "fam-6",  "source": "family", "title": "Flight AS 1385 — SEA → SFO", "location": "SEA", "start": "2026-06-14T16:36:00-07:00", "end": "2026-06-14T18:48:00-07:00", "allDay": false, "kind": "flight" },
+    { "id": "fam-7",  "source": "family", "title": "Kindergarteners field trip to Golden Gardens — Courtney chaperoning", "start": "2026-06-15T09:00:00-07:00", "end": "2026-06-15T14:00:00-07:00", "allDay": false, "tentative": true },
+    { "id": "fam-8",  "source": "family", "title": "Kinley kindergarten graduation", "start": "2026-06-17T12:30:00-07:00", "end": "2026-06-17T13:15:00-07:00", "allDay": false, "highlight": true },
+    { "id": "fam-9",  "source": "family", "title": "Flight AS 758 — SFO → SEA", "location": "SFO", "start": "2026-06-17T17:38:00-07:00", "end": "2026-06-17T19:47:00-07:00", "allDay": false, "kind": "flight" },
+    { "id": "fam-10", "source": "family", "title": "Courtney taking kids to Everett", "date": "2026-06-18", "allDay": true }
+  ]
+}
