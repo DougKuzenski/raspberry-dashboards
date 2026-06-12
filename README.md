@@ -94,6 +94,10 @@ EXTERNAL_API_KEY=
 
 ## Raspberry Pi kiosk setup
 
+**New to this / starting from a dusty Pi?** Follow the full step-by-step walkthrough in
+[`pi/SETUP.md`](pi/SETUP.md) — from flashing the SD card to the dashboard auto-starting on the TV.
+The condensed version is below.
+
 Use Raspberry Pi OS **Desktop** (easier to debug than Lite). Pi 4 or 5 recommended.
 
 ```bash
