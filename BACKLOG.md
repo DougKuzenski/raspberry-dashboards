@@ -4,13 +4,12 @@ Future work, captured so we don't re-research it. Nothing here is built yet.
 
 ## Live-score provider (real-time scores)
 
-**Decision (2026-06-11):** v1 ships with OpenFootball as the schedule/bracket backbone
-(reliable, no key) plus manual overrides for the "what's happening right now" moment.
-OpenFootball is fixtures-only — it's one maintainer (`geraldb`) hand-committing the file
-roughly monthly, so scores lag by hours/days. For true live scores we add a second provider
-later and **merge live data onto the OpenFootball schedule** (schedule stays authoritative;
-live source only fills in `homeScore`/`awayScore`/`minute`/`status`). Manual override remains
-the final safety net.
+**DONE (2026-06-11):** `football_data` provider wired (football-data.org, free key in
+`FOOTBALL_DATA_API_KEY`). Real status + scores + minute + groups + knockout stages, full WC feed —
+used standalone (no merge needed). 30s in-memory cache keeps us under the 10/min free limit.
+OpenFootball remains the no-key fixtures fallback; manual override still wins over everything.
+
+Remaining ideas below are alternatives only if football-data proves too laggy/limited.
 
 ### Candidate sources
 

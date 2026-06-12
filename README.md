@@ -40,8 +40,11 @@ manual JSON / external API  ->  DataProvider  ->  normalize + selectDashboardSta
 - **Data providers** (selected by `DATA_PROVIDER`):
   - `manual` (default) — reads `data/manual/*.json`. No network.
   - `openfootball` — **live fetch** of [OpenFootball's public-domain `worldcup.json`](https://github.com/openfootball/worldcup.json)
-    (all 104 matches, 48 teams). No API key. Fixtures/groups/schedule are solid; scores appear once the
-    upstream repo publishes them. Match status is inferred from kickoff time, and manual overrides apply on top.
+    (all 104 matches, 48 teams). No API key. Fixtures/groups/schedule are solid, but it's hand-maintained
+    (~monthly) so it does **not** give live scores; status is inferred from kickoff time.
+  - `football_data` — **live scores + status** from [football-data.org](https://www.football-data.org/) (free
+    key required). Real `SCHEDULED/IN_PLAY/PAUSED/FINISHED` status, scores, minute, groups, and knockout stages.
+    A 30s server-side cache keeps requests well under the free tier's 10/min. **This is the one to use for live data.**
   - `worldcup_api` — a local sample-remote stub demonstrating the same normalize pipeline (no network).
 - **Manual overrides** (`data/manual/overrides.json`, when `ENABLE_MANUAL_OVERRIDES=true`) let a human
   correct TV channel / stream / notes / kickoff time / team name on top of remote data.
@@ -85,11 +88,18 @@ Copy `.env.example` to `.env`:
 
 ```bash
 PORT=3000
-DATA_PROVIDER=manual          # manual | worldcup_api | openfootball
+DATA_PROVIDER=manual          # manual | openfootball | football_data | worldcup_api
 ENABLE_MANUAL_OVERRIDES=true
 TIMEZONE=America/Los_Angeles
 EXTERNAL_API_BASE_URL=
 EXTERNAL_API_KEY=
+FOOTBALL_DATA_API_KEY=        # required for DATA_PROVIDER=football_data
+```
+
+For live scores, get a free key at https://www.football-data.org/client/register, then:
+
+```bash
+DATA_PROVIDER=football_data FOOTBALL_DATA_API_KEY=your_key npm run dev
 ```
 
 ## Raspberry Pi kiosk setup

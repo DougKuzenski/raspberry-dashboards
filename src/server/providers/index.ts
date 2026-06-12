@@ -2,11 +2,13 @@ import type { DataProvider } from './providerTypes.js';
 import { manualProvider } from './manualProvider.js';
 import { worldCupApiProvider } from './worldCupApiProvider.js';
 import { openFootballProvider } from './openFootballProvider.js';
+import { footballDataProvider } from './footballDataProvider.js';
 
 const PROVIDERS: Record<string, DataProvider> = {
   manual: manualProvider,
   worldcup_api: worldCupApiProvider,
   openfootball: openFootballProvider,
+  football_data: footballDataProvider,
 };
 
 // Select the active provider from DATA_PROVIDER, defaulting to manual (spec §12).
