@@ -191,23 +191,52 @@
 .status--scheduled { background: transparent; color: var(--text-dim); }
 .status--off { background: #5a2a2a; color: #ffd; }
 
-/* ---- Standings ---- */
-.standings { margin-bottom: clamp(8px, 1vw, 16px); }
-.standings__group { color: var(--accent); font-weight: 700; margin-bottom: 4px; }
-.standings__table { width: 100%; border-collapse: collapse; font-size: calc(var(--fs-base) * 0.95); }
-.standings__table th {
-  text-align: right;
-  color: var(--text-dim);
-  font-weight: 600;
-  padding: 0.3em 0.5em;
-  font-size: 0.85em;
+/* ---- Group standings: compact "all groups at once" grid ---- */
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 11vw, 180px), 1fr));
+  gap: clamp(6px, 0.8vw, 12px);
+  align-content: start;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
-.standings__table td { text-align: right; padding: 0.35em 0.5em; border-top: 1px solid var(--line); }
-.standings__pos, .standings__team { text-align: left; }
-.standings__team { display: flex; align-items: center; gap: 0.4em; font-weight: 600; }
-.standings__pts { color: var(--accent); font-weight: 800; }
-.standings__row--favorite td { background: rgba(74, 214, 255, 0.1); }
-.standings__row--favorite .standings__team { color: var(--favorite); }
+.group-card {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(5px, 0.6vw, 9px) clamp(6px, 0.7vw, 10px);
+}
+.group-card--featured {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.group-card__title {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: calc(var(--fs-base) * 0.8);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25em;
+}
+.group-card__row {
+  display: grid;
+  grid-template-columns: 1.2em 1fr auto;
+  align-items: center;
+  gap: 0.35em;
+  font-size: calc(var(--fs-base) * 0.78);
+  padding: 0.12em 0;
+}
+.group-card__pos { color: var(--text-dim); text-align: right; }
+.group-card__team {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.group-card__pts { color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
+.group-card__row--favorite .group-card__team { color: var(--favorite); }
 
 /* ---- Bracket ---- */
 .bracket { display: flex; gap: clamp(10px, 1.4vw, 24px); overflow: hidden; }

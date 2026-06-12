@@ -62,7 +62,7 @@ export function App() {
           {view.showBracket ? (
             <BracketView nodes={data.bracket} />
           ) : (
-            <GroupStandings group={view.featuredGroup} standings={view.featuredStandings} />
+            <GroupStandings standings={data.standings} featuredGroup={view.featuredGroup} />
           )}
         </section>
       </main>
