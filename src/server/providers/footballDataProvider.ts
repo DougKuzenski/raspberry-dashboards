@@ -1,4 +1,4 @@
-import type { DashboardData } from '../../shared/types.js';
+import type { DashboardData, Match } from '../../shared/types.js';
 import type { DataProvider } from './providerTypes.js';
 import { parseFootballData, type FootballDataResponse } from '../normalize/parseFootballData.js';
 import { calculateStandings } from '../normalize/calculateStandings.js';
@@ -16,10 +16,35 @@ import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
 const DEFAULT_BASE = 'https://api.football-data.org';
 const COMPETITION = 'WC'; // FIFA World Cup
 const FETCH_TIMEOUT_MS = 8_000;
-const CACHE_TTL_MS = 30_000;
 
-let memo: { at: number; data: DashboardData } | null = null;
+// Adaptive refresh cadence: poll often only when it matters. Between games the
+// scores don't change, so we hold the cache until just before the next kickoff.
+const LIVE_TTL_MS = 45_000; // a match is live / about to start -> keep fresh
+const PRE_KICKOFF_MS = 15 * 60_000; // start polling fast this long before kickoff
+const IDLE_MAX_MS = 30 * 60_000; // cap so fixtures still refresh occasionally
+
+let memo: { at: number; data: DashboardData; ttl: number } | null = null;
 let cooldownUntil = 0;
+
+// How long the just-fetched data is good for, based on what's happening.
+export function refreshTtl(matches: Match[], now: number): number {
+  const liveNow = matches.some(
+    (m) => m.status === 'live' || m.status === 'halftime' || m.status === 'pre_match',
+  );
+  if (liveNow) return LIVE_TTL_MS;
+
+  const nextKickoff = matches
+    .filter((m) => m.status === 'scheduled')
+    .map((m) => new Date(m.kickoffUtc).getTime())
+    .filter((t) => t > now)
+    .sort((a, b) => a - b)[0];
+
+  if (nextKickoff == null) return IDLE_MAX_MS; // nothing upcoming (tournament over)
+  const untilKickoff = nextKickoff - now;
+  if (untilKickoff <= PRE_KICKOFF_MS) return LIVE_TTL_MS; // kickoff imminent
+  // Otherwise sleep until ~15 min before the next match, capped.
+  return Math.min(untilKickoff - PRE_KICKOFF_MS, IDLE_MAX_MS);
+}
 
 function num(v: string | null): number | null {
   if (v == null) return null;
@@ -65,8 +90,9 @@ export const footballDataProvider: DataProvider = {
   async fetchDashboardData(): Promise<DashboardData> {
     const now = Date.now();
 
-    // Serve the in-memory cache when fresh, or while we're in a backoff window.
-    if (memo && now - memo.at < CACHE_TTL_MS) return memo.data;
+    // Serve the in-memory cache while it's still good (adaptive TTL), or while
+    // we're in a rate-limit backoff window.
+    if (memo && now - memo.at < memo.ttl) return memo.data;
     if (memo && now < cooldownUntil) return memo.data;
 
     const key = process.env.FOOTBALL_DATA_API_KEY || process.env.EXTERNAL_API_KEY;
@@ -98,7 +124,7 @@ export const footballDataProvider: DataProvider = {
       data = await applyManualOverrides(data);
     }
 
-    memo = { at: now, data };
+    memo = { at: now, data, ttl: refreshTtl(matches, now) };
     return data;
   },
 };
