@@ -5,20 +5,35 @@ import { calculateStandings } from '../normalize/calculateStandings.js';
 import { applyManualOverrides } from '../normalize/applyManualOverrides.js';
 import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
 
-// Live provider: football-data.org v4 (spec §7 Option C, free tier).
-// Real status + scores. Needs a free API key in FOOTBALL_DATA_API_KEY.
+// Live provider: football-data.org v4 (free tier). Real status + scores.
+// Needs a free API key in FOOTBALL_DATA_API_KEY.
 //
-// Free tier is 10 requests/minute. The client polls /api/dashboard every ~60s
-// (1 req/min), but we add a short in-memory cache so bursts/multiple clients
-// can't push us over the limit, and we don't re-fetch needlessly.
+// Rate limiting (the maintainer explicitly asks clients to respect it):
+//  - A 30s in-memory cache means the kiosk's ~60s polling makes at most ~2 calls/min.
+//  - We also read the response's `X-Requests-Available-Minute` / `X-RequestCounter-Reset`
+//    headers and back off (serve cached data) until the counter resets when the
+//    free 10/min budget is exhausted or we get a 429.
 const DEFAULT_BASE = 'https://api.football-data.org';
 const COMPETITION = 'WC'; // FIFA World Cup
 const FETCH_TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 30_000;
 
 let memo: { at: number; data: DashboardData } | null = null;
+let cooldownUntil = 0;
 
-async function fetchMatches(base: string, key: string): Promise<FootballDataResponse> {
+function num(v: string | null): number | null {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+interface FetchResult {
+  body: FootballDataResponse;
+  remainingMinute: number | null;
+  resetSeconds: number | null;
+}
+
+async function fetchMatches(base: string, key: string): Promise<FetchResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -26,12 +41,20 @@ async function fetchMatches(base: string, key: string): Promise<FootballDataResp
       signal: controller.signal,
       headers: { 'X-Auth-Token': key },
     });
-    if (res.status === 429) throw new Error('football-data rate limit hit (HTTP 429)');
+    const remainingMinute = num(res.headers.get('X-Requests-Available-Minute'));
+    const resetSeconds = num(res.headers.get('X-RequestCounter-Reset'));
+
+    if (res.status === 429) {
+      // Back off until the counter resets.
+      cooldownUntil = Date.now() + ((resetSeconds ?? 60) + 1) * 1000;
+      throw new Error('football-data rate limit hit (HTTP 429) — backing off');
+    }
     if (res.status === 403) {
       throw new Error('football-data HTTP 403 — key invalid or World Cup not on your plan');
     }
     if (!res.ok) throw new Error(`football-data responded HTTP ${res.status}`);
-    return (await res.json()) as FootballDataResponse;
+
+    return { body: (await res.json()) as FootballDataResponse, remainingMinute, resetSeconds };
   } finally {
     clearTimeout(timer);
   }
@@ -40,7 +63,11 @@ async function fetchMatches(base: string, key: string): Promise<FootballDataResp
 export const footballDataProvider: DataProvider = {
   name: 'football_data',
   async fetchDashboardData(): Promise<DashboardData> {
-    if (memo && Date.now() - memo.at < CACHE_TTL_MS) return memo.data;
+    const now = Date.now();
+
+    // Serve the in-memory cache when fresh, or while we're in a backoff window.
+    if (memo && now - memo.at < CACHE_TTL_MS) return memo.data;
+    if (memo && now < cooldownUntil) return memo.data;
 
     const key = process.env.FOOTBALL_DATA_API_KEY || process.env.EXTERNAL_API_KEY;
     if (!key) {
@@ -48,8 +75,14 @@ export const footballDataProvider: DataProvider = {
     }
     const base = process.env.FOOTBALL_DATA_BASE_URL || DEFAULT_BASE;
 
-    const response = await fetchMatches(base, key);
-    const matches = parseFootballData(response);
+    const { body, remainingMinute, resetSeconds } = await fetchMatches(base, key);
+
+    // Proactively back off if this response exhausted the per-minute budget.
+    if (remainingMinute != null && remainingMinute <= 0) {
+      cooldownUntil = now + ((resetSeconds ?? 60) + 1) * 1000;
+    }
+
+    const matches = parseFootballData(body);
     const standings = calculateStandings(matches);
 
     let data: DashboardData = {
@@ -65,7 +98,7 @@ export const footballDataProvider: DataProvider = {
       data = await applyManualOverrides(data);
     }
 
-    memo = { at: Date.now(), data };
+    memo = { at: now, data };
     return data;
   },
 };

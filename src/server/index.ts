@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import { existsSync } from 'node:fs';
 import { getDashboard } from './dashboardService.js';

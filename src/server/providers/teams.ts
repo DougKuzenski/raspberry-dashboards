@@ -74,7 +74,14 @@ const NATIONS: Record<string, Nation> = {
   uzbekistan: { code: 'UZB', iso2: 'UZ' },
   jordan: { code: 'JOR', iso2: 'JO' },
   'cape verde': { code: 'CPV', iso2: 'CV' },
+  'cape verde islands': { code: 'CPV', iso2: 'CV' },
   curaçao: { code: 'CUW', iso2: 'CW' },
+  'bosnia-herzegovina': { code: 'BIH', iso2: 'BA' },
+  'bosnia and herzegovina': { code: 'BIH', iso2: 'BA' },
+  haiti: { code: 'HAI', iso2: 'HT' },
+  iraq: { code: 'IRQ', iso2: 'IQ' },
+  'congo dr': { code: 'COD', iso2: 'CD' },
+  'dr congo': { code: 'COD', iso2: 'CD' },
 };
 
 // Regional-indicator flag emoji from an ISO2 country code.
