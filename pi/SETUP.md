@@ -122,10 +122,51 @@ sleep 3
 curl -s http://localhost:3000/healthz   # -> {"ok":true}
 ```
 
-Leave it running for the next step, or `kill %1` to stop it.
+Leave it running for the next step, or `kill %1` to stop it. (That smoke test uses the default
+`manual` provider — you'll point it at live data in the next step.)
 
-> Want live fixtures instead of the bundled sample data? Use the OpenFootball provider — set
-> `Environment=DATA_PROVIDER=openfootball` in the service file in step 6.
+---
+
+## 5b. Configure the data source (`.env`)
+
+The server reads its configuration from a `.env` file in the project directory. Create one on the Pi:
+
+```bash
+cd ~/world-cup-dashboard
+cp .env.example .env
+nano .env
+```
+
+Set the provider you want:
+
+```bash
+# Live scores (recommended) — needs your free football-data.org key:
+DATA_PROVIDER=football_data
+FOOTBALL_DATA_API_KEY=your_key_here
+
+# ...or no key needed, fixtures/schedule only:
+# DATA_PROVIDER=openfootball
+
+# ...or hand-edited JSON, fully offline:
+# DATA_PROVIDER=manual
+```
+
+> **Why this lives on the Pi and not in git:** `.env` holds your secret API key, so it's
+> `.gitignore`d — it does **not** come down with `git clone`/`git pull`. You must create it on the
+> Pi (this step). The systemd service in step 6 reads it automatically from this directory.
+>
+> Keep the key alive: **verify your email** with football-data.org, or they delete inactive keys.
+> If the key is ever missing/invalid, the dashboard falls back to its last cached data rather than
+> going blank — but you won't get fresh scores until it's fixed.
+
+Re-test with live data:
+
+```bash
+npm run start &
+sleep 3
+curl -s http://localhost:3000/api/dashboard | grep -o '"source":"[^"]*"'   # -> "source":"football_data"
+kill %1
+```
 
 ---
 
@@ -145,8 +186,9 @@ systemctl --user enable --now worldcup-dashboard.service
 systemctl --user status worldcup-dashboard.service --no-pager   # should be "active (running)"
 ```
 
-To use live data, edit the service first and change/add the `DATA_PROVIDER` line, then
-`systemctl --user daemon-reload && systemctl --user restart worldcup-dashboard.service`.
+The service reads your provider + key from the `.env` you created in step 5b — no edits to the unit
+file needed. If you change `.env` later, just restart:
+`systemctl --user restart worldcup-dashboard.service`.
 
 ---
 
