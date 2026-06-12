@@ -54,3 +54,18 @@ export function useNow(intervalMs = 1000): Date {
   }, [intervalMs]);
   return now;
 }
+
+// Scale factor to fit a fixed baseW x baseH design canvas inside the current
+// window, preserving aspect ratio (letterboxed). Recomputes on resize so the
+// dashboard always shows in full — never clipped — at any resolution or zoom.
+export function useFitScale(baseW: number, baseH: number): number {
+  const compute = () => Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
+  const [scale, setScale] = useState(compute);
+  useEffect(() => {
+    const onResize = () => setScale(compute());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseW, baseH]);
+  return scale;
+}

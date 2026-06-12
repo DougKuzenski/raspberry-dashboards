@@ -1,19 +1,22 @@
-/* Full-screen dashboard layout. Grid: header / body (hero+today+context) /
-   upcoming strip / footer ticker. Sized so a normal match day needs no scroll. */
+/* The dashboard is a fixed 1280x720 "stage". App.tsx scales it with a transform
+   to fit the real screen, so everything is sized in fixed px here and nothing is
+   ever clipped — the whole canvas shrinks/grows uniformly (720p, 1080p, a laptop
+   window at 100%, all identical). Grid: header / body / upcoming / ticker. */
 
 .dashboard {
-  width: 100vw;
-  height: 100vh;
-  padding: clamp(10px, 1.4vw, 24px);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 720px;
+  padding: 20px;
   display: grid;
   grid-template-rows: auto 1fr auto auto;
-  gap: clamp(8px, 1.1vw, 18px);
-  transition: transform 2s ease; /* smooth burn-in nudge */
+  gap: 14px;
+  transform-origin: center center;
+  transition: transform 1.5s ease; /* smooth burn-in nudge */
 }
 
-.dashboard--loading {
-  place-items: center;
-}
 .loading-text {
   font-size: var(--fs-title);
   color: var(--text-dim);
@@ -25,12 +28,12 @@
   justify-content: space-between;
   align-items: baseline;
   border-bottom: 2px solid var(--line);
-  padding-bottom: clamp(6px, 0.8vw, 14px);
+  padding-bottom: 10px;
 }
 .header__title {
   display: flex;
   align-items: baseline;
-  gap: clamp(10px, 1.4vw, 22px);
+  gap: 18px;
 }
 .header__brand {
   font-size: var(--fs-brand);
@@ -53,7 +56,7 @@
 .header__clock {
   display: flex;
   align-items: baseline;
-  gap: clamp(8px, 1vw, 16px);
+  gap: 14px;
 }
 .header__date {
   color: var(--text-dim);
@@ -73,7 +76,7 @@
   grid-template-areas:
     'hero    context'
     'today   context';
-  gap: clamp(8px, 1.1vw, 18px);
+  gap: 14px;
   min-height: 0;
 }
 .dashboard__hero { grid-area: hero; }
@@ -85,10 +88,10 @@
   background: linear-gradient(140deg, var(--bg-panel-2), var(--bg-panel));
   border: 2px solid var(--line);
   border-radius: 16px;
-  padding: clamp(14px, 1.8vw, 32px);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: clamp(6px, 0.9vw, 16px);
+  gap: 12px;
   height: 100%;
 }
 .hero--live { border-color: var(--live); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.25); }
@@ -104,7 +107,7 @@
 .hero__teams {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 1.6vw, 28px);
+  gap: 22px;
   font-size: var(--fs-hero);
   font-weight: 800;
   line-height: 1.05;
@@ -118,7 +121,7 @@
   flex-wrap: wrap;
   gap: 8px;
   color: var(--text-dim);
-  font-size: calc(var(--fs-base) * 1.0);
+  font-size: var(--fs-base);
 }
 .hero__countdown {
   font-size: var(--fs-title);
@@ -133,7 +136,7 @@
   background: var(--bg-panel);
   border: 2px solid var(--line);
   border-radius: 16px;
-  padding: clamp(12px, 1.4vw, 24px);
+  padding: 18px;
   height: 100%;
   overflow: hidden;
   display: flex;
@@ -143,19 +146,19 @@
   font-size: calc(var(--fs-base) * 1.05);
   letter-spacing: 0.12em;
   color: var(--text-dim);
-  margin-bottom: clamp(8px, 1vw, 16px);
+  margin-bottom: 12px;
   font-weight: 800;
 }
 .panel__empty { color: var(--text-dim); }
 
 /* ---- Match rows (today) ---- */
-.match-list { list-style: none; display: flex; flex-direction: column; gap: clamp(6px, 0.8vw, 12px); }
+.match-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .match-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: clamp(8px, 1.2vw, 20px);
-  padding: clamp(6px, 0.8vw, 12px) clamp(8px, 1vw, 14px);
+  gap: 16px;
+  padding: 10px 12px;
   background: var(--bg-panel-2);
   border-radius: 10px;
   border-left: 5px solid var(--line);
@@ -164,7 +167,7 @@
 .match-row--final { border-left-color: var(--final); }
 .match-row--scheduled { border-left-color: var(--accent); }
 .match-row__time { color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.match-row__teams { display: flex; align-items: center; gap: clamp(8px, 1vw, 16px); font-weight: 700; }
+.match-row__teams { display: flex; align-items: center; gap: 13px; font-weight: 700; }
 .match-row__score { color: var(--accent); font-variant-numeric: tabular-nums; }
 
 /* ---- Team label ---- */
@@ -194,8 +197,8 @@
 /* ---- Group standings: compact "all groups at once" grid ---- */
 .groups-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 11vw, 180px), 1fr));
-  gap: clamp(6px, 0.8vw, 12px);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
   align-content: start;
   overflow: hidden;
   flex: 1;
@@ -205,7 +208,7 @@
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: clamp(5px, 0.6vw, 9px) clamp(6px, 0.7vw, 10px);
+  padding: 8px 9px;
 }
 .group-card--featured {
   border-color: var(--accent);
@@ -239,8 +242,8 @@
 .group-card__row--favorite .group-card__team { color: var(--favorite); }
 
 /* ---- Bracket ---- */
-.bracket { display: flex; gap: clamp(10px, 1.4vw, 24px); overflow: hidden; }
-.bracket__col { display: flex; flex-direction: column; justify-content: space-around; gap: clamp(8px, 1vw, 16px); flex: 1; }
+.bracket { display: flex; gap: 20px; overflow: hidden; }
+.bracket__col { display: flex; flex-direction: column; justify-content: space-around; gap: 13px; flex: 1; }
 .bracket__round { color: var(--text-dim); font-size: 0.8em; letter-spacing: 0.08em; text-transform: uppercase; }
 .bracket__node {
   background: var(--bg-panel-2);
@@ -255,14 +258,14 @@
 .upcoming {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 1.4vw, 22px);
-  padding: clamp(6px, 0.8vw, 12px) clamp(10px, 1.2vw, 18px);
+  gap: 18px;
+  padding: 10px 16px;
   background: var(--bg-panel);
   border-radius: 12px;
   border: 1px solid var(--line);
 }
 .upcoming__label { color: var(--accent); font-weight: 800; letter-spacing: 0.1em; font-size: 0.85em; }
-.upcoming__list { list-style: none; display: flex; gap: clamp(12px, 1.8vw, 32px); flex: 1; overflow: hidden; }
+.upcoming__list { list-style: none; display: flex; gap: 24px; flex: 1; overflow: hidden; }
 .upcoming__item { display: flex; flex-direction: column; white-space: nowrap; }
 .upcoming__item--favorite .upcoming__teams { color: var(--favorite); font-weight: 700; }
 .upcoming__time { color: var(--text-dim); font-size: 0.8em; }
@@ -272,18 +275,18 @@
   background: var(--accent);
   color: #1a1300;
   border-radius: 10px;
-  padding: clamp(6px, 0.8vw, 12px) clamp(12px, 1.4vw, 22px);
+  padding: 10px 18px;
   font-weight: 700;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-/* ---- Connection status ---- */
+/* ---- Connection status (sits in the bottom-right of the scaled stage) ---- */
 .conn {
-  position: fixed;
-  bottom: 10px;
-  right: 14px;
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 6px;

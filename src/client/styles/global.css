@@ -12,11 +12,13 @@
   --final: #6f7fb0;
   --ok: #3ddc84;
 
-  /* Type scale is viewport-relative so it fills 720p and still holds at 1080p. */
-  --fs-base: clamp(16px, 1.7vw, 26px);
-  --fs-title: clamp(22px, 2.6vw, 40px);
-  --fs-hero: clamp(34px, 5vw, 76px);
-  --fs-brand: clamp(20px, 2.4vw, 38px);
+  /* Fixed type scale for the 1280x720 design canvas. The whole dashboard is
+     scaled to fit the actual screen (see .viewport / .dashboard), so these never
+     need viewport units — they're sized for 720p and scale up uniformly. */
+  --fs-base: 18px;
+  --fs-title: 30px;
+  --fs-hero: 54px;
+  --fs-brand: 27px;
 
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
@@ -41,4 +43,12 @@ body {
   line-height: 1.25;
   overflow: hidden; /* kiosk: never scroll */
   -webkit-font-smoothing: antialiased;
+}
+
+/* Fills the real screen and letterboxes the scaled canvas. */
+.viewport {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  overflow: hidden;
 }

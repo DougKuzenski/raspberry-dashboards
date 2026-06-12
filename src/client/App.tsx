@@ -1,4 +1,4 @@
-import { useDashboardFeed, useNow } from './hooks.js';
+import { useDashboardFeed, useNow, useFitScale } from './hooks.js';
 import { selectDashboardState } from '../shared/selectDashboardState.js';
 import { Header } from './components/Header.js';
 import { HeroMatchCard } from './components/HeroMatchCard.js';
@@ -22,13 +22,18 @@ function burnInOffset(now: Date): { x: number; y: number } {
   return positions[step % positions.length];
 }
 
+// Fixed design canvas; the whole dashboard scales to fit the screen.
+const BASE_W = 1280;
+const BASE_H = 720;
+
 export function App() {
   const { data, stale, lastUpdated } = useDashboardFeed();
   const now = useNow();
+  const scale = useFitScale(BASE_W, BASE_H);
 
   if (!data) {
     return (
-      <div className="dashboard dashboard--loading">
+      <div className="viewport" style={{ display: 'grid', placeItems: 'center' }}>
         <div className="loading-text">Loading World Cup dashboard…</div>
       </div>
     );
@@ -38,11 +43,13 @@ export function App() {
   const offset = burnInOffset(now);
   const isStale = stale || Boolean(data.stale);
 
+  // Center, scale to fit, then apply the subtle burn-in nudge (in design px).
+  const transform =
+    `translate(-50%, -50%) scale(${scale}) translate(${offset.x}px, ${offset.y}px)`;
+
   return (
-    <div
-      className="dashboard"
-      style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
-    >
+    <div className="viewport">
+      <div className="dashboard" style={{ transform }}>
       <Header
         phase={data.tournamentPhase}
         now={now}
@@ -77,6 +84,7 @@ export function App() {
       />
 
       <ConnectionStatus stale={isStale} lastUpdated={lastUpdated} source={data.source} />
+      </div>
     </div>
   );
 }
