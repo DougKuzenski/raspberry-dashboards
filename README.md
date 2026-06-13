@@ -119,16 +119,25 @@ Full walkthrough — flashing the SD card to a hands-free TV kiosk — is in
 # On the Pi (Raspberry Pi OS Desktop; Node 20 installed):
 git clone <your-repo-url> ~/raspberry-playground
 cd ~/raspberry-playground
-cp .env.example .env && nano .env     # set DATA_PROVIDER + FOOTBALL_DATA_API_KEY
+cp .env.example .env && nano .env                 # World Cup: DATA_PROVIDER + FOOTBALL_DATA_API_KEY
+cd apps/family && cp .env.example .env && nano .env && cd ../..   # family: CAL_PROVIDER + ICAL_SOURCES
 ./pi/install-kiosk.sh
 sudo reboot
 ```
 
-The display runs as **cage + cog** (a kiosk Wayland compositor + the WPE WebKit browser),
-not a desktop + Chromium — it's lean enough for a **Pi 2** and works great on a **Pi 4/5**
-(keep the same setup; cog just gets GPU acceleration). `install-kiosk.sh` sets up the server,
-the kiosk, a memory watchdog, and disables the desktop. See `pi/SETUP.md` for the Pi 4/5
-guidance and the (hard-won) reasons Chromium isn't used.
+The Pi runs **both** dashboard servers (World Cup :3000, family :3001) and **one** app-agnostic
+kiosk — **cage + cog** (a kiosk Wayland compositor + the WPE WebKit browser), not a desktop +
+Chromium. Which dashboard shows is set by **`kiosk.json`** (`{ "active": "family" }`), so swapping
+is a one-line commit, not a reinstall:
+
+```bash
+./pi/switch.sh worldcup        # or: make swap APP=worldcup   — ~3s cog reload, no reboot
+./pi/deploy.sh                 # apply latest main to the Pi now (otherwise the timer does, ~10 min)
+```
+
+Lean enough for a **Pi 2**, GPU-accelerated on a **Pi 4/5** (same setup — keep it). `install-kiosk.sh`
+sets up both servers, the manifest kiosk, a self-update timer, and a memory watchdog. See
+`pi/SETUP.md` for the swap/deploy loop, Pi 4/5 guidance, and why Chromium isn't used.
 
 ## Project layout
 

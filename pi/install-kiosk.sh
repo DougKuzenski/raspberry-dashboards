@@ -1,119 +1,100 @@
 #!/usr/bin/env bash
 #
-# One-shot, re-runnable installer for a dashboard kiosk on Raspberry Pi OS
-# (Bookworm/Trixie, labwc/Wayland). Sets up, for the chosen app:
-#   - the dashboard server as a user service (starts at boot via linger)
-#   - the display as cage + cog (a kiosk compositor + WPE WebKit browser),
-#     replacing the desktop — lean enough for a Pi 2, great on a Pi 4/5
-#   - a memory watchdog that restarts the kiosk if RAM runs low
+# One-shot, re-runnable installer for the dashboard kiosk on Raspberry Pi OS
+# (Bookworm/Trixie, labwc/Wayland). Sets up a MANIFEST-DRIVEN kiosk:
 #
-# Usage:
-#   ./pi/install-kiosk.sh            # the World Cup dashboard (default)
-#   ./pi/install-kiosk.sh worldcup   # same, explicit
-#   ./pi/install-kiosk.sh family     # the family-calendar dashboard
+#   - BOTH dashboard servers run side by side as user services (worldcup :3000,
+#     family :3001), started at boot via linger. (An app is skipped if it has no .env.)
+#   - ONE app-agnostic kiosk (cage + cog) shows whichever dashboard kiosk.json
+#     selects. Swapping is a one-line manifest change — see pi/switch.sh — not a
+#     reinstall: the other server is already running, so it's a ~3s cog reload.
+#   - A self-update timer (git pull + rebuild changed apps + reload kiosk) and a
+#     memory watchdog (restart the kiosk if RAM runs low).
 #
-# A Pi runs ONE kiosk (they'd fight over tty1). Installing for a second app on
-# the same Pi disables the first app's kiosk.
+# Re-runnable: safe to run again after pulling new code or adding a second app's .env.
 #
 # WHY cage + cog instead of Chromium? See pi/SETUP.md. Short version: Chromium
 # won't composite a visible window under labwc, and on a GPU-less Pi 2 it renders
-# black and leaks itself to death. cog (WPE WebKit) software-renders reliably and
-# uses ~70MB. This same setup works on a Pi 4/5 too (keep it — see SETUP.md).
+# black and leaks itself to death. cog (WPE WebKit) software-renders reliably at
+# ~70MB and gets GPU acceleration on a Pi 4/5.
 #
-# Prereqs: Node 20+ installed, and a .env in the app dir (repo root for worldcup,
-#          apps/family for family) with the provider settings that app needs.
-# Then:    ./pi/install-kiosk.sh <app>   and   sudo reboot
+# Prereqs: Node 20+, and a .env in each app you want (repo root for worldcup,
+#          apps/family for family). Then:  ./pi/install-kiosk.sh   and  sudo reboot
 set -euo pipefail
 
-APP="${1:-worldcup}"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 USER_NAME="$(id -un)"
 NODE_BIN="$(command -v node || true)"
-
-# Per-app config: where it lives, what it's called, and which port it serves.
-case "$APP" in
-  worldcup)
-    APP_DIR="$REPO"
-    NAME="World Cup Dashboard"
-    SERVICE="worldcup-dashboard"
-    KIOSK="worldcup-kiosk"
-    GUARD="worldcup-mem-guard"
-    PORT=3000
-    ;;
-  family)
-    APP_DIR="$REPO/apps/family"
-    NAME="Family Dashboard"
-    SERVICE="family-dashboard"
-    KIOSK="family-kiosk"
-    GUARD="family-mem-guard"
-    PORT=3001
-    ;;
-  *)
-    echo "ERROR: unknown app '$APP' (expected: worldcup | family)" >&2
-    exit 1
-    ;;
-esac
-
-echo "==> app: $APP   repo: $REPO   dir: $APP_DIR   user: $USER_NAME   port: $PORT"
 [ -n "$NODE_BIN" ] || { echo "ERROR: Node not found. Install Node 20 LTS first."; exit 1; }
-[ -f "$APP_DIR/.env" ] || {
-  echo "ERROR: $APP_DIR/.env not found.";
-  echo "Create it (cp .env.example .env in $APP_DIR) and set the provider settings first.";
-  exit 1;
-}
+
+echo "==> repo: $REPO   user: $USER_NAME"
 
 echo "==> installing packages (cage, cog, emoji font)"
 sudo apt-get update -y
 sudo apt-get install -y cage cog fonts-noto-color-emoji curl
 sudo fc-cache -f >/dev/null 2>&1 || true
 
-echo "==> building the app"
-cd "$APP_DIR"
-( npm ci || npm install )
-npm run build
-
-echo "==> dashboard server as a user service + linger (starts at boot)"
 mkdir -p "$HOME/.config/systemd/user"
-cat > "$HOME/.config/systemd/user/$SERVICE.service" <<EOF
+chmod +x "$REPO/pi/kiosk-launch.sh" "$REPO/pi/auto-update.sh" 2>/dev/null || true
+
+# --- one dashboard server (user service) per app that has a .env ---
+setup_server() {  # name  app-dir  service  port
+  local name="$1" dir="$2" service="$3" port="$4"
+  if [ ! -f "$dir/.env" ]; then
+    echo "==> skipping $name server (no $dir/.env)"
+    return 0
+  fi
+  echo "==> building $name ($dir) + server service on :$port"
+  ( cd "$dir" && ( npm ci || npm install ) && npm run build )
+  cat > "$HOME/.config/systemd/user/$service.service" <<EOF
 [Unit]
-Description=$NAME Server
+Description=$name dashboard server (:$port)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=$APP_DIR
-ExecStart=$NODE_BIN $APP_DIR/dist/server/index.js
+WorkingDirectory=$dir
+ExecStart=$NODE_BIN $dir/dist/server/index.js
 Restart=always
 RestartSec=5
 
 [Install]
 WantedBy=default.target
 EOF
+  systemctl --user enable "$service.service"
+}
+
+setup_server worldcup "$REPO"             worldcup-dashboard 3000
+setup_server family   "$REPO/apps/family" family-dashboard   3001
+
 systemctl --user daemon-reload
-systemctl --user enable --now "$SERVICE.service"
+# (re)start whatever servers got installed
+[ -f "$REPO/.env" ]             && systemctl --user restart worldcup-dashboard.service || true
+[ -f "$REPO/apps/family/.env" ] && systemctl --user restart family-dashboard.service   || true
 sudo loginctl enable-linger "$USER_NAME"
 
-echo "==> memory watchdog (restart kiosk if MemAvailable < 160MB)"
-sudo tee "/usr/local/bin/$GUARD.sh" >/dev/null <<GUARD
+# --- memory watchdog: restart the kiosk if free RAM gets low ---
+echo "==> memory watchdog"
+sudo tee /usr/local/bin/dashboard-mem-guard.sh >/dev/null <<'GUARD'
 #!/bin/sh
-avail=\$(awk '/MemAvailable/{print int(\$2/1024)}' /proc/meminfo)
-if [ "\${avail:-9999}" -lt 160 ]; then
-  logger -t $GUARD "MemAvailable \${avail}MB < 160MB; restarting kiosk"
-  systemctl restart $KIOSK.service
+avail=$(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo)
+if [ "${avail:-9999}" -lt 160 ]; then
+  logger -t dashboard-mem-guard "MemAvailable ${avail}MB < 160MB; restarting kiosk"
+  systemctl restart dashboard-kiosk.service
 fi
 GUARD
-sudo chmod +x "/usr/local/bin/$GUARD.sh"
-sudo tee "/etc/systemd/system/$GUARD.service" >/dev/null <<SVC
+sudo chmod +x /usr/local/bin/dashboard-mem-guard.sh
+sudo tee /etc/systemd/system/dashboard-mem-guard.service >/dev/null <<'SVC'
 [Unit]
-Description=$NAME kiosk memory guard
+Description=Dashboard kiosk memory guard
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/$GUARD.sh
+ExecStart=/usr/local/bin/dashboard-mem-guard.sh
 SVC
-sudo tee "/etc/systemd/system/$GUARD.timer" >/dev/null <<TMR
+sudo tee /etc/systemd/system/dashboard-mem-guard.timer >/dev/null <<'TMR'
 [Unit]
-Description=Run $NAME kiosk memory guard every 10 min
+Description=Run dashboard kiosk memory guard every 10 min
 [Timer]
 OnBootSec=10min
 OnUnitActiveSec=10min
@@ -121,10 +102,11 @@ OnUnitActiveSec=10min
 WantedBy=timers.target
 TMR
 
-echo "==> kiosk service (cage + cog on tty1)"
-sudo tee "/etc/systemd/system/$KIOSK.service" >/dev/null <<EOF
+# --- the one kiosk: cage runs the manifest launcher, which becomes cog ---
+echo "==> kiosk service (cage + cog, manifest-driven)"
+sudo tee /etc/systemd/system/dashboard-kiosk.service >/dev/null <<EOF
 [Unit]
-Description=$NAME Kiosk (cage + cog)
+Description=Dashboard Kiosk (cage + cog, manifest-driven)
 After=systemd-user-sessions.service network-online.target
 Wants=network-online.target
 Conflicts=getty@tty1.service
@@ -144,8 +126,7 @@ StandardError=journal
 Environment=WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 # cage only gets the display if its tty is the ACTIVE console — force it.
 ExecStartPre=+/usr/bin/chvt 1
-ExecStartPre=/bin/sh -c 'until curl -sf http://localhost:$PORT/healthz >/dev/null 2>&1; do sleep 1; done'
-ExecStart=/usr/bin/cage -- /usr/bin/cog http://localhost:$PORT
+ExecStart=/usr/bin/cage -- $REPO/pi/kiosk-launch.sh
 Restart=always
 RestartSec=5
 
@@ -153,15 +134,58 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-echo "==> disabling the desktop + any sibling kiosk, enabling this one"
+# --- let auto-update / switch reload the kiosk unattended (passwordless) ---
+echo "==> sudoers rule for unattended kiosk reload"
+echo "$USER_NAME ALL=(root) NOPASSWD: /usr/bin/systemctl restart dashboard-kiosk.service, /usr/bin/systemctl restart dashboard-kiosk" \
+  | sudo tee /etc/sudoers.d/dashboard-kiosk >/dev/null
+sudo chmod 0440 /etc/sudoers.d/dashboard-kiosk
+sudo visudo -c >/dev/null
+
+# --- self-update timer (app-agnostic) ---
+echo "==> self-update timer (every 10 min)"
+cat > "$HOME/.config/systemd/user/dashboard-auto-update.service" <<EOF
+[Unit]
+Description=Dashboard self-update (git pull + build changed apps + reload kiosk)
+
+[Service]
+Type=oneshot
+ExecStart=$REPO/pi/auto-update.sh
+EOF
+cat > "$HOME/.config/systemd/user/dashboard-auto-update.timer" <<'EOF'
+[Unit]
+Description=Check for dashboard updates every 10 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+RandomizedDelaySec=1min
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# --- retire the old per-app units (superseded by the single kiosk) ---
+echo "==> disabling desktop + legacy per-app kiosks"
 sudo systemctl disable lightdm 2>/dev/null || true
-# A Pi runs one kiosk; disable the other app's kiosk if it was installed.
-for other in worldcup-kiosk family-kiosk; do
-  [ "$other" = "$KIOSK" ] || sudo systemctl disable "$other.service" 2>/dev/null || true
+for u in worldcup-kiosk family-kiosk worldcup-mem-guard.timer family-mem-guard.timer; do
+  sudo systemctl disable "$u" 2>/dev/null || true
 done
+
+# --- enable everything ---
 sudo systemctl daemon-reload
-sudo systemctl enable "$GUARD.timer" "$KIOSK.service"
+sudo systemctl enable dashboard-mem-guard.timer dashboard-kiosk.service
+systemctl --user daemon-reload
+systemctl --user enable dashboard-auto-update.timer
+
+# --- sanity: warn if the active app has no server ---
+ACTIVE="$("$NODE_BIN" -e 'try{process.stdout.write(String(require(process.argv[1]).active||""))}catch(e){}' "$REPO/kiosk.json" 2>/dev/null || true)"
+case "$ACTIVE" in
+  worldcup) [ -f "$REPO/.env" ]             || echo "WARNING: kiosk.json active=worldcup but no $REPO/.env — the TV will be blank until you add it." ;;
+  family)   [ -f "$REPO/apps/family/.env" ] || echo "WARNING: kiosk.json active=family but no $REPO/apps/family/.env — the TV will be blank until you add it." ;;
+  *)        echo "WARNING: kiosk.json active='$ACTIVE' not recognized; kiosk will default to worldcup." ;;
+esac
 
 echo ""
-echo "Done ($APP). Reboot to launch the kiosk hands-free:  sudo reboot"
-echo "Debug the screen over SSH:  XDG_RUNTIME_DIR=/run/user/\$(id -u) WAYLAND_DISPLAY=wayland-0 grim /tmp/shot.png"
+echo "Done. Active dashboard: '${ACTIVE:-worldcup}'. Reboot to launch hands-free:  sudo reboot"
+echo "Swap anytime:  ./pi/switch.sh <worldcup|family>   (from your laptop)"
+echo "Debug the screen:  XDG_RUNTIME_DIR=/run/user/\$(id -u) WAYLAND_DISPLAY=wayland-0 grim /tmp/shot.png"
