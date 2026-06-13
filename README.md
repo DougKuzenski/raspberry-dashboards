@@ -112,59 +112,23 @@ DATA_PROVIDER=football_data FOOTBALL_DATA_API_KEY=your_key npm run dev
 
 ## Raspberry Pi kiosk setup
 
-**New to this / starting from a dusty Pi?** Follow the full step-by-step walkthrough in
-[`pi/SETUP.md`](pi/SETUP.md) — from flashing the SD card to the dashboard auto-starting on the TV.
-The condensed version is below.
-
-Use Raspberry Pi OS **Desktop** (easier to debug than Lite). Pi 4 or 5 recommended.
+Full walkthrough — flashing the SD card to a hands-free TV kiosk — is in
+[`pi/SETUP.md`](pi/SETUP.md). The short version:
 
 ```bash
-sudo apt update
-sudo apt install -y git curl chromium-browser unclutter
-# Install Node 20 LTS (nvm or NodeSource), then:
-git clone <your-repo-url> ~/world-cup-dashboard
-cd ~/world-cup-dashboard
-./scripts/build-kiosk.sh      # install + build + validate
+# On the Pi (Raspberry Pi OS Desktop; Node 20 installed):
+git clone <your-repo-url> ~/raspberry-playground
+cd ~/raspberry-playground
+cp .env.example .env && nano .env     # set DATA_PROVIDER + FOOTBALL_DATA_API_KEY
+./pi/install-kiosk.sh
+sudo reboot
 ```
 
-**1. Run the server as a user service**
-
-```bash
-cp pi/dashboard.service.example ~/.config/systemd/user/worldcup-dashboard.service
-systemctl --user daemon-reload
-systemctl --user enable --now worldcup-dashboard.service
-curl -sf http://localhost:3000/healthz   # -> {"ok":true}
-```
-
-**2. Confirm the kiosk launches manually first**
-
-```bash
-chmod +x pi/chromium-launch.sh
-./pi/chromium-launch.sh
-```
-
-**3. Autostart the kiosk.** Easiest is a desktop autostart entry:
-
-```bash
-mkdir -p ~/.config/autostart
-cat > ~/.config/autostart/worldcup-kiosk.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=World Cup Kiosk
-Exec=/home/pi/world-cup-dashboard/pi/chromium-launch.sh
-X-GNOME-Autostart-enabled=true
-EOF
-```
-
-Adjust `/home/pi` to your username. Alternatively use `pi/kiosk.service.example`.
-
-**Troubleshooting**
-
-- Browser doesn't appear: check whether the Pi is on **Wayland or X11** (`echo $XDG_SESSION_TYPE`).
-  The `xset` screen-blank disables in `chromium-launch.sh` are X11-only; on Wayland set idle behavior
-  in the compositor. Switching to X11 gives the simplest kiosk setup.
-- TV goes black: that's display blanking — handled by the `xset` calls on X11.
-- Binary name differs by OS release (`chromium-browser` vs `chromium`); the launch script handles both.
+The display runs as **cage + cog** (a kiosk Wayland compositor + the WPE WebKit browser),
+not a desktop + Chromium — it's lean enough for a **Pi 2** and works great on a **Pi 4/5**
+(keep the same setup; cog just gets GPU acceleration). `install-kiosk.sh` sets up the server,
+the kiosk, a memory watchdog, and disables the desktop. See `pi/SETUP.md` for the Pi 4/5
+guidance and the (hard-won) reasons Chromium isn't used.
 
 ## Project layout
 

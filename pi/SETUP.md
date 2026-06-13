@@ -1,304 +1,146 @@
-# Dusty Pi → Dashboard on the TV
+# Raspberry Pi Kiosk Setup
 
-A from-scratch guide. Assumes you haven't touched the Pi in a while and want the
-cleanest path: a fresh OS flash, then this dashboard auto-starting full-screen on
-the TV after every reboot.
+From a fresh SD card to the dashboard auto-starting full-screen on the TV, hands-free.
 
-Budget ~45–60 minutes, most of it waiting on downloads.
+The display runs as **cage + cog** (a tiny kiosk Wayland compositor + the WPE WebKit
+browser) instead of a desktop + Chromium. This is lean enough for a **Pi 2** and works
+great on a **Pi 4/5** — see [Which Pi / upgrading](#which-pi--upgrading-to-a-4-or-5).
+
+Most of the work is one script: [`install-kiosk.sh`](install-kiosk.sh).
 
 ---
 
 ## 0. What you need
 
-- The Raspberry Pi + its power supply
-- A **microSD card** (16GB+; you'll re-flash it, so back up anything on it first)
-- A way to write the SD card from your laptop (built-in slot or a USB adapter)
-- The right **HDMI cable for your model** — this trips people up:
-  - **Pi 4 and Pi 5** have **micro-HDMI** ports → you need a *micro-HDMI-to-HDMI* cable or adapter
-  - **Pi 3** has a **full-size HDMI** port → a normal HDMI cable
-- Wi-Fi name + password (or an ethernet cable)
-- Optional but recommended: a USB keyboard for first boot (you can also go fully headless over SSH — see step 3)
+- Raspberry Pi (2/3/4/5) + power supply
+- microSD card (16GB+). **Use a good brand** — a worn/cheap card corrupts and is the #1 Pi headache.
+- HDMI cable for your model (**Pi 4/5 = micro-HDMI**; Pi 2/3 = full-size HDMI)
+- Network: ethernet, or Wi-Fi (Pi 2 has none built-in — use ethernet or a USB Wi-Fi dongle)
 
-Don't know which Pi you have? The model is printed on the board, or check later with
-`cat /proc/device-tree/model`.
+## 1. Flash Raspberry Pi OS
 
-> **On a Pi 2 or older board?** Two differences from the steps below:
-> - **Flash the 32-bit OS, not 64-bit** — the Pi 2/3 32-bit chip won't boot the 64-bit image.
->   Choose *Raspberry Pi OS (32-bit)*, Desktop.
-> - **No built-in Wi-Fi on the Pi 2.** Use **ethernet for setup** (most reliable). If you have a
->   USB Wi-Fi dongle, plug it in too, but confirm it connects over ethernet first — old dongles can
->   need extra firmware, and you don't want to be locked out on a headless Wi-Fi-only first boot.
-> - Good news: the Pi 2 uses a **full-size HDMI** port (normal cable) and **micro-USB power** (5V/2A).
-> - Expect a **slow boot (1–2 min)** and a pokier Chromium. It works; it's just old.
+Use **Raspberry Pi Imager**. Pick **Raspberry Pi OS (Desktop)** — the installer disables the
+desktop later, but Desktop pulls in the Wayland/labwc bits cage relies on.
 
----
+- **Pi 4/5/3:** 64-bit.
+- **Pi 2:** **32-bit** (the 64-bit image won't boot on a Pi 2).
 
-## 1. Flash a fresh Raspberry Pi OS
+In Imager's **Edit Settings** (the gear), pre-set: hostname (e.g. `worldcup`), your user +
+password, Wi-Fi (if used), timezone `America/Los_Angeles`, and **enable SSH**. This makes the
+Pi come up ready for headless setup.
 
-Re-flashing is faster and more reliable than reviving an old install.
+## 2. First boot + SSH in
 
-1. Install **Raspberry Pi Imager** on your laptop: https://www.raspberrypi.com/software/
-2. Insert the SD card.
-3. In Imager:
-   - **Choose Device:** your Pi model
-   - **Choose OS:** *Raspberry Pi OS (64-bit)* — the full **Desktop** version (not Lite).
-     Desktop is much easier to debug for a kiosk. **(Pi 2/3: pick the 32-bit version instead.)**
-   - **Choose Storage:** your SD card
-4. Click **Next → Edit Settings** (the gear / "would you like to apply customisation"). This is the
-   big time-saver — set it all now so the Pi comes up ready:
-   - **Hostname:** `worldcup` (then you can reach it at `worldcup.local`)
-   - **Username / password:** pick something you'll remember (e.g. user `pi`)
-   - **Wireless LAN:** your Wi-Fi SSID + password + country *(Pi 2 with a USB dongle: this may not
-     take effect until the dongle's driver loads — set it, but plan to use ethernet for first boot.)*
-   - **Locale / timezone:** `America/Los_Angeles`
-   - **Services tab:** ✅ **Enable SSH** → "Use password authentication"
-5. **Write**, wait, eject.
-
-> The username you choose matters later — this guide assumes `pi` and a home at `/home/pi`.
-> If you pick something else, adjust the paths.
-
----
-
-## 2. First boot
-
-1. Put the SD card in the Pi, connect **HDMI to the TV**, switch the TV to that HDMI input.
-2. Plug in power. First boot takes a few minutes and may reboot itself once.
-3. You should land on the Raspberry Pi OS desktop.
-
-If the TV shows "No signal": confirm you're on the right HDMI input and that the cable is in the
-**micro-HDMI port nearest the USB-C power** on a Pi 4/5 (that's HDMI0).
-
----
-
-## 3. Get a terminal (two options)
-
-**Option A — directly on the Pi:** open the Terminal app from the taskbar. Need a USB keyboard.
-
-**Option B — headless over SSH from your laptop (recommended, easier to paste commands):**
+Connect HDMI + power, let it boot, then from your laptop:
 
 ```bash
-ssh pi@worldcup.local
+ssh <user>@worldcup.local        # or <user>@<ip> from your router
 ```
 
-If `worldcup.local` doesn't resolve, find the Pi's IP from your router and use `ssh pi@<ip>`.
+(Pi 2 on a USB Wi-Fi dongle: set up over **ethernet** first; old dongles can need extra firmware.)
 
-Everything from here can be done in that terminal.
-
----
-
-## 4. Update the OS and install dependencies
+## 3. Install Node 20
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y git curl chromium unclutter
-```
-
-(On older Pi OS the browser package is `chromium-browser` instead of `chromium` — install whichever
-exists; the launch script handles either name.)
-
-Install **Node 20 LTS** from NodeSource:
-
-```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-node --version    # should print v20.x
+sudo apt install -y git nodejs
 ```
 
----
-
-## 5. Get the dashboard and build it
+## 4. Clone + configure
 
 ```bash
-git clone <your-repo-url> ~/world-cup-dashboard
-cd ~/world-cup-dashboard
-./scripts/build-kiosk.sh        # installs deps, builds client+server, validates data
-```
-
-Quick manual smoke test before wiring autostart:
-
-```bash
-npm run start &                 # start the server in the background
-sleep 3
-curl -s http://localhost:3000/healthz   # -> {"ok":true}
-```
-
-Leave it running for the next step, or `kill %1` to stop it. (That smoke test uses the default
-`manual` provider — you'll point it at live data in the next step.)
-
----
-
-## 5b. Configure the data source (`.env`)
-
-The server reads its configuration from a `.env` file in the project directory. Create one on the Pi:
-
-```bash
-cd ~/world-cup-dashboard
+git clone <your-repo-url> ~/raspberry-playground
+cd ~/raspberry-playground
 cp .env.example .env
-nano .env
+nano .env        # set DATA_PROVIDER=football_data and FOOTBALL_DATA_API_KEY=<your key>
 ```
 
-Set the provider you want:
+> **The API key lives only on the Pi** — `.env` is gitignored, so it does NOT arrive via `git pull`.
+> Get a free key at https://www.football-data.org/client/register and **verify the email** (they
+> delete inactive keys). No key? Use `DATA_PROVIDER=openfootball` (fixtures only) or `manual`.
+
+## 5. Run the installer
 
 ```bash
-# Live scores (recommended) — needs your free football-data.org key:
-DATA_PROVIDER=football_data
-FOOTBALL_DATA_API_KEY=your_key_here
-
-# ...or no key needed, fixtures/schedule only:
-# DATA_PROVIDER=openfootball
-
-# ...or hand-edited JSON, fully offline:
-# DATA_PROVIDER=manual
-```
-
-> **Why this lives on the Pi and not in git:** `.env` holds your secret API key, so it's
-> `.gitignore`d — it does **not** come down with `git clone`/`git pull`. You must create it on the
-> Pi (this step). The systemd service in step 6 reads it automatically from this directory.
->
-> Keep the key alive: **verify your email** with football-data.org, or they delete inactive keys.
-> If the key is ever missing/invalid, the dashboard falls back to its last cached data rather than
-> going blank — but you won't get fresh scores until it's fixed.
-
-Re-test with live data:
-
-```bash
-npm run start &
-sleep 3
-curl -s http://localhost:3000/api/dashboard | grep -o '"source":"[^"]*"'   # -> "source":"football_data"
-kill %1
-```
-
----
-
-## 6. Run the server as a background service
-
-This keeps the dashboard server alive across crashes and reboots, no login required.
-
-```bash
-mkdir -p ~/.config/systemd/user
-cp pi/dashboard.service.example ~/.config/systemd/user/worldcup-dashboard.service
-
-# Allow user services to run at boot without an interactive login:
-sudo loginctl enable-linger "$USER"
-
-systemctl --user daemon-reload
-systemctl --user enable --now worldcup-dashboard.service
-systemctl --user status worldcup-dashboard.service --no-pager   # should be "active (running)"
-```
-
-The service reads your provider + key from the `.env` you created in step 5b — no edits to the unit
-file needed. If you change `.env` later, just restart:
-`systemctl --user restart worldcup-dashboard.service`.
-
----
-
-## 7. Make the TV behave like an appliance
-
-Use `raspi-config` for the two settings that matter most:
-
-```bash
-sudo raspi-config
-```
-
-- **System Options → Boot / Auto Login → Desktop Autologin** — so a reboot goes straight to the
-  desktop (and then the kiosk) with no login prompt.
-- **Display Options → Screen Blanking → Disable** — so the TV never goes black from the Pi side.
-  (This is the reliable way on current Pi OS, whether it's running Wayland or X11.)
-
-Reboot when it offers to.
-
----
-
-## 8. Launch the kiosk and confirm it works *manually* first
-
-Don't wire autostart until you've seen it work once by hand.
-
-```bash
-cd ~/world-cup-dashboard
-chmod +x pi/chromium-launch.sh
-./pi/chromium-launch.sh
-```
-
-Chromium should fill the screen with the dashboard. The mouse cursor disappears after a moment
-(`unclutter`). Press **Ctrl+W** or **Alt+F4** to exit, or from another SSH session `pkill chromium`.
-
-If it works → continue. If not → see Troubleshooting below before automating.
-
----
-
-## 9. Auto-start the kiosk on boot
-
-Add an XDG autostart entry so the desktop session launches the kiosk:
-
-```bash
-mkdir -p ~/.config/autostart
-cat > ~/.config/autostart/worldcup-kiosk.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=World Cup Kiosk
-Exec=/home/pi/world-cup-dashboard/pi/chromium-launch.sh
-X-GNOME-Autostart-enabled=true
-EOF
-```
-
-Adjust `/home/pi` if your username differs.
-
-**Now the real test:**
-
-```bash
+./pi/install-kiosk.sh
 sudo reboot
 ```
 
-After it comes back up the TV should show the dashboard full-screen, no cursor, no login. That's the
-finish line.
+That's it. The script installs cage/cog + an emoji font, builds the app, sets up the server +
+kiosk + memory-watchdog services, disables the desktop, and enables everything. After the reboot
+the TV shows the dashboard with **no login and no input needed**.
 
 ---
 
-## 10. Day-to-day
+## How it works
 
-- **Switch between the dashboard and a game:** just change the TV's input with the Roku remote. The
-  Pi keeps running on its own HDMI input.
-- **Edit data / channel notes:** SSH in and edit `data/manual/*.json` (or `overrides.json`). Changes
-  show within ~60s; no restart needed.
-- **Update the app after a code change:**
+```
+boot → (no desktop) → worldcup-kiosk.service on tty1
+        → cage (kiosk compositor) → cog (WPE WebKit) → http://localhost:3000
+worldcup-dashboard.service (user, linger) → Express server serves the dashboard
+wc-mem-guard.timer → restarts the kiosk if free RAM drops below 160MB
+```
+
+- **Server:** `systemctl --user status worldcup-dashboard` — config from `~/raspberry-playground/.env`.
+- **Display:** `systemctl status worldcup-kiosk` — cage + cog on tty1.
+- **Logs:** `journalctl --user -u worldcup-dashboard -f` and `sudo journalctl -u worldcup-kiosk -f`.
+
+### Day-to-day
+
+- **Switch between dashboard and a game:** just change the TV input with the Roku remote.
+- **Edit data / channel notes:** SSH in, edit `data/manual/*.json` (or `overrides.json`) — shows within ~60s.
+- **Update after code changes:** `cd ~/raspberry-playground && git pull && npm run build && sudo systemctl restart worldcup-kiosk`
+- **See what's on screen over SSH (no monitor needed):**
   ```bash
-  cd ~/world-cup-dashboard && git pull && npm run build
-  systemctl --user restart worldcup-dashboard.service
+  sudo apt install -y grim
+  XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-0 grim /tmp/shot.png
   ```
-- **Server logs:** `journalctl --user -u worldcup-dashboard -f`
 
 ---
+
+## Which Pi / upgrading to a 4 or 5
+
+**Keep this same cage + cog setup on every model — including a Pi 4/5.** Reasons:
+
+- It already works and is **lean** (cog ≈ 70MB), so it boots fast and leaves headroom.
+- cog (WPE WebKit) renders this dashboard perfectly and gets **hardware acceleration
+  automatically** on a Pi 4/5's GPU — it just gets smoother, no config change.
+- The exact same `install-kiosk.sh` runs on a Pi 4/5. To migrate: flash a 64-bit OS on the new
+  Pi, clone, create `.env`, run the script. Done. Nothing in this repo is Pi-2-specific.
+
+**Do you need to go back to Chromium on a Pi 4/5?** No. Chromium only ever offered "broader site
+compatibility," and cog renders our React app fine. The earlier Chromium attempts failed for
+Pi-2-specific reasons (no GPU → black screen; labwc → invisible window), *not* because cog is a
+compromise. If you ever truly need Chromium for some other page on a Pi 4/5, run it **under cage**
+(so it gets the display cleanly) and **with** the GPU (do not pass `--disable-gpu`):
+
+```
+ExecStart=/usr/bin/cage -- /usr/bin/chromium --ozone-platform=wayland --kiosk http://localhost:3000
+```
+
+But for this project, leave it on cog.
+
+---
+
+## Why cage + cog (and not the desktop + Chromium)
+
+Hard-won on the Pi 2, kept because it's simply the better kiosk design:
+
+- **Chromium under labwc never showed a window** (Wayland: no surface; X11/Xwayland: a window that
+  wouldn't come to the foreground even when force-raised).
+- **Chromium under cage rendered pure black** — the Pi 2 has no usable GPU and Chromium's software
+  (SwiftShader) compositing fails on armv7.
+- **Chromium also leaked** to ~all RAM+swap in ~4 hours → black screen. cog stays flat at ~70MB.
+- cog needed two fixes: `WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1` (bubblewrap can't init on the
+  Pi kernel) and `fonts-noto-color-emoji` (so the flag emoji render).
+- cage must run on the **active VT** to be granted the display, so the service does `chvt 1` first.
 
 ## Troubleshooting
 
-**Chromium doesn't appear / kiosk autostart does nothing.**
-Check whether the desktop is Wayland or X11:
-```bash
-echo $XDG_SESSION_TYPE          # "wayland" or "x11"
-```
-- The XDG `autostart/*.desktop` entry works under both the Wayfire and labwc Wayland sessions used on
-  current Pi OS, and under X11. If nothing launches, try the compositor's own autostart instead:
-  - **Wayfire (Pi 4/5 default):** add to `~/.config/wayfire.ini` under an `[autostart]` section:
-    `kiosk = /home/pi/world-cup-dashboard/pi/chromium-launch.sh`
-  - **labwc:** add the script path to `~/.config/labwc/autostart`
-- As a last resort, switch to X11: `sudo raspi-config` → **Advanced Options → Wayland → X11**, reboot,
-  and the XDG autostart + the `xset` screen-blank disables in the launch script will all behave.
-
-**TV goes black after a while.** Screen blanking — redo step 7's "Screen Blanking → Disable", reboot.
-
-**Dashboard shows but says "Data stale" / fallback.** The server isn't reachable or the provider
-failed. Check `systemctl --user status worldcup-dashboard` and `journalctl --user -u worldcup-dashboard`.
-Manual mode needs no network; only `openfootball` mode needs internet.
-
-**Wrong resolution / edges cut off (overscan).** `sudo raspi-config` → **Display Options** → set
-resolution or toggle overscan. Many TVs also have a "Just Scan" / "1:1 pixel" picture setting that
-fixes cut-off edges.
-
-**`worldcup.local` won't resolve for SSH.** Use the IP from your router, or connect a keyboard and
-work on the Pi directly.
-
-**Which Pi / OS am I on?**
-```bash
-cat /proc/device-tree/model        # e.g. "Raspberry Pi 4 Model B Rev 1.5"
-cat /etc/os-release | head -2      # OS version (Bookworm, etc.)
-```
+- **Black screen:** check `sudo journalctl -u worldcup-kiosk -n 50`. Capture the actual output with
+  `grim` (above). If cog is crash-looping, the sandbox env var is the usual cause.
+- **Nothing on the TV / wrong VT:** `sudo fgconsole` should be `1`; `sudo systemctl restart worldcup-kiosk`.
+- **Edges cut off (overscan):** fix on the TV (a "Just Scan / 1:1 pixel" picture setting) or `raspi-config` → Display.
+- **Don't run `apt install` while the kiosk is up on a Pi 2** — concurrent heavy load can OOM-freeze
+  it. Stop it first: `sudo systemctl stop worldcup-kiosk`.
