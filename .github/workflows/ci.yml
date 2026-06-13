@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read   # dorny/paths-filter lists a PR's changed files via the API
 
 jobs:
   # Detect which app changed so we only run that app's gate. The app jobs below
@@ -80,17 +81,26 @@ jobs:
   # Single stable check to require in branch protection. Always runs; fails if
   # any app gate failed, passes if they succeeded or were skipped (path-filtered).
   ci-ok:
-    needs: [worldcup, family]
+    needs: [changes, worldcup, family]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Verify app gates
         run: |
+          echo "changes:  ${{ needs.changes.result }}"
           echo "worldcup: ${{ needs.worldcup.result }}"
           echo "family:   ${{ needs.family.result }}"
-          if [ "${{ needs.worldcup.result }}" = "failure" ] || [ "${{ needs.worldcup.result }}" = "cancelled" ] \
-          || [ "${{ needs.family.result }}" = "failure" ]   || [ "${{ needs.family.result }}" = "cancelled" ]; then
-            echo "::error::one or more app gates failed"
+          # changes must succeed — if it fails, the app jobs skip and would
+          # otherwise look like a (false) green. A legitimately skipped app job
+          # (path-filtered, unchanged) is fine; a failed/cancelled one is not.
+          if [ "${{ needs.changes.result }}" != "success" ]; then
+            echo "::error::change-detection job did not succeed (${{ needs.changes.result }}) — gates did not run"
             exit 1
           fi
+          for r in "${{ needs.worldcup.result }}" "${{ needs.family.result }}"; do
+            if [ "$r" = "failure" ] || [ "$r" = "cancelled" ]; then
+              echo "::error::an app gate failed ($r)"
+              exit 1
+            fi
+          done
           echo "all required gates passed (or were skipped as unchanged)"
