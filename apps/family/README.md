@@ -71,19 +71,26 @@ Copy `.env.example` to `.env`. Key vars: `CAL_PROVIDER`, `TIMEZONE`, `HOST`
 
 ## Raspberry Pi
 
-Same kiosk approach as the root app — see the root `pi/SETUP.md` walkthrough.
-This app ships its own unit files in `pi/`:
+Same cage + cog kiosk as the root app — the installer takes the app name:
 
 ```bash
-cp pi/dashboard.service.example ~/.config/systemd/user/family-dashboard.service
-systemctl --user daemon-reload && systemctl --user enable --now family-dashboard
-./pi/chromium-launch.sh          # kiosk pointed at :3001
+# On the Pi (Node 20 installed, repo cloned at ~/raspberry-playground):
+cd ~/raspberry-playground/apps/family
+cp .env.example .env && nano .env     # set CAL_PROVIDER + ICAL_SOURCES
+cd ~/raspberry-playground
+./pi/install-kiosk.sh family          # server :3001 + cage/cog kiosk + watchdog
+sudo reboot
 ```
 
-Deploys are git-powered, no SD card: from your laptop run
-`./pi/deploy.sh family` (repo root), or install the auto-update timer so the Pi
-pulls, rebuilds, and restarts itself when you push to `main` — see SETUP.md
-§11. Both gate the restart on a successful build.
+See the root [`pi/SETUP.md`](../../pi/SETUP.md) for the full from-scratch
+walkthrough and the (hard-won) reasons cage + cog is used instead of Chromium.
+A Pi runs one kiosk, so installing `family` disables the `worldcup` kiosk and
+vice versa.
+
+Deploys are git-powered, no SD card: from your laptop run `./pi/deploy.sh
+family`, or install the auto-update timer so the Pi pulls, rebuilds, and
+restarts itself when you push to `main` — see SETUP.md. Both gate the restart on
+a successful build.
 
 ## Status
 
