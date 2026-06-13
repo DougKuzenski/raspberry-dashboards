@@ -80,10 +80,8 @@ export function App() {
       <UpcomingMatches matches={view.upcomingMatches} now={now} />
 
       <FooterTicker
-        upcoming={view.upcomingMatches}
         recent={view.recentResults}
         message={data.manualMessage}
-        now={now}
       />
 
       <ConnectionStatus stale={isStale} lastUpdated={lastUpdated} source={data.source} />

@@ -95,6 +95,9 @@
   height: 100%;
 }
 .hero--live { border-color: var(--live); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.25); }
+.hero--home { border-color: var(--home); box-shadow: 0 0 0 2px rgba(90, 240, 140, 0.25); }
+.hero--home.hero--live { border-color: var(--live); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.25); }
+.hero__venue--home { color: var(--home); font-weight: 700; }
 .hero__eyebrow {
   display: flex;
   align-items: center;
@@ -128,6 +131,7 @@
   color: var(--accent);
   font-weight: 700;
 }
+.hero__venue { white-space: nowrap; }
 .hero__notes { color: var(--favorite); font-size: calc(var(--fs-base) * 0.95); }
 .hero--empty { justify-content: center; align-items: center; color: var(--text-dim); }
 
@@ -166,9 +170,22 @@
 .match-row--live { border-left-color: var(--live); }
 .match-row--final { border-left-color: var(--final); }
 .match-row--scheduled { border-left-color: var(--accent); }
+.match-row--home {
+  background: rgba(90, 240, 140, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(90, 240, 140, 0.4);
+}
 .match-row__time { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.match-row__main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .match-row__teams { display: flex; align-items: center; gap: 13px; font-weight: 700; }
 .match-row__score { color: var(--accent); font-variant-numeric: tabular-nums; }
+.match-row__venue {
+  color: var(--text-dim);
+  font-size: calc(var(--fs-base) * 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.match-row__venue--home { color: var(--home); font-weight: 700; }
 
 /* ---- Team label ---- */
 .team { display: inline-flex; align-items: center; gap: 0.4em; }
@@ -193,6 +210,7 @@
 .status--final { background: var(--final); color: #fff; }
 .status--scheduled { background: transparent; color: var(--text-dim); }
 .status--off { background: #5a2a2a; color: #ffd; }
+.status--home { background: var(--home); color: #06210f; }
 
 /* ---- Group standings: compact "all groups at once" grid ---- */
 .groups-grid {
@@ -270,6 +288,9 @@
 .upcoming__item { display: flex; flex-direction: column; white-space: nowrap; }
 .upcoming__item--favorite .upcoming__teams { color: var(--favorite); font-weight: 700; }
 .upcoming__time { color: var(--text-dim); font-size: 0.8em; }
+.upcoming__venue { color: var(--text-dim); font-size: 0.72em; opacity: 0.85; }
+.upcoming__item--home .upcoming__teams { color: var(--home); font-weight: 700; }
+.upcoming__venue--home { color: var(--home); opacity: 1; font-weight: 700; }
 
 /* ---- Footer ticker ---- */
 .ticker {

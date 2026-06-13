@@ -3,6 +3,7 @@ import { formatKickoffPacific, formatCountdown, timeZoneAbbrev } from '../../sha
 import { TeamLabel } from './TeamLabel.js';
 import { statusBadge, hasScore } from './statusText.js';
 import { useTimeZone } from '../hooks.js';
+import { isHomeCity } from '../../shared/constants.js';
 
 interface Props {
   match?: Match;
@@ -25,12 +26,15 @@ export function HeroMatchCard({ match, now }: Props) {
   const live = match.status === 'live' || match.status === 'halftime';
   const countdown = match.status === 'scheduled' ? formatCountdown(match.kickoffUtc, now) : undefined;
   const channel = [match.tv, match.stream].filter(Boolean).join(' / ');
+  const venue = [match.venue, match.city].filter(Boolean).join(', ');
+  const home = isHomeCity(match.city);
 
   return (
-    <div className={`hero hero--${badge.variant}`}>
+    <div className={`hero hero--${badge.variant}${home ? ' hero--home' : ''}`}>
       <div className="hero__eyebrow">
         {live ? 'LIVE NOW' : 'NEXT MATCH'}
         <span className={`status status--${badge.variant}`}>{badge.text}</span>
+        {home && <span className="status status--home">📍 SEATTLE</span>}
       </div>
 
       <div className="hero__teams">
@@ -48,7 +52,11 @@ export function HeroMatchCard({ match, now }: Props) {
       <div className="hero__meta">
         <span>{formatKickoffPacific(match.kickoffUtc, tz)} {timeZoneAbbrev(now, tz)}</span>
         {channel && <span>· {channel}</span>}
-        {match.venue && <span>· {match.venue}</span>}
+        {venue && (
+          <span className={`hero__venue${home ? ' hero__venue--home' : ''}`}>
+            · {home ? '📍' : '🏟'} {venue}
+          </span>
+        )}
       </div>
 
       {countdown && <div className="hero__countdown">Starts in {countdown}</div>}

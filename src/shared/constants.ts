@@ -2,6 +2,10 @@
 // 2026 host nations (United States, Mexico, Canada).
 export const FAVORITE_TEAMS = ['USA', 'MEX', 'CAN'] as const;
 
+// The dashboard's home city. Matches played here get a location accent — the
+// kitchen TV this runs on is in Seattle, so local games are worth a glance.
+export const HOME_CITY = 'Seattle';
+
 // All kickoff times are stored in UTC and rendered in this zone.
 export const DEFAULT_TIMEZONE = 'America/Los_Angeles';
 
@@ -14,4 +18,9 @@ export const PRE_MATCH_WINDOW_MINUTES = 15;
 export function isFavoriteTeam(teamId: string | undefined): boolean {
   if (!teamId) return false;
   return (FAVORITE_TEAMS as readonly string[]).includes(teamId);
+}
+
+export function isHomeCity(city: string | undefined): boolean {
+  if (!city) return false;
+  return city.toLowerCase() === HOME_CITY.toLowerCase();
 }
