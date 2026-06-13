@@ -45,7 +45,9 @@ setup_server() {  # name  app-dir  service  port
     return 0
   fi
   echo "==> building $name ($dir) + server service on :$port"
-  ( cd "$dir" && ( npm ci || npm install ) && npm run build )
+  # npm install (not ci): ci wipes node_modules and re-downloads everything, which
+  # is ~5 min per app on a Pi 2 every re-run. install is incremental and idempotent.
+  ( cd "$dir" && npm install --no-fund --no-audit && npm run build )
   cat > "$HOME/.config/systemd/user/$service.service" <<EOF
 [Unit]
 Description=$name dashboard server (:$port)
@@ -136,10 +138,19 @@ EOF
 
 # --- let auto-update / switch reload the kiosk unattended (passwordless) ---
 echo "==> sudoers rule for unattended kiosk reload"
+# Drop stale per-app sudoers from the old model (a left-behind one with the wrong
+# mode would otherwise make a full `visudo -c` fail and abort this script).
+sudo rm -f /etc/sudoers.d/worldcup-kiosk /etc/sudoers.d/family-kiosk
 echo "$USER_NAME ALL=(root) NOPASSWD: /usr/bin/systemctl restart dashboard-kiosk.service, /usr/bin/systemctl restart dashboard-kiosk" \
   | sudo tee /etc/sudoers.d/dashboard-kiosk >/dev/null
 sudo chmod 0440 /etc/sudoers.d/dashboard-kiosk
-sudo visudo -c >/dev/null
+# Validate ONLY our drop-in (not the whole tree) so an unrelated bad sudoers file
+# elsewhere can't abort the install. Roll back our file if it somehow won't parse.
+if ! sudo visudo -cf /etc/sudoers.d/dashboard-kiosk >/dev/null; then
+  echo "ERROR: generated sudoers file failed validation; removing it." >&2
+  sudo rm -f /etc/sudoers.d/dashboard-kiosk
+  exit 1
+fi
 
 # --- self-update timer (app-agnostic) ---
 echo "==> self-update timer (every 10 min)"
