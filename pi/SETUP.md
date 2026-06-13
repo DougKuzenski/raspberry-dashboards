@@ -1,10 +1,14 @@
 # Raspberry Pi Kiosk Setup
 
-From a fresh SD card to the dashboard auto-starting full-screen on the TV, hands-free.
+From a fresh SD card to a dashboard auto-starting full-screen on the TV, hands-free —
+and able to **swap between dashboards with a one-line commit**.
 
-The display runs as **cage + cog** (a tiny kiosk Wayland compositor + the WPE WebKit
-browser) instead of a desktop + Chromium. This is lean enough for a **Pi 2** and works
-great on a **Pi 4/5** — see [Which Pi / upgrading](#which-pi--upgrading-to-a-4-or-5).
+The Pi runs **both** dashboard servers side by side (World Cup on :3000, family on :3001)
+and **one** app-agnostic kiosk (**cage + cog** — a kiosk Wayland compositor + the WPE WebKit
+browser) that shows whichever dashboard `kiosk.json` selects. Swapping is just flipping that
+manifest — the other server is already running, so it's a ~3s reload, no reinstall, no reboot.
+
+Lean enough for a **Pi 2**, great on a **Pi 4/5** — see [Which Pi / upgrading](#which-pi--upgrading-to-a-4-or-5).
 
 Most of the work is one script: [`install-kiosk.sh`](install-kiosk.sh).
 
@@ -19,25 +23,20 @@ Most of the work is one script: [`install-kiosk.sh`](install-kiosk.sh).
 
 ## 1. Flash Raspberry Pi OS
 
-Use **Raspberry Pi Imager**. Pick **Raspberry Pi OS (Desktop)** — the installer disables the
-desktop later, but Desktop pulls in the Wayland/labwc bits cage relies on.
+Use **Raspberry Pi Imager** → **Raspberry Pi OS (Desktop)** (the installer disables the desktop
+later, but it pulls in the Wayland/labwc bits cage relies on).
 
-- **Pi 4/5/3:** 64-bit.
-- **Pi 2:** **32-bit** (the 64-bit image won't boot on a Pi 2).
+- **Pi 4/5/3:** 64-bit.   **Pi 2:** **32-bit** (the 64-bit image won't boot on a Pi 2).
 
-In Imager's **Edit Settings** (the gear), pre-set: hostname (e.g. `worldcup`), your user +
-password, Wi-Fi (if used), timezone `America/Los_Angeles`, and **enable SSH**. This makes the
-Pi come up ready for headless setup.
+In Imager's **Edit Settings**: hostname (e.g. `worldcup`), your user + password, Wi-Fi (if used),
+timezone `America/Los_Angeles`, **enable SSH**.
 
 ## 2. First boot + SSH in
 
-Connect HDMI + power, let it boot, then from your laptop:
-
 ```bash
-ssh <user>@worldcup.local        # or <user>@<ip> from your router
+ssh <user>@worldcup.local        # or <user>@<ip>
 ```
-
-(Pi 2 on a USB Wi-Fi dongle: set up over **ethernet** first; old dongles can need extra firmware.)
+(Pi 2 on a USB Wi-Fi dongle: set up over **ethernet** first.)
 
 ## 3. Install Node 20
 
@@ -47,18 +46,27 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y git nodejs
 ```
 
-## 4. Clone + configure
+## 4. Clone + configure each dashboard you want
 
 ```bash
 git clone <your-repo-url> ~/raspberry-playground
 cd ~/raspberry-playground
+
+# World Cup dashboard (root app):
 cp .env.example .env
-nano .env        # set DATA_PROVIDER=football_data and FOOTBALL_DATA_API_KEY=<your key>
+nano .env        # DATA_PROVIDER=football_data + FOOTBALL_DATA_API_KEY=<key>
+
+# Family calendar dashboard:
+cd apps/family && cp .env.example .env
+nano .env        # CAL_PROVIDER=ical + ICAL_SOURCES=[{...}]   (one line)
+cd ../..
 ```
 
-> **The API key lives only on the Pi** — `.env` is gitignored, so it does NOT arrive via `git pull`.
-> Get a free key at https://www.football-data.org/client/register and **verify the email** (they
-> delete inactive keys). No key? Use `DATA_PROVIDER=openfootball` (fixtures only) or `manual`.
+You can configure just one if that's all you want — the installer skips an app with no `.env`.
+
+> **Secrets live only on the Pi.** Both `.env` files (the football key, the calendars' secret iCal
+> URLs) are gitignored and never pulled. Get the iCal URLs from Google Calendar → the calendar →
+> "Secret address in iCal format". Get the football key at football-data.org (verify the email).
 
 ## 5. Run the installer
 
@@ -67,135 +75,90 @@ nano .env        # set DATA_PROVIDER=football_data and FOOTBALL_DATA_API_KEY=<yo
 sudo reboot
 ```
 
-That's it. The script installs cage/cog + an emoji font, builds the app, sets up the server +
-kiosk + memory-watchdog services, disables the desktop, and enables everything. After the reboot
-the TV shows the dashboard with **no login and no input needed**.
+That installs cage/cog + an emoji font, builds each configured app, runs both servers, sets up the
+manifest-driven kiosk + a self-update timer + a memory watchdog, adds the passwordless kiosk-reload
+rule, and disables the desktop. After the reboot the TV shows the dashboard named in `kiosk.json`
+(default: `family`) with **no login and no input needed**.
 
 ---
+
+## Swapping which dashboard is on the TV
+
+`kiosk.json` (repo root) is the single source of truth:
+
+```json
+{ "active": "family" }
+```
+
+**The easy way** — from your laptop, one command (commits the manifest + applies it on the Pi):
+
+```bash
+./pi/switch.sh worldcup      # or:  make swap APP=worldcup
+./pi/switch.sh family        #      make swap APP=family
+```
+
+**The manual way** — edit `kiosk.json`, commit, push. The Pi's self-update timer applies it within
+~10 min (or run `./pi/deploy.sh` to apply now). Either path is a ~3s cog reload onto the
+already-running other server — no rebuild, no reboot.
+
+## The deploy loop (code changes)
+
+`main` is the deploy branch. Edit code on your laptop → push to `main` → the Pi picks it up:
+
+- **Automatic:** the self-update timer checks every ~10 min and, on new commits, rebuilds the
+  changed app(s), restarts their servers, and reloads the kiosk.
+  Watch it: `journalctl --user -u dashboard-auto-update -f`.
+- **Now:** `./pi/deploy.sh` (or `make deploy`) applies the latest `main` immediately.
+
+A failed build leaves the running version up (the restart is gated on a successful build), so a bad
+push won't black out the TV.
 
 ## How it works
 
 ```
-boot → (no desktop) → worldcup-kiosk.service on tty1
-        → cage (kiosk compositor) → cog (WPE WebKit) → http://localhost:3000
-worldcup-dashboard.service (user, linger) → Express server serves the dashboard
-wc-mem-guard.timer → restarts the kiosk if free RAM drops below 160MB
+boot → (no desktop) → dashboard-kiosk.service on tty1
+        → cage → pi/kiosk-launch.sh reads kiosk.json → exec cog http://localhost:<port>
+worldcup-dashboard.service (:3000)  ┐  both user services, started at boot (linger)
+family-dashboard.service   (:3001)  ┘  config from each app's .env
+dashboard-auto-update.timer  → git pull + build changed apps + reload kiosk
+dashboard-mem-guard.timer    → restart the kiosk if free RAM < 160MB
 ```
 
-- **Server:** `systemctl --user status worldcup-dashboard` — config from `~/raspberry-playground/.env`.
-- **Display:** `systemctl status worldcup-kiosk` — cage + cog on tty1.
-- **Logs:** `journalctl --user -u worldcup-dashboard -f` and `sudo journalctl -u worldcup-kiosk -f`.
-
-### Day-to-day
-
-- **Switch between dashboard and a game:** just change the TV input with the Roku remote.
-- **Edit data / channel notes:** SSH in, edit `data/manual/*.json` (or `overrides.json`) — shows within ~60s.
-- **Update after code changes:** `cd ~/raspberry-playground && git pull && npm run build && sudo systemctl restart worldcup-kiosk`
-- **See what's on screen over SSH (no monitor needed):**
-  ```bash
-  sudo apt install -y grim
-  XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-0 grim /tmp/shot.png
-  ```
+- **Servers:** `systemctl --user status worldcup-dashboard family-dashboard`
+- **Kiosk:** `systemctl status dashboard-kiosk`
+- **Logs:** `journalctl --user -u worldcup-dashboard -f`, `sudo journalctl -u dashboard-kiosk -f`
+- **See the screen over SSH (no monitor):**
+  `sudo apt install -y grim; XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-0 grim /tmp/shot.png`
 
 ---
 
 ## Which Pi / upgrading to a 4 or 5
 
-**Keep this same cage + cog setup on every model — including a Pi 4/5.** Reasons:
+**Keep this exact setup on every model — including a Pi 4/5.** It's lean (cog ≈ 70MB, two servers
+≈ 70MB each), boots fast, and cog gets **hardware acceleration automatically** on a Pi 4/5 (just
+smoother — no config change). To migrate: flash 64-bit OS, clone, create the `.env`(s), run
+`./pi/install-kiosk.sh`. Nothing here is Pi-2-specific.
 
-- It already works and is **lean** (cog ≈ 70MB), so it boots fast and leaves headroom.
-- cog (WPE WebKit) renders this dashboard perfectly and gets **hardware acceleration
-  automatically** on a Pi 4/5's GPU — it just gets smoother, no config change.
-- The exact same `install-kiosk.sh` runs on a Pi 4/5. To migrate: flash a 64-bit OS on the new
-  Pi, clone, create `.env`, run the script. Done. Nothing in this repo is Pi-2-specific.
+**Don't go back to Chromium.** cog renders these apps fine. Chromium's failures were Pi-2-specific
+(no GPU → black; labwc → invisible window), not a cog limitation. If you ever truly need Chromium
+on a Pi 4/5 for some other page, run it **under cage** with the GPU on (`cage -- chromium
+--ozone-platform=wayland --kiosk <url>`, no `--disable-gpu`).
 
-**Do you need to go back to Chromium on a Pi 4/5?** No. Chromium only ever offered "broader site
-compatibility," and cog renders our React app fine. The earlier Chromium attempts failed for
-Pi-2-specific reasons (no GPU → black screen; labwc → invisible window), *not* because cog is a
-compromise. If you ever truly need Chromium for some other page on a Pi 4/5, run it **under cage**
-(so it gets the display cleanly) and **with** the GPU (do not pass `--disable-gpu`):
+## Why cage + cog (and not desktop + Chromium)
 
-```
-ExecStart=/usr/bin/cage -- /usr/bin/chromium --ozone-platform=wayland --kiosk http://localhost:3000
-```
+Hard-won on the Pi 2, kept because it's the better kiosk design:
 
-But for this project, leave it on cog.
-
----
-
-## Why cage + cog (and not the desktop + Chromium)
-
-Hard-won on the Pi 2, kept because it's simply the better kiosk design:
-
-- **Chromium under labwc never showed a window** (Wayland: no surface; X11/Xwayland: a window that
-  wouldn't come to the foreground even when force-raised).
-- **Chromium under cage rendered pure black** — the Pi 2 has no usable GPU and Chromium's software
-  (SwiftShader) compositing fails on armv7.
-- **Chromium also leaked** to ~all RAM+swap in ~4 hours → black screen. cog stays flat at ~70MB.
-- cog needed two fixes: `WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1` (bubblewrap can't init on the
-  Pi kernel) and `fonts-noto-color-emoji` (so the flag emoji render).
-- cage must run on the **active VT** to be granted the display, so the service does `chvt 1` first.
-
----
-
-## Deploying updates from your laptop (no SD card, ever again)
-
-The SD card was a one-time thing for the OS. From here on, code travels by git:
-
-```
-laptop: code → commit → push ──► GitHub ──► Pi: git pull → build → restart
-```
-
-**One command from the laptop** — `pi/deploy.sh` SSHes in, pulls, installs,
-builds, restarts the server, and reloads the kiosk. The restart is gated on a
-successful build, so a broken push leaves the old version running:
-
-```bash
-./pi/deploy.sh worldcup            # or: family
-PI_HOST=pi@192.168.1.50 ./pi/deploy.sh family   # override the defaults
-```
-
-**Or let the Pi update itself** — a systemd timer polls GitHub every 10 minutes
-and only rebuilds/restarts when new commits land (polling on purpose: a webhook
-would mean exposing the Pi to the internet):
-
-```bash
-cp pi/auto-update.service.example ~/.config/systemd/user/dashboard-auto-update.service
-cp pi/auto-update.timer.example   ~/.config/systemd/user/dashboard-auto-update.timer
-# edit the service's ExecStart to pick your app (worldcup | family), then:
-systemctl --user daemon-reload
-systemctl --user enable --now dashboard-auto-update.timer
-journalctl --user -u dashboard-auto-update -f    # watch it work
-```
-
-Then "deploying" is just pushing to `main` — the kiosk updates itself within
-~10 minutes, and a broken build never takes the screen down.
-
-> **Reloading the kiosk needs root** (it's a system service on tty1), so both
-> scripts try `sudo systemctl restart <app>-kiosk`. `deploy.sh` uses `ssh -t` so
-> the prompt works; `auto-update.sh` uses `sudo -n` and, if passwordless sudo
-> isn't configured, updates the server and notes that new *client* code loads on
-> the next reboot. The server itself is a `--user` service and always restarts
-> cleanly. To make auto-update reload the kiosk unattended, add a sudoers rule:
-> `<user> ALL=(root) NOPASSWD: /usr/bin/systemctl restart worldcup-kiosk` (or
-> `family-kiosk`).
-
-> Both scripts assume the repo is cloned at `~/raspberry-playground`. If you
-> used a different path (e.g. the older `~/world-cup-dashboard`), set
-> `REPO_DIR=world-cup-dashboard` when invoking them, or re-clone under the new
-> name and update the service `WorkingDirectory`.
-
-For quick experiments without committing: `rsync -av --exclude node_modules ./
-pi@worldcup.local:~/raspberry-playground/` then build/restart by hand — but
-treat it as throwaway; git stays the source of truth.
-
----
+- Chromium under labwc never showed a window; under cage it rendered pure black (no usable GPU);
+  and it leaked to all RAM+swap in ~4h. cog stays flat at ~70MB.
+- cog needs `WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1` (bubblewrap can't init on the Pi kernel)
+  and `fonts-noto-color-emoji` (so flags render). Both handled by the installer.
+- cage must run on the **active VT** to be granted the display, so the kiosk service does `chvt 1` first.
 
 ## Troubleshooting
 
-- **Black screen:** check `sudo journalctl -u worldcup-kiosk -n 50`. Capture the actual output with
-  `grim` (above). If cog is crash-looping, the sandbox env var is the usual cause.
-- **Nothing on the TV / wrong VT:** `sudo fgconsole` should be `1`; `sudo systemctl restart worldcup-kiosk`.
-- **Edges cut off (overscan):** fix on the TV (a "Just Scan / 1:1 pixel" picture setting) or `raspi-config` → Display.
-- **Don't run `apt install` while the kiosk is up on a Pi 2** — concurrent heavy load can OOM-freeze
-  it. Stop it first: `sudo systemctl stop worldcup-kiosk`.
+- **Black screen:** `sudo journalctl -u dashboard-kiosk -n 50`; capture with `grim` (above). If the
+  active app's server isn't up, the launcher waits forever — check `systemctl --user status <app>-dashboard`.
+- **Wrong VT / nothing on TV:** `sudo fgconsole` should be `1`; `sudo systemctl restart dashboard-kiosk`.
+- **Edges cut off (overscan):** fix on the TV ("Just Scan / 1:1 pixel") or `raspi-config` → Display.
+- **Don't run `apt install` while the kiosk is busy on a Pi 2** — concurrent heavy load can OOM-freeze
+  it. `sudo systemctl stop dashboard-kiosk` first.
