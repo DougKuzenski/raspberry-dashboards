@@ -1,0 +1,74 @@
+/* Fixed design canvas, centered + scaled to fit (works on any screen incl. a
+   narrow phone, because absolute 50%/50% + translate(-50%,-50%) centers a canvas
+   wider than the viewport instead of overflowing off-screen). */
+.board {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1280px;
+  height: 720px;
+  padding: 26px 32px;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto;
+  gap: 16px;
+}
+
+/* header */
+.header { display: flex; justify-content: space-between; align-items: flex-end; }
+.header__date { font-size: 58px; font-weight: 800; line-height: .95; letter-spacing: -1px; }
+.header__sub { font-size: 22px; color: var(--dim); font-weight: 600; margin-top: 6px; }
+.header__clock { text-align: right; }
+.header__time { font-size: 56px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.header__zone { font-size: 18px; color: var(--dim); font-weight: 700; margin-top: 4px; }
+
+/* legend */
+.legend { display: flex; gap: 22px; font-size: 18px; color: var(--dim); font-weight: 600; }
+.legend__item { display: flex; align-items: center; gap: 8px; }
+.legend__item--failed { opacity: .45; font-style: italic; }
+.legend__dot { width: 13px; height: 13px; border-radius: 50%; }
+
+/* hero now/next */
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; --accent: var(--dim); }
+.card__eyebrow { font-size: 15px; letter-spacing: 2px; color: var(--dim); font-weight: 700; }
+.card__title { font-size: 30px; font-weight: 800; margin-top: 6px; line-height: 1.05; }
+.card__meta { font-size: 20px; color: var(--dim); margin-top: 8px; }
+.card--now { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.card--now .card__eyebrow { color: var(--accent); }
+.card--empty { display: grid; place-items: center; color: var(--dim); }
+.pulse { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); margin-right: 9px; animation: pulse 2s infinite; vertical-align: middle; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+
+/* all-day banner */
+.allday { display: flex; gap: 10px; flex-wrap: wrap; min-height: 0; }
+.allday--empty { min-height: 0; }
+.chip { background: var(--panel2); border: 1px solid var(--line); border-left: 4px solid var(--dim); border-radius: 9px; padding: 7px 12px; font-size: 17px; font-weight: 600; }
+.chip__day { font-size: 13px; color: var(--dim); margin-right: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* main panels */
+.board__body { display: grid; grid-template-columns: .95fr 1.05fr; gap: 16px; min-height: 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 20px; overflow: hidden; }
+.panel__title { margin: 0 0 10px; font-size: 17px; letter-spacing: 3px; color: var(--dim); font-weight: 800; }
+.panel__empty { color: var(--dim); font-size: 18px; font-style: italic; }
+
+.ev { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 9px 0; border-top: 1px solid var(--line); }
+.ev:first-of-type { border-top: none; }
+.ev__time { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.ev__time small { display: block; font-size: 13px; color: var(--dim); font-weight: 600; }
+.ev__name { font-size: 21px; font-weight: 700; line-height: 1.12; border-left: 4px solid var(--dim); padding-left: 12px; }
+.ev__where { font-size: 15px; color: var(--dim); font-weight: 600; margin-top: 2px; padding-left: 16px; }
+.ev--tentative .ev__name { font-style: italic; opacity: .78; }
+.ev--past { opacity: .4; }
+
+.daygroup { margin-bottom: 4px; }
+.daygroup__head { font-size: 14px; font-weight: 800; letter-spacing: 2px; color: var(--dim); margin: 8px 0 2px; text-transform: uppercase; }
+.panel--week .ev { grid-template-columns: 84px 1fr; padding: 6px 0; }
+.panel--week .ev__time { font-size: 17px; }
+.panel--week .ev__name { font-size: 17px; }
+
+/* footer + status */
+.ticker { color: var(--dim); font-size: 18px; }
+.ticker span b { color: var(--ink); }
+.conn { position: absolute; top: 10px; right: 14px; display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--dim); }
+.conn__dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; }
+.conn--stale .conn__dot { background: #f59e0b; }

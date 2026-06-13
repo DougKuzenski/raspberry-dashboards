@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.local
+.env
+
+# Runtime-generated cache (the directory is kept, the file is ignored)
+data/cache/calendar.json

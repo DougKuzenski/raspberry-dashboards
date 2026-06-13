@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read   # dorny/paths-filter lists a PR's changed files via the API
+
+jobs:
+  # Detect which app changed so we only run that app's gate. The app jobs below
+  # are conditional on these outputs; the `ci-ok` job at the end is what you mark
+  # as the required status check (a path-filtered job that gets skipped never
+  # reports, which would wedge a required check — the aggregator avoids that).
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      worldcup: ${{ steps.filter.outputs.worldcup }}
+      family: ${{ steps.filter.outputs.family }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            worldcup:
+              - 'src/**'
+              - 'tests/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - 'vite.config.ts'
+              - 'vitest.config.ts'
+              - '.eslintrc.cjs'
+              - '.github/workflows/ci.yml'
+            family:
+              - 'apps/family/**'
+              - '.github/workflows/ci.yml'
+
+  worldcup:
+    needs: changes
+    if: ${{ needs.changes.outputs.worldcup == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  family:
+    needs: changes
+    if: ${{ needs.changes.outputs.family == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/family
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/family/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run validate:data
+
+  # Single stable check to require in branch protection. Always runs; fails if
+  # any app gate failed, passes if they succeeded or were skipped (path-filtered).
+  ci-ok:
+    needs: [changes, worldcup, family]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify app gates
+        run: |
+          echo "changes:  ${{ needs.changes.result }}"
+          echo "worldcup: ${{ needs.worldcup.result }}"
+          echo "family:   ${{ needs.family.result }}"
+          # changes must succeed — if it fails, the app jobs skip and would
+          # otherwise look like a (false) green. A legitimately skipped app job
+          # (path-filtered, unchanged) is fine; a failed/cancelled one is not.
+          if [ "${{ needs.changes.result }}" != "success" ]; then
+            echo "::error::change-detection job did not succeed (${{ needs.changes.result }}) — gates did not run"
+            exit 1
+          fi
+          for r in "${{ needs.worldcup.result }}" "${{ needs.family.result }}"; do
+            if [ "$r" = "failure" ] || [ "$r" = "cancelled" ]; then
+              echo "::error::an app gate failed ($r)"
+              exit 1
+            fi
+          done
+          echo "all required gates passed (or were skipped as unchanged)"

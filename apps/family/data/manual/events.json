@@ -1,0 +1,19 @@
+{
+  "timezone": "America/Los_Angeles",
+  "sources": [
+    { "id": "family", "label": "Family", "color": "#2dd4bf" },
+    { "id": "school", "label": "School", "color": "#f59e0b" }
+  ],
+  "events": [
+    { "id": "s1", "source": "family", "title": "Park playdate", "start": "2026-06-12T09:00:00-07:00", "end": "2026-06-12T13:00:00-07:00", "allDay": false, "tentative": true },
+    { "id": "s2", "source": "family", "title": "Family movie night", "start": "2026-06-12T18:30:00-07:00", "end": "2026-06-12T20:00:00-07:00", "allDay": false },
+    { "id": "s3", "source": "family", "title": "Grandma visits", "date": "2026-06-13", "allDay": true },
+    { "id": "s4", "source": "school", "title": "Library story time", "start": "2026-06-13T10:00:00-07:00", "end": "2026-06-13T11:00:00-07:00", "allDay": false },
+    { "id": "s5", "source": "family", "title": "Build-a-Bear trip", "start": "2026-06-13T16:00:00-07:00", "end": "2026-06-13T17:00:00-07:00", "allDay": false, "tentative": true },
+    { "id": "s6", "source": "family", "title": "Flight to Denver", "location": "SEA", "start": "2026-06-14T16:36:00-07:00", "end": "2026-06-14T18:48:00-07:00", "allDay": false, "kind": "flight" },
+    { "id": "s7", "source": "school", "title": "Field trip — science museum", "start": "2026-06-15T09:00:00-07:00", "end": "2026-06-15T14:00:00-07:00", "allDay": false, "tentative": true },
+    { "id": "s8", "source": "school", "title": "Kindergarten recital", "start": "2026-06-17T12:30:00-07:00", "end": "2026-06-17T13:15:00-07:00", "allDay": false, "highlight": true },
+    { "id": "s9", "source": "family", "title": "Flight home", "location": "DEN", "start": "2026-06-17T17:38:00-07:00", "end": "2026-06-17T19:47:00-07:00", "allDay": false, "kind": "flight" },
+    { "id": "s10", "source": "family", "title": "Cabin weekend", "date": "2026-06-18", "endDate": "2026-06-20", "allDay": true }
+  ]
+}
