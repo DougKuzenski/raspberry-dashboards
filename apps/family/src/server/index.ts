@@ -13,6 +13,32 @@ const HOST = process.env.HOST ?? '127.0.0.1';
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 const app = express();
 
+// Surface the two .env traps at boot (they otherwise fail silently or only show
+// up per-request in the fallback message). See apps/family/.env.example.
+function warnOnConfig(): void {
+  const provider = process.env.CAL_PROVIDER ?? 'manual';
+  const sources = process.env.ICAL_SOURCES;
+  if (provider === 'manual' && sources) {
+    console.warn(
+      '  warning: ICAL_SOURCES is set but CAL_PROVIDER=manual — serving sample data, not your calendars. Set CAL_PROVIDER=ical.',
+    );
+  }
+  if (provider === 'ical') {
+    if (!sources) {
+      console.warn('  warning: CAL_PROVIDER=ical but ICAL_SOURCES is not set — the board will be empty.');
+    } else {
+      try {
+        JSON.parse(sources);
+      } catch (err) {
+        console.warn(
+          `  warning: CAL_PROVIDER=ical but ICAL_SOURCES is not valid JSON (${err instanceof Error ? err.message : String(err)}). ` +
+            "If your colors contain '#', wrap the whole ICAL_SOURCES value in single quotes in .env.",
+        );
+      }
+    }
+  }
+}
+
 app.get('/healthz', (_req, res) => {
   res.json({ ok: true });
 });
@@ -58,6 +84,7 @@ if (existsSync(CLIENT_DIST)) {
 app.listen(PORT, HOST, () => {
   console.log(`Family dashboard server listening on http://${HOST}:${PORT}`);
   console.log(`  provider: ${process.env.CAL_PROVIDER ?? 'manual'}`);
+  warnOnConfig();
   if (HOST !== '127.0.0.1' && HOST !== 'localhost' && !REFRESH_TOKEN) {
     console.warn('  warning: bound to a non-loopback host with no REFRESH_TOKEN set — /api/refresh is open on your LAN');
   }
