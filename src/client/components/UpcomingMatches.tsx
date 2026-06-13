@@ -26,6 +26,7 @@ export function UpcomingMatches({ matches, now }: Props) {
                 {m.homeTeam.shortName ?? m.homeTeam.id} v {m.awayTeam.shortName ?? m.awayTeam.id}
               </span>
               <span className="upcoming__time">{formatUpcomingLabel(m.kickoffUtc, now, tz)}</span>
+              {m.venue && <span className="upcoming__venue">🏟 {m.venue}</span>}
             </li>
           );
         })}

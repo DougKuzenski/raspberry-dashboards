@@ -23,10 +23,13 @@ export function TodayMatches({ matches }: Props) {
             return (
               <li key={m.id} className={`match-row match-row--${badge.variant}`}>
                 <span className="match-row__time">{formatTimeOfDay(m.kickoffUtc, tz)}</span>
-                <span className="match-row__teams">
-                  <TeamLabel team={m.homeTeam} short />
-                  <span className="match-row__score">{scoreText(m)}</span>
-                  <TeamLabel team={m.awayTeam} short />
+                <span className="match-row__main">
+                  <span className="match-row__teams">
+                    <TeamLabel team={m.homeTeam} short />
+                    <span className="match-row__score">{scoreText(m)}</span>
+                    <TeamLabel team={m.awayTeam} short />
+                  </span>
+                  {m.venue && <span className="match-row__venue">🏟 {m.venue}</span>}
                 </span>
                 <span className={`status status--${badge.variant}`}>{badge.text}</span>
               </li>

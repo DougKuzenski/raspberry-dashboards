@@ -128,6 +128,7 @@
   color: var(--accent);
   font-weight: 700;
 }
+.hero__venue { white-space: nowrap; }
 .hero__notes { color: var(--favorite); font-size: calc(var(--fs-base) * 0.95); }
 .hero--empty { justify-content: center; align-items: center; color: var(--text-dim); }
 
@@ -167,8 +168,16 @@
 .match-row--final { border-left-color: var(--final); }
 .match-row--scheduled { border-left-color: var(--accent); }
 .match-row__time { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.match-row__main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .match-row__teams { display: flex; align-items: center; gap: 13px; font-weight: 700; }
 .match-row__score { color: var(--accent); font-variant-numeric: tabular-nums; }
+.match-row__venue {
+  color: var(--text-dim);
+  font-size: calc(var(--fs-base) * 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* ---- Team label ---- */
 .team { display: inline-flex; align-items: center; gap: 0.4em; }
@@ -270,6 +279,7 @@
 .upcoming__item { display: flex; flex-direction: column; white-space: nowrap; }
 .upcoming__item--favorite .upcoming__teams { color: var(--favorite); font-weight: 700; }
 .upcoming__time { color: var(--text-dim); font-size: 0.8em; }
+.upcoming__venue { color: var(--text-dim); font-size: 0.72em; opacity: 0.85; }
 
 /* ---- Footer ticker ---- */
 .ticker {

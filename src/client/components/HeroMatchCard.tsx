@@ -25,6 +25,7 @@ export function HeroMatchCard({ match, now }: Props) {
   const live = match.status === 'live' || match.status === 'halftime';
   const countdown = match.status === 'scheduled' ? formatCountdown(match.kickoffUtc, now) : undefined;
   const channel = [match.tv, match.stream].filter(Boolean).join(' / ');
+  const venue = [match.venue, match.city].filter(Boolean).join(', ');
 
   return (
     <div className={`hero hero--${badge.variant}`}>
@@ -48,7 +49,7 @@ export function HeroMatchCard({ match, now }: Props) {
       <div className="hero__meta">
         <span>{formatKickoffPacific(match.kickoffUtc, tz)} {timeZoneAbbrev(now, tz)}</span>
         {channel && <span>· {channel}</span>}
-        {match.venue && <span>· {match.venue}</span>}
+        {venue && <span className="hero__venue">· 🏟 {venue}</span>}
       </div>
 
       {countdown && <div className="hero__countdown">Starts in {countdown}</div>}

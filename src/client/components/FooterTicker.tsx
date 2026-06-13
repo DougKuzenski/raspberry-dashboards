@@ -1,12 +1,8 @@
 import type { Match } from '../../shared/types.js';
-import { formatUpcomingLabel } from '../../shared/time.js';
-import { useTimeZone } from '../hooks.js';
 
 interface Props {
-  upcoming: Match[];
   recent: Match[];
   message?: string;
-  now: Date;
 }
 
 function code(m: Match, side: 'home' | 'away'): string {
@@ -23,22 +19,17 @@ function recentLabel(m: Match): string {
     : `${code(m, 'home')} v ${code(m, 'away')} (FT)`;
 }
 
-// Footer ticker: a manual message if set, otherwise recent results, otherwise
-// the upcoming schedule (spec §6).
-export function FooterTicker({ upcoming, recent, message, now }: Props) {
-  const tz = useTimeZone();
+// Footer ticker: a manual message if set, otherwise recent results. Upcoming
+// matches are no longer duplicated here — the "UP NEXT" strip above owns them —
+// so when there's nothing to say the ticker collapses and gives the body room.
+export function FooterTicker({ recent, message }: Props) {
   let content: string;
   if (message) {
     content = message;
   } else if (recent.length > 0) {
     content = 'RECENT  ·  ' + recent.map(recentLabel).join('   ·   ');
   } else {
-    content =
-      'UP NEXT  ·  ' +
-      upcoming
-        .slice(0, 5)
-        .map((m) => `${formatUpcomingLabel(m.kickoffUtc, now, tz)} ${code(m, 'home')} v ${code(m, 'away')}`)
-        .join('   ·   ');
+    return null;
   }
 
   return (
