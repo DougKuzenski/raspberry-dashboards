@@ -19,16 +19,20 @@ iOS has no real Node runtime.
 
 2. Install the tools and clone:
    ```bash
-   pkg update -y && pkg install -y nodejs git esbuild
+   pkg update -y && pkg install -y nodejs git
    git clone <your-repo-url> ~/raspberry-playground
    cd ~/raspberry-playground
    ```
 
-   > **The one Termux gotcha — esbuild.** Termux's Node confuses the esbuild binary npm installs, so
-   > the build can fail with a platform/version error. `pkg install esbuild` gives you a native one,
-   > and `termux-run.sh` automatically points vite/tsx at it (`ESBUILD_BINARY_PATH`). If you still hit
-   > a version-mismatch error, either match the versions or use the **proot Debian** path below, where
-   > the normal binary just works.
+   > **Don't install the `esbuild` package**, and don't set `ESBUILD_BINARY_PATH`. The build (vite)
+   > pins a specific esbuild version and refuses to run a different one — pointing it at Termux's
+   > esbuild fails with `Expected "0.21.5" but got "0.28.0"`. Just let npm fetch esbuild's own binary;
+   > current Termux Node reports `android`, so it self-selects a working build. If you set either of
+   > those earlier, undo them: `pkg uninstall esbuild` and remove any `ESBUILD_BINARY_PATH` line from
+   > `~/.bashrc` (then `rm -rf node_modules && npm install`).
+   >
+   > **If the build instead fails with an "exec format / cannot execute" error** (older Termux whose
+   > Node reports `linux` and grabbed a glibc binary), use the **proot Debian** path below — it just works.
 
 ## Run it
 
