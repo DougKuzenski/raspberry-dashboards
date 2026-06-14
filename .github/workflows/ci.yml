@@ -20,6 +20,7 @@ jobs:
     outputs:
       worldcup: ${{ steps.filter.outputs.worldcup }}
       family: ${{ steps.filter.outputs.family }}
+      control: ${{ steps.filter.outputs.control }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -38,6 +39,9 @@ jobs:
               - '.github/workflows/ci.yml'
             family:
               - 'apps/family/**'
+              - '.github/workflows/ci.yml'
+            control:
+              - 'apps/control/**'
               - '.github/workflows/ci.yml'
 
   worldcup:
@@ -78,10 +82,30 @@ jobs:
       - run: npm run build
       - run: npm run validate:data
 
+  control:
+    needs: changes
+    if: ${{ needs.changes.outputs.control == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/control
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/control/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
   # Single stable check to require in branch protection. Always runs; fails if
   # any app gate failed, passes if they succeeded or were skipped (path-filtered).
   ci-ok:
-    needs: [changes, worldcup, family]
+    needs: [changes, worldcup, family, control]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -90,6 +114,7 @@ jobs:
           echo "changes:  ${{ needs.changes.result }}"
           echo "worldcup: ${{ needs.worldcup.result }}"
           echo "family:   ${{ needs.family.result }}"
+          echo "control:  ${{ needs.control.result }}"
           # changes must succeed — if it fails, the app jobs skip and would
           # otherwise look like a (false) green. A legitimately skipped app job
           # (path-filtered, unchanged) is fine; a failed/cancelled one is not.
@@ -97,7 +122,7 @@ jobs:
             echo "::error::change-detection job did not succeed (${{ needs.changes.result }}) — gates did not run"
             exit 1
           fi
-          for r in "${{ needs.worldcup.result }}" "${{ needs.family.result }}"; do
+          for r in "${{ needs.worldcup.result }}" "${{ needs.family.result }}" "${{ needs.control.result }}"; do
             if [ "$r" = "failure" ] || [ "$r" = "cancelled" ]; then
               echo "::error::an app gate failed ($r)"
               exit 1

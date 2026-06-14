@@ -7,3 +7,6 @@ npm-debug.log*
 
 # Runtime-generated cache (keep the directory, ignore the file)
 data/cache/dashboard.json
+
+# Runtime kiosk swap target written by the control panel / pi/switch.sh
+.kiosk-active

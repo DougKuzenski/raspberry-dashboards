@@ -101,6 +101,26 @@ rule, and disables the desktop. After the reboot the TV shows the dashboard name
 ~10 min (or run `./pi/deploy.sh` to apply now). Either path is a ~3s cog reload onto the
 already-running other server — no rebuild, no reboot.
 
+**From your phone** — install the control panel (below) for tap-to-switch, plus reboot/shutdown.
+
+## Control panel (phone remote)
+
+A small LAN web app (`apps/control`) to switch dashboards, reboot, or shut down the Pi from your
+phone. Unlike the dashboards (loopback-only), it binds to the LAN on purpose. Opt-in:
+
+```bash
+./pi/install-control.sh          # builds it, runs it as a user service on :8080,
+                                 # adds a narrow reboot/poweroff sudoers rule
+```
+
+Then open `http://<pi-host>:8080` (e.g. `http://worldcup.local:8080`) on your phone. Tapping a
+dashboard writes a runtime override (`.kiosk-active`, gitignored) the kiosk reads before
+`kiosk.json`, so a phone swap sticks across auto-updates; `pi/switch.sh` writes the same file, so
+laptop and phone agree (last switch wins). Power buttons are press-and-hold to confirm.
+
+> **It's open by default — anyone on your wifi can switch/reboot/shut down the Pi.** To require a
+> PIN, set `CONTROL_PIN` in `apps/control/.env` and re-run the installer. Reading status stays open.
+
 ## The deploy loop (code changes)
 
 `main` is the deploy branch. Edit code on your laptop → push to `main` → the Pi picks it up:

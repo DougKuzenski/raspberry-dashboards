@@ -30,9 +30,12 @@ else
 fi
 
 echo "Applying swap on $PI_HOST…"
+# Also write the runtime override the kiosk reads first, so this agrees with the
+# control panel (last switch wins, laptop or phone) instead of being shadowed by it.
 ssh "$PI_HOST" "set -e
   cd ~/$REPO_DIR
   git pull --ff-only origin $BRANCH --quiet
+  printf '%s\n' '$APP' > .kiosk-active
   sudo -n systemctl restart dashboard-kiosk.service
   echo 'swapped to $APP'
 "
