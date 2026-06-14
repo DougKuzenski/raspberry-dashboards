@@ -139,6 +139,13 @@ Lean enough for a **Pi 2**, GPU-accelerated on a **Pi 4/5** (same setup — keep
 sets up both servers, the manifest kiosk, a self-update timer, and a memory watchdog. See
 `pi/SETUP.md` for the swap/deploy loop, Pi 4/5 guidance, and why Chromium isn't used.
 
+## Run it on your phone (Android)
+
+No Pi needed to glance at a board on your phone: with [Termux](https://f-droid.org) you can pull the
+repo and serve a dashboard locally — `bash scripts/termux-run.sh` (World Cup) or
+`… family`, then open `http://localhost:3000`. Edit with the Claude Code app, push, re-run to update.
+Full walkthrough + gotchas in [`docs/termux.md`](docs/termux.md). (Android only; iOS has no Node runtime.)
+
 ## Project layout
 
 ```
