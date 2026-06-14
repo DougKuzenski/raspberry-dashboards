@@ -30,10 +30,12 @@ git pull --ff-only origin "$BRANCH"
 # Decide which apps need a rebuild from the changed paths (force = rebuild all).
 need_wc=$FORCE
 need_fam=$FORCE
+need_control=$FORCE
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   case "$f" in
-    apps/family/*) need_fam=1 ;;
+    apps/family/*)  need_fam=1 ;;
+    apps/control/*) need_control=1 ;;
     apps/*|pi/*|prototypes/*|*.md|.github/*|kiosk.json) : ;;  # not World Cup app code
     *) need_wc=1 ;;
   esac
@@ -53,6 +55,13 @@ build_and_restart() {  # name  app-dir  service
 
 [ "$need_wc" -eq 1 ]  && build_and_restart worldcup "$REPO_DIR"             worldcup-dashboard
 [ "$need_fam" -eq 1 ] && build_and_restart family   "$REPO_DIR/apps/family" family-dashboard
+
+# Control panel has no .env requirement, so rebuild it only when it's installed.
+if [ "$need_control" -eq 1 ] && [ -f "$HOME/.config/systemd/user/dashboard-control.service" ]; then
+  echo "rebuilding control panel"
+  ( cd "$REPO_DIR/apps/control" && npm install --no-fund --no-audit && npm run build )
+  systemctl --user restart dashboard-control.service
+fi
 
 # Reload the kiosk to pick up new client code and/or a manifest swap. Needs root
 # (system service); the installer adds a NOPASSWD rule for exactly this.

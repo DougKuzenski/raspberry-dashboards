@@ -7,10 +7,17 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$REPO/kiosk.json"
+OVERRIDE="$REPO/.kiosk-active"   # runtime swap target (control panel / switch.sh), gitignored
 NODE_BIN="$(command -v node || echo /usr/bin/node)"
 
-# Parse {"active": "..."} with node (always installed); tolerate a missing/bad file.
-active="$("$NODE_BIN" -e 'try{process.stdout.write(String(require(process.argv[1]).active||""))}catch(e){}' "$MANIFEST" 2>/dev/null || true)"
+# The control panel writes a runtime override that wins over the committed
+# manifest, so a phone swap survives `git pull --ff-only`. Fall back to kiosk.json.
+if [ -f "$OVERRIDE" ]; then
+  active="$(tr -d '[:space:]' < "$OVERRIDE" 2>/dev/null || true)"
+else
+  # Parse {"active": "..."} with node (always installed); tolerate a missing/bad file.
+  active="$("$NODE_BIN" -e 'try{process.stdout.write(String(require(process.argv[1]).active||""))}catch(e){}' "$MANIFEST" 2>/dev/null || true)"
+fi
 
 case "$active" in
   family)   port=3001 ;;

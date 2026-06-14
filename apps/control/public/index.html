@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1120" />
+  <title>Pi Control</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>Pi Control</h1>
+      <div class="sub" id="sub">connecting…</div>
+    </header>
+
+    <section>
+      <h2 class="section-title">Display</h2>
+      <div id="apps" class="apps"></div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Power</h2>
+      <div class="power">
+        <button class="hold danger" data-action="reboot">
+          <span class="fill"></span><span class="label">Reboot <small>(hold)</small></span>
+        </button>
+        <button class="hold danger danger--hard" data-action="shutdown">
+          <span class="fill"></span><span class="label">Shut Down <small>(hold)</small></span>
+        </button>
+      </div>
+    </section>
+
+    <details id="pin-box" class="pin">
+      <summary>PIN</summary>
+      <input id="pin" type="password" inputmode="numeric" placeholder="control PIN" autocomplete="off" />
+      <span class="hint">Saved in this browser. Only needed if the Pi has a PIN set.</span>
+    </details>
+
+    <p id="toast" class="toast" aria-live="polite"></p>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>

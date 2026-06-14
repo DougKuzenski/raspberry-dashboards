@@ -1,0 +1,53 @@
+:root {
+  --bg: #0b1120; --panel: #111a2e; --line: #1f2c47; --ink: #f5f7fb; --dim: #93a4c3;
+  --accent: #2dd4bf; --up: #34d399; --down: #6b7280; --danger: #f87171; --danger2: #ef4444;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.wrap { max-width: 540px; margin: 0 auto; padding: 22px 18px 40px; }
+.head h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+.sub { color: var(--dim); font-size: 15px; margin-top: 4px; }
+.section-title { font-size: 13px; letter-spacing: 2px; color: var(--dim); font-weight: 800; margin: 26px 0 10px; }
+
+.apps { display: grid; gap: 12px; }
+.app-btn {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 16px; padding: 18px 18px; font-size: 20px; font-weight: 700; cursor: pointer;
+}
+.app-btn:active { transform: scale(.99); }
+.app-btn .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--down); flex: none; }
+.app-btn.up .dot { background: var(--up); }
+.app-btn .name { flex: 1; }
+.app-btn .badge { font-size: 12px; font-weight: 800; letter-spacing: 1px; color: var(--bg);
+  background: var(--accent); border-radius: 999px; padding: 4px 10px; }
+.app-btn.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.app-btn.active .name { color: var(--accent); }
+.app-btn[disabled] { opacity: .6; cursor: default; }
+
+.power { display: grid; gap: 12px; }
+.hold {
+  position: relative; overflow: hidden; width: 100%; border: 1px solid var(--line);
+  border-radius: 16px; padding: 18px; font-size: 19px; font-weight: 800; cursor: pointer;
+  background: var(--panel); color: var(--danger); user-select: none;
+}
+.hold.danger--hard { color: #fff; background: #2a1414; border-color: #5b1d1d; }
+.hold .label { position: relative; z-index: 1; }
+.hold .label small { font-weight: 600; opacity: .7; }
+.hold .fill { position: absolute; inset: 0 100% 0 0; background: var(--danger2); opacity: .35;
+  transition: right 0s linear; }
+.hold.holding .fill { right: 0; }
+
+.pin { margin-top: 26px; color: var(--dim); }
+.pin summary { cursor: pointer; font-size: 14px; }
+.pin input { margin-top: 10px; width: 100%; padding: 12px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 16px; }
+.pin .hint { display: block; margin-top: 6px; font-size: 12px; }
+
+.toast { min-height: 22px; margin-top: 18px; text-align: center; font-size: 15px; color: var(--dim); }
+.toast.err { color: var(--danger); }
+.toast.ok { color: var(--up); }
