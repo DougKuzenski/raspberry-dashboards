@@ -2,6 +2,7 @@ import type { DashboardData, Match } from '../../shared/types.js';
 import type { DataProvider } from './providerTypes.js';
 import { parseFootballData, type FootballDataResponse } from '../normalize/parseFootballData.js';
 import { calculateStandings } from '../normalize/calculateStandings.js';
+import { enrichVenues, loadVenueIndex } from '../normalize/applyVenues.js';
 import { applyManualOverrides } from '../normalize/applyManualOverrides.js';
 import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
 
@@ -114,7 +115,7 @@ export const footballDataProvider: DataProvider = {
       cooldownUntil = now + ((resetSeconds ?? 60) + 1) * 1000;
     }
 
-    const matches = parseFootballData(body);
+    const matches = enrichVenues(parseFootballData(body), loadVenueIndex());
     const standings = calculateStandings(matches);
 
     let data: DashboardData = {

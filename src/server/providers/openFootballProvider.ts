@@ -2,6 +2,7 @@ import type { DashboardData } from '../../shared/types.js';
 import type { DataProvider } from './providerTypes.js';
 import { parseOpenFootball, type OpenFootballFile } from '../normalize/parseOpenFootball.js';
 import { calculateStandings } from '../normalize/calculateStandings.js';
+import { enrichVenues, loadVenueIndex } from '../normalize/applyVenues.js';
 import { applyManualOverrides } from '../normalize/applyManualOverrides.js';
 import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
 
@@ -53,7 +54,7 @@ export const openFootballProvider: DataProvider = {
   async fetchDashboardData(): Promise<DashboardData> {
     const url = process.env.EXTERNAL_API_BASE_URL || DEFAULT_URL;
     const file = await getFile(url);
-    const matches = parseOpenFootball(file);
+    const matches = enrichVenues(parseOpenFootball(file), loadVenueIndex());
     const standings = calculateStandings(matches);
 
     let data: DashboardData = {
