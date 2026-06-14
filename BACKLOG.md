@@ -33,6 +33,16 @@ Remaining ideas below are alternatives only if football-data proves too laggy/li
 4. Poll cadence + rate-limit guard (only poll while a match is in its live window) to respect free tiers.
 5. Order of precedence: manual override > live source > OpenFootball schedule.
 
+## Venues / stadiums
+
+**DONE (2026-06-14):** the venue gap is solved without a new API. football-data.org carries no location
+and OpenFootball's is a verbose host-city string, so `data/venues.json` is a committed static snapshot
+of the **clean host city** for all 104 matches (`scripts/generate-venues.ts` builds it from OpenFootball
++ a 16-city cleanup table). `normalize/applyVenues` enriches every provider: group games by (date + team
+codes — disambiguates the simultaneous final-round slots), knockouts by a singleton-only kickoff-minute
+key (placeholder teams, but every knockout slot is unique). Verified 104/104 enriched. We show city
+names (not stadiums — simpler on the kitchen TV); switch the table if you want stadium names back.
+
 ## Other ideas
 
 - Web admin/debug page for editing `data/manual/overrides.json` from a browser (spec §23).
