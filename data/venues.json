@@ -4,7 +4,7 @@
     "home": "MEX",
     "away": "RSA",
     "stage": "group",
-    "venue": "Estadio Azteca",
+    "venue": "Mexico City",
     "city": "Mexico City"
   },
   {
@@ -12,7 +12,7 @@
     "home": "KOR",
     "away": "CZE",
     "stage": "group",
-    "venue": "Estadio Akron",
+    "venue": "Guadalajara",
     "city": "Guadalajara"
   },
   {
@@ -20,7 +20,7 @@
     "home": "CAN",
     "away": "BOS",
     "stage": "group",
-    "venue": "BMO Field",
+    "venue": "Toronto",
     "city": "Toronto"
   },
   {
@@ -28,7 +28,7 @@
     "home": "USA",
     "away": "PAR",
     "stage": "group",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -36,7 +36,7 @@
     "home": "QAT",
     "away": "SUI",
     "stage": "group",
-    "venue": "Levi's Stadium",
+    "venue": "San Francisco",
     "city": "San Francisco"
   },
   {
@@ -44,7 +44,7 @@
     "home": "BRA",
     "away": "MAR",
     "stage": "group",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -52,7 +52,7 @@
     "home": "HAI",
     "away": "SCO",
     "stage": "group",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -60,7 +60,7 @@
     "home": "AUS",
     "away": "TUR",
     "stage": "group",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -68,7 +68,7 @@
     "home": "GER",
     "away": "CUW",
     "stage": "group",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -76,7 +76,7 @@
     "home": "NED",
     "away": "JPN",
     "stage": "group",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -84,7 +84,7 @@
     "home": "CIV",
     "away": "ECU",
     "stage": "group",
-    "venue": "Lincoln Financial Field",
+    "venue": "Philadelphia",
     "city": "Philadelphia"
   },
   {
@@ -92,7 +92,7 @@
     "home": "SWE",
     "away": "TUN",
     "stage": "group",
-    "venue": "Estadio BBVA",
+    "venue": "Monterrey",
     "city": "Monterrey"
   },
   {
@@ -100,7 +100,7 @@
     "home": "ESP",
     "away": "CPV",
     "stage": "group",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -108,7 +108,7 @@
     "home": "BEL",
     "away": "EGY",
     "stage": "group",
-    "venue": "Lumen Field",
+    "venue": "Seattle",
     "city": "Seattle"
   },
   {
@@ -116,7 +116,7 @@
     "home": "KSA",
     "away": "URU",
     "stage": "group",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -124,7 +124,7 @@
     "home": "IRN",
     "away": "NZL",
     "stage": "group",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -132,7 +132,7 @@
     "home": "FRA",
     "away": "SEN",
     "stage": "group",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -140,7 +140,7 @@
     "home": "IRQ",
     "away": "NOR",
     "stage": "group",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -148,7 +148,7 @@
     "home": "ARG",
     "away": "ALG",
     "stage": "group",
-    "venue": "Arrowhead Stadium",
+    "venue": "Kansas City",
     "city": "Kansas City"
   },
   {
@@ -156,7 +156,7 @@
     "home": "AUT",
     "away": "JOR",
     "stage": "group",
-    "venue": "Levi's Stadium",
+    "venue": "San Francisco",
     "city": "San Francisco"
   },
   {
@@ -164,7 +164,7 @@
     "home": "POR",
     "away": "COD",
     "stage": "group",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -172,7 +172,7 @@
     "home": "ENG",
     "away": "CRO",
     "stage": "group",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -180,7 +180,7 @@
     "home": "GHA",
     "away": "PAN",
     "stage": "group",
-    "venue": "BMO Field",
+    "venue": "Toronto",
     "city": "Toronto"
   },
   {
@@ -188,7 +188,7 @@
     "home": "UZB",
     "away": "COL",
     "stage": "group",
-    "venue": "Estadio Azteca",
+    "venue": "Mexico City",
     "city": "Mexico City"
   },
   {
@@ -196,7 +196,7 @@
     "home": "CZE",
     "away": "RSA",
     "stage": "group",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -204,7 +204,7 @@
     "home": "SUI",
     "away": "BOS",
     "stage": "group",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -212,7 +212,7 @@
     "home": "CAN",
     "away": "QAT",
     "stage": "group",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -220,7 +220,7 @@
     "home": "MEX",
     "away": "KOR",
     "stage": "group",
-    "venue": "Estadio Akron",
+    "venue": "Guadalajara",
     "city": "Guadalajara"
   },
   {
@@ -228,7 +228,7 @@
     "home": "USA",
     "away": "AUS",
     "stage": "group",
-    "venue": "Lumen Field",
+    "venue": "Seattle",
     "city": "Seattle"
   },
   {
@@ -236,7 +236,7 @@
     "home": "SCO",
     "away": "MAR",
     "stage": "group",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -244,7 +244,7 @@
     "home": "BRA",
     "away": "HAI",
     "stage": "group",
-    "venue": "Lincoln Financial Field",
+    "venue": "Philadelphia",
     "city": "Philadelphia"
   },
   {
@@ -252,7 +252,7 @@
     "home": "TUR",
     "away": "PAR",
     "stage": "group",
-    "venue": "Levi's Stadium",
+    "venue": "San Francisco",
     "city": "San Francisco"
   },
   {
@@ -260,7 +260,7 @@
     "home": "NED",
     "away": "SWE",
     "stage": "group",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -268,7 +268,7 @@
     "home": "GER",
     "away": "CIV",
     "stage": "group",
-    "venue": "BMO Field",
+    "venue": "Toronto",
     "city": "Toronto"
   },
   {
@@ -276,7 +276,7 @@
     "home": "ECU",
     "away": "CUW",
     "stage": "group",
-    "venue": "Arrowhead Stadium",
+    "venue": "Kansas City",
     "city": "Kansas City"
   },
   {
@@ -284,7 +284,7 @@
     "home": "TUN",
     "away": "JPN",
     "stage": "group",
-    "venue": "Estadio BBVA",
+    "venue": "Monterrey",
     "city": "Monterrey"
   },
   {
@@ -292,7 +292,7 @@
     "home": "ESP",
     "away": "KSA",
     "stage": "group",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -300,7 +300,7 @@
     "home": "BEL",
     "away": "IRN",
     "stage": "group",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -308,7 +308,7 @@
     "home": "URU",
     "away": "CPV",
     "stage": "group",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -316,7 +316,7 @@
     "home": "NZL",
     "away": "EGY",
     "stage": "group",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -324,7 +324,7 @@
     "home": "ARG",
     "away": "AUT",
     "stage": "group",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -332,7 +332,7 @@
     "home": "FRA",
     "away": "IRQ",
     "stage": "group",
-    "venue": "Lincoln Financial Field",
+    "venue": "Philadelphia",
     "city": "Philadelphia"
   },
   {
@@ -340,7 +340,7 @@
     "home": "NOR",
     "away": "SEN",
     "stage": "group",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -348,7 +348,7 @@
     "home": "JOR",
     "away": "ALG",
     "stage": "group",
-    "venue": "Levi's Stadium",
+    "venue": "San Francisco",
     "city": "San Francisco"
   },
   {
@@ -356,7 +356,7 @@
     "home": "POR",
     "away": "UZB",
     "stage": "group",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -364,7 +364,7 @@
     "home": "ENG",
     "away": "GHA",
     "stage": "group",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -372,7 +372,7 @@
     "home": "PAN",
     "away": "CRO",
     "stage": "group",
-    "venue": "BMO Field",
+    "venue": "Toronto",
     "city": "Toronto"
   },
   {
@@ -380,7 +380,7 @@
     "home": "COL",
     "away": "COD",
     "stage": "group",
-    "venue": "Estadio Akron",
+    "venue": "Guadalajara",
     "city": "Guadalajara"
   },
   {
@@ -388,7 +388,7 @@
     "home": "SUI",
     "away": "CAN",
     "stage": "group",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -396,7 +396,7 @@
     "home": "BOS",
     "away": "QAT",
     "stage": "group",
-    "venue": "Lumen Field",
+    "venue": "Seattle",
     "city": "Seattle"
   },
   {
@@ -404,7 +404,7 @@
     "home": "SCO",
     "away": "BRA",
     "stage": "group",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -412,7 +412,7 @@
     "home": "MAR",
     "away": "HAI",
     "stage": "group",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -420,7 +420,7 @@
     "home": "CZE",
     "away": "MEX",
     "stage": "group",
-    "venue": "Estadio Azteca",
+    "venue": "Mexico City",
     "city": "Mexico City"
   },
   {
@@ -428,7 +428,7 @@
     "home": "RSA",
     "away": "KOR",
     "stage": "group",
-    "venue": "Estadio BBVA",
+    "venue": "Monterrey",
     "city": "Monterrey"
   },
   {
@@ -436,7 +436,7 @@
     "home": "CUW",
     "away": "CIV",
     "stage": "group",
-    "venue": "Lincoln Financial Field",
+    "venue": "Philadelphia",
     "city": "Philadelphia"
   },
   {
@@ -444,7 +444,7 @@
     "home": "ECU",
     "away": "GER",
     "stage": "group",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -452,7 +452,7 @@
     "home": "JPN",
     "away": "SWE",
     "stage": "group",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -460,7 +460,7 @@
     "home": "TUN",
     "away": "NED",
     "stage": "group",
-    "venue": "Arrowhead Stadium",
+    "venue": "Kansas City",
     "city": "Kansas City"
   },
   {
@@ -468,7 +468,7 @@
     "home": "TUR",
     "away": "USA",
     "stage": "group",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -476,7 +476,7 @@
     "home": "PAR",
     "away": "AUS",
     "stage": "group",
-    "venue": "Levi's Stadium",
+    "venue": "San Francisco",
     "city": "San Francisco"
   },
   {
@@ -484,7 +484,7 @@
     "home": "NOR",
     "away": "FRA",
     "stage": "group",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -492,7 +492,7 @@
     "home": "SEN",
     "away": "IRQ",
     "stage": "group",
-    "venue": "BMO Field",
+    "venue": "Toronto",
     "city": "Toronto"
   },
   {
@@ -500,7 +500,7 @@
     "home": "CPV",
     "away": "KSA",
     "stage": "group",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -508,7 +508,7 @@
     "home": "URU",
     "away": "ESP",
     "stage": "group",
-    "venue": "Estadio Akron",
+    "venue": "Guadalajara",
     "city": "Guadalajara"
   },
   {
@@ -516,7 +516,7 @@
     "home": "EGY",
     "away": "IRN",
     "stage": "group",
-    "venue": "Lumen Field",
+    "venue": "Seattle",
     "city": "Seattle"
   },
   {
@@ -524,7 +524,7 @@
     "home": "NZL",
     "away": "BEL",
     "stage": "group",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -532,7 +532,7 @@
     "home": "PAN",
     "away": "ENG",
     "stage": "group",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -540,7 +540,7 @@
     "home": "CRO",
     "away": "GHA",
     "stage": "group",
-    "venue": "Lincoln Financial Field",
+    "venue": "Philadelphia",
     "city": "Philadelphia"
   },
   {
@@ -548,7 +548,7 @@
     "home": "COL",
     "away": "POR",
     "stage": "group",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -556,7 +556,7 @@
     "home": "COD",
     "away": "UZB",
     "stage": "group",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -564,7 +564,7 @@
     "home": "ALG",
     "away": "AUT",
     "stage": "group",
-    "venue": "Arrowhead Stadium",
+    "venue": "Kansas City",
     "city": "Kansas City"
   },
   {
@@ -572,7 +572,7 @@
     "home": "JOR",
     "away": "ARG",
     "stage": "group",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -580,7 +580,7 @@
     "home": "2A",
     "away": "2B",
     "stage": "round_of_32",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -588,7 +588,7 @@
     "home": "1C",
     "away": "2F",
     "stage": "round_of_32",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -596,7 +596,7 @@
     "home": "1E",
     "away": "ABC",
     "stage": "round_of_32",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -604,7 +604,7 @@
     "home": "1F",
     "away": "2C",
     "stage": "round_of_32",
-    "venue": "Estadio BBVA",
+    "venue": "Monterrey",
     "city": "Monterrey"
   },
   {
@@ -612,7 +612,7 @@
     "home": "2E",
     "away": "2I",
     "stage": "round_of_32",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -620,7 +620,7 @@
     "home": "1I",
     "away": "CDF",
     "stage": "round_of_32",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -628,7 +628,7 @@
     "home": "1A",
     "away": "CEF",
     "stage": "round_of_32",
-    "venue": "Estadio Azteca",
+    "venue": "Mexico City",
     "city": "Mexico City"
   },
   {
@@ -636,7 +636,7 @@
     "home": "1L",
     "away": "EHI",
     "stage": "round_of_32",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -644,7 +644,7 @@
     "home": "1G",
     "away": "AEH",
     "stage": "round_of_32",
-    "venue": "Lumen Field",
+    "venue": "Seattle",
     "city": "Seattle"
   },
   {
@@ -652,7 +652,7 @@
     "home": "1D",
     "away": "BEF",
     "stage": "round_of_32",
-    "venue": "Levi's Stadium",
+    "venue": "San Francisco",
     "city": "San Francisco"
   },
   {
@@ -660,7 +660,7 @@
     "home": "1H",
     "away": "2J",
     "stage": "round_of_32",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -668,7 +668,7 @@
     "home": "2K",
     "away": "2L",
     "stage": "round_of_32",
-    "venue": "BMO Field",
+    "venue": "Toronto",
     "city": "Toronto"
   },
   {
@@ -676,7 +676,7 @@
     "home": "1B",
     "away": "EFG",
     "stage": "round_of_32",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -684,7 +684,7 @@
     "home": "2D",
     "away": "2G",
     "stage": "round_of_32",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -692,7 +692,7 @@
     "home": "1J",
     "away": "2H",
     "stage": "round_of_32",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -700,7 +700,7 @@
     "home": "1K",
     "away": "DEI",
     "stage": "round_of_32",
-    "venue": "Arrowhead Stadium",
+    "venue": "Kansas City",
     "city": "Kansas City"
   },
   {
@@ -708,7 +708,7 @@
     "home": "W73",
     "away": "W75",
     "stage": "round_of_16",
-    "venue": "NRG Stadium",
+    "venue": "Houston",
     "city": "Houston"
   },
   {
@@ -716,7 +716,7 @@
     "home": "W74",
     "away": "W77",
     "stage": "round_of_16",
-    "venue": "Lincoln Financial Field",
+    "venue": "Philadelphia",
     "city": "Philadelphia"
   },
   {
@@ -724,7 +724,7 @@
     "home": "W76",
     "away": "W78",
     "stage": "round_of_16",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   },
   {
@@ -732,7 +732,7 @@
     "home": "W79",
     "away": "W80",
     "stage": "round_of_16",
-    "venue": "Estadio Azteca",
+    "venue": "Mexico City",
     "city": "Mexico City"
   },
   {
@@ -740,7 +740,7 @@
     "home": "W83",
     "away": "W84",
     "stage": "round_of_16",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -748,7 +748,7 @@
     "home": "W81",
     "away": "W82",
     "stage": "round_of_16",
-    "venue": "Lumen Field",
+    "venue": "Seattle",
     "city": "Seattle"
   },
   {
@@ -756,7 +756,7 @@
     "home": "W86",
     "away": "W88",
     "stage": "round_of_16",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -764,7 +764,7 @@
     "home": "W85",
     "away": "W87",
     "stage": "round_of_16",
-    "venue": "BC Place",
+    "venue": "Vancouver",
     "city": "Vancouver"
   },
   {
@@ -772,7 +772,7 @@
     "home": "W89",
     "away": "W90",
     "stage": "quarterfinal",
-    "venue": "Gillette Stadium",
+    "venue": "Boston",
     "city": "Boston"
   },
   {
@@ -780,7 +780,7 @@
     "home": "W93",
     "away": "W94",
     "stage": "quarterfinal",
-    "venue": "SoFi Stadium",
+    "venue": "Los Angeles",
     "city": "Los Angeles"
   },
   {
@@ -788,7 +788,7 @@
     "home": "W91",
     "away": "W92",
     "stage": "quarterfinal",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -796,7 +796,7 @@
     "home": "W95",
     "away": "W96",
     "stage": "quarterfinal",
-    "venue": "Arrowhead Stadium",
+    "venue": "Kansas City",
     "city": "Kansas City"
   },
   {
@@ -804,7 +804,7 @@
     "home": "W97",
     "away": "W98",
     "stage": "semifinal",
-    "venue": "AT&T Stadium",
+    "venue": "Dallas",
     "city": "Dallas"
   },
   {
@@ -812,7 +812,7 @@
     "home": "W99",
     "away": "W100",
     "stage": "semifinal",
-    "venue": "Mercedes-Benz Stadium",
+    "venue": "Atlanta",
     "city": "Atlanta"
   },
   {
@@ -820,7 +820,7 @@
     "home": "L101",
     "away": "L102",
     "stage": "third_place",
-    "venue": "Hard Rock Stadium",
+    "venue": "Miami",
     "city": "Miami"
   },
   {
@@ -828,7 +828,7 @@
     "home": "W101",
     "away": "W102",
     "stage": "final",
-    "venue": "MetLife Stadium",
+    "venue": "New York",
     "city": "New York"
   }
 ]

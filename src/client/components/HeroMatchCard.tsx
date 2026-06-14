@@ -26,7 +26,9 @@ export function HeroMatchCard({ match, now }: Props) {
   const live = match.status === 'live' || match.status === 'halftime';
   const countdown = match.status === 'scheduled' ? formatCountdown(match.kickoffUtc, now) : undefined;
   const channel = [match.tv, match.stream].filter(Boolean).join(' / ');
-  const venue = [match.venue, match.city].filter(Boolean).join(', ');
+  // De-dupe: venue and city are often the same (we show city names), so a plain
+  // join would read "Seattle, Seattle".
+  const venue = [...new Set([match.venue, match.city].filter(Boolean))].join(', ');
   const home = isHomeCity(match.city);
 
   return (

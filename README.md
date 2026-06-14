@@ -46,11 +46,11 @@ manual JSON / external API  ->  DataProvider  ->  normalize + selectDashboardSta
     key required). Real `SCHEDULED/IN_PLAY/PAUSED/FINISHED` status, scores, minute, groups, and knockout stages.
     A 30s server-side cache keeps requests well under the free tier's 10/min. **This is the one to use for live data.**
   - `worldcup_api` — a local sample-remote stub demonstrating the same normalize pipeline (no network).
-- **Venues** (`data/venues.json`): the live feed carries no stadium and OpenFootball only carries the
-  host *city*, so a committed static snapshot supplies the **stadium + city** for all 104 matches.
+- **Venues** (`data/venues.json`): the live feed carries no location and OpenFootball's is a verbose
+  host-city string, so a committed static snapshot supplies a **clean host city** for all 104 matches.
   `normalize/applyVenues` enriches every provider's matches from it (group games matched by team codes,
   knockouts by kickoff slot). Regenerate from OpenFootball with `npm run generate:venues`. This is what
-  makes the stadium labels and the Seattle home-city accent work regardless of data source.
+  makes the city labels and the Seattle home-city accent work regardless of data source.
 - **Manual overrides** (`data/manual/overrides.json`, when `ENABLE_MANUAL_OVERRIDES=true`) let a human
   correct TV channel / stream / notes / kickoff time / team name on top of remote data.
 - **Cache + fallback:** every successful load writes `data/cache/dashboard.json`. On a failed load the

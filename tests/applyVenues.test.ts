@@ -9,11 +9,12 @@ function match(over: Partial<Match> & Pick<Match, 'kickoffUtc'>): Match {
   };
 }
 
-// Two simultaneous group games (final round) + one knockout with placeholder teams.
+// Two simultaneous group games (final round) + one knockout with placeholder
+// teams. venue == city (the board shows city names).
 const ENTRIES: VenueEntry[] = [
-  { kickoffUtc: '2026-06-24T18:00:00.000Z', home: 'USA', away: 'MEX', stage: 'group', venue: 'SoFi Stadium', city: 'Los Angeles' },
-  { kickoffUtc: '2026-06-24T18:00:00.000Z', home: 'CAN', away: 'BRA', stage: 'group', venue: 'Lumen Field', city: 'Seattle' },
-  { kickoffUtc: '2026-06-28T19:00:00.000Z', home: '2A', away: '2B', stage: 'round_of_32', venue: 'AT&T Stadium', city: 'Dallas' },
+  { kickoffUtc: '2026-06-24T18:00:00.000Z', home: 'USA', away: 'MEX', stage: 'group', venue: 'Los Angeles', city: 'Los Angeles' },
+  { kickoffUtc: '2026-06-24T18:00:00.000Z', home: 'CAN', away: 'BRA', stage: 'group', venue: 'Seattle', city: 'Seattle' },
+  { kickoffUtc: '2026-06-28T19:00:00.000Z', home: '2A', away: '2B', stage: 'round_of_32', venue: 'Dallas', city: 'Dallas' },
 ];
 
 describe('enrichVenues', () => {
@@ -27,9 +28,9 @@ describe('enrichVenues', () => {
       ],
       index,
     );
-    expect(a.venue).toBe('SoFi Stadium');
+    expect(a.venue).toBe('Los Angeles');
     expect(a.city).toBe('Los Angeles');
-    expect(b.venue).toBe('Lumen Field'); // same minute, different venue — resolved correctly
+    expect(b.venue).toBe('Seattle'); // same minute, different city — resolved correctly
   });
 
   it('fills knockout venues by kickoff time even though the snapshot teams are placeholders', () => {
@@ -37,7 +38,7 @@ describe('enrichVenues', () => {
       [match({ kickoffUtc: '2026-06-28T19:00:00.000Z', stage: 'round_of_32', homeTeam: { id: 'NED', name: 'Netherlands' }, awayTeam: { id: 'JPN', name: 'Japan' } })],
       index,
     );
-    expect(m.venue).toBe('AT&T Stadium');
+    expect(m.venue).toBe('Dallas');
     expect(m.city).toBe('Dallas');
   });
 
@@ -51,12 +52,13 @@ describe('enrichVenues', () => {
     expect(m.venue).toBeUndefined();
   });
 
-  it('overrides an existing (city-only) venue from the snapshot', () => {
+  it('overrides a raw provider venue with the clean snapshot city', () => {
     const [m] = enrichVenues(
-      [match({ kickoffUtc: '2026-06-24T18:00:00.000Z', homeTeam: { id: 'USA', name: 'USA' }, awayTeam: { id: 'MEX', name: 'Mexico' }, venue: 'Los Angeles', city: 'Los Angeles' })],
+      [match({ kickoffUtc: '2026-06-24T18:00:00.000Z', homeTeam: { id: 'USA', name: 'USA' }, awayTeam: { id: 'MEX', name: 'Mexico' }, venue: 'Los Angeles (Inglewood)', city: 'Los Angeles (Inglewood)' })],
       index,
     );
-    expect(m.venue).toBe('SoFi Stadium');
+    expect(m.venue).toBe('Los Angeles');
+    expect(m.city).toBe('Los Angeles');
   });
 
   it('leaves unknown matches untouched', () => {
@@ -68,12 +70,12 @@ describe('enrichVenues', () => {
 describe('committed snapshot (data/venues.json)', () => {
   const index = loadVenueIndex();
 
-  it('enriches the real opener (MEX v RSA) with stadium + city', () => {
+  it('enriches the real opener (MEX v RSA) with its host city', () => {
     const [m] = enrichVenues(
       [match({ kickoffUtc: '2026-06-11T19:00:00.000Z', homeTeam: { id: 'MEX', name: 'Mexico' }, awayTeam: { id: 'RSA', name: 'South Africa' } })],
       index,
     );
-    expect(m.venue).toBe('Estadio Azteca');
+    expect(m.venue).toBe('Mexico City');
     expect(m.city).toBe('Mexico City');
   });
 

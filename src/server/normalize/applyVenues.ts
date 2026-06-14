@@ -2,11 +2,12 @@ import { readFileSync } from 'node:fs';
 import type { Match } from '../../shared/types.js';
 import { VENUES_FILE } from '../paths.js';
 
-// Enriches normalized matches with stadium + city from a static snapshot
+// Enriches normalized matches with the host city from a static snapshot
 // (data/venues.json), because the live source (football-data.org) carries no
-// venue and OpenFootball only carries the host *city*, not the stadium. The 2026
-// schedule fixes venue per slot, so a committed snapshot is the boring-reliable
-// way to get stadiums without a new API/key.
+// location and OpenFootball's is a verbose host-city string. The 2026 schedule
+// fixes the city per slot, so a committed snapshot is the boring-reliable way to
+// get clean city labels without a new API/key. (venue == city — we show city
+// names; the row components read `venue`, the home-city accent reads `city`.)
 //
 // Matching (proven against the 104-match schedule):
 //  - GROUP games -> by (date + team tri-codes). This disambiguates the final
