@@ -8,7 +8,7 @@
 #   bash scripts/termux-run.sh family     # Family calendar  -> http://localhost:3001
 #
 # One-time prereqs (Termux from F-Droid — NOT the Play Store):
-#   pkg install -y nodejs git esbuild
+#   pkg update -y && pkg install -y nodejs git
 # See docs/termux.md for the full walkthrough and gotchas.
 set -euo pipefail
 
@@ -21,12 +21,16 @@ case "$APP" in
   *) echo "unknown app '$APP' (expected: worldcup | family)" >&2; exit 1 ;;
 esac
 
-# The npm-shipped esbuild binary doesn't run under Termux; point vite/tsx at the
-# system one (pkg install esbuild). Harmless elsewhere (e.g. proot Debian, where
-# the normal binary works and this just isn't found).
-if command -v esbuild >/dev/null 2>&1; then
-  export ESBUILD_BINARY_PATH="$(command -v esbuild)"
+# Preflight: Node + npm must be installed (npm ships with Node).
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+  echo "ERROR: node/npm not found. In Termux run:  pkg update -y && pkg install -y nodejs git" >&2
+  exit 1
 fi
+
+# Let esbuild pick its own binary (current Termux Node reports 'android', so it
+# self-selects a working Android build). Forcing the system esbuild via this var
+# breaks the build on a version mismatch — so clear it if a stale one is exported.
+unset ESBUILD_BINARY_PATH 2>/dev/null || true
 
 # Pull what you pushed from the Claude Code app (skip cleanly if offline).
 echo "==> updating repo"
