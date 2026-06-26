@@ -340,7 +340,7 @@
 .transition {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 12px;
+  gap: 8px;
   height: 100%;
   min-height: 0;
 }
@@ -364,12 +364,27 @@
    panel chrome, so all 12 groups fit in roughly half the column and the forming
    bracket below keeps a legible half. Scoped to .transition* only — the
    group-only and knockout-only states keep the base sizing. */
-.transition .panel { padding: 12px 14px; }
-.transition .panel__title { margin-bottom: 6px; font-size: var(--fs-base); }
-.transition .groups-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
-.transition .group-card { padding: 4px 7px; border-radius: 6px; }
-.transition .group-card__title { font-size: calc(var(--fs-base) * 0.7); margin-bottom: 0.15em; }
-.transition .group-card__row { font-size: calc(var(--fs-base) * 0.68); padding: 0.05em 0; }
+.transition .panel { padding: 6px 12px; }
+.transition .panel__title { margin-bottom: 3px; font-size: var(--fs-base); }
+.transition .groups-grid { grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.transition .group-card { padding: 1px 6px; border-radius: 6px; }
+.transition .group-card__title { font-size: calc(var(--fs-base) * 0.6); margin-bottom: 0.05em; }
+.transition .group-card__row { font-size: calc(var(--fs-base) * 0.54); padding: 0; line-height: 1.06; }
+
+/* Condensed forming bracket for the shared transition column. The knockout-only
+   state gives the bracket the entire context column; here it shares the column
+   *below* the standings, so the Round-of-32's 16 two-slot nodes have to pack into
+   a much shorter pane. Mirror the standings density treatment above: pack the
+   columns from the top (no space-around stretch), stop the nodes/slots from
+   flex-shrinking to nothing, and shrink the per-node gap, slot padding and font so
+   all six rounds and every R32 slot label stay fully visible instead of being
+   crushed and clipped by the base `.bracket { overflow: hidden }`. Scoped to
+   .transition* only — the knockout-only bracket keeps the base sizing untouched. */
+.transition .bracket { gap: 8px; }
+.transition .bracket__col { justify-content: flex-start; gap: 1px; }
+.transition .bracket__node { flex: 0 0 auto; border-radius: 3px; }
+.transition .bracket__slot { flex: 0 0 auto; font-size: calc(var(--fs-base) * 0.33); line-height: 1.05; padding: 0.01em 0.4em; gap: 0.3em; }
+.transition .bracket__round { font-size: 0.46em; margin-bottom: 0; line-height: 1; }
 
 /* ---- Upcoming strip ---- */
 .upcoming {
