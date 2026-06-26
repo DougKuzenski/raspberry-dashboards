@@ -1,20 +1,62 @@
 // Pure transform from raw DashboardData -> DashboardView (what the UI renders).
 // Lives in shared because the client recomputes it every render against the live
 // clock, so the hero card and "today" buckets stay correct between data fetches.
-import type { DashboardData, DashboardView, Match, TournamentPhase } from './types.js';
+import type {
+  ContextPhase,
+  DashboardData,
+  DashboardView,
+  Match,
+  TournamentPhase,
+} from './types.js';
 import { DEFAULT_TIMEZONE, RECENT_RESULT_WINDOW_HOURS } from './constants.js';
 import { isSameLocalDay } from './time.js';
 import { resolveBracket } from './resolveBracket.js';
+
+// A group match still left to play (cancelled games don't block, matching the
+// server-side phase rule).
+function groupMatchesRemaining(matches: Match[]): boolean {
+  return matches.some(
+    (m) => m.stage === 'group' && m.status !== 'finished' && m.status !== 'cancelled',
+  );
+}
+
+// True once at least one group is mathematically decided — every one of that
+// group's group matches is finished (mirrors `groupIsDecided` in resolveBracket,
+// so a placeholder slot and the transition trigger agree on "group settled").
+function anyGroupDecided(matches: Match[]): boolean {
+  const groups = new Set(
+    matches.filter((m) => m.stage === 'group' && m.group).map((m) => m.group as string),
+  );
+  for (const group of groups) {
+    const groupMatches = matches.filter((m) => m.stage === 'group' && m.group === group);
+    if (groupMatches.length > 0 && groupMatches.every((m) => m.status === 'finished')) {
+      return true;
+    }
+  }
+  return false;
+}
 
 // The tournament is in its group phase while any group match has yet to finish;
 // once every group game is done (or the dataset has no group games left), we're
 // into the knockout phase. Works whether the data is just the group stage or the
 // full 104-match schedule (which always contains knockout fixtures).
 export function deriveTournamentPhase(matches: Match[]): TournamentPhase {
-  const groupRemaining = matches.some(
-    (m) => m.stage === 'group' && m.status !== 'finished' && m.status !== 'cancelled',
-  );
-  return groupRemaining ? 'group' : 'knockout';
+  return groupMatchesRemaining(matches) ? 'group' : 'knockout';
+}
+
+// Three-state context-panel phase (spec §6: group → knockout transition). The
+// rule (confirmed with the product owner) is deliberately the simplest:
+//   - 'knockout'   once NO group match remains unfinished (== TournamentPhase),
+//   - 'transition' while still in the group stage BUT either a knockout match is
+//     already scheduled (any non-group match exists) OR at least one group is
+//     mathematically decided — i.e. the bracket has started to form,
+//   - 'group'      before any of that.
+// Pure and clock-independent, like the rest of the selector.
+export function deriveContextPhase(matches: Match[]): ContextPhase {
+  if (!groupMatchesRemaining(matches)) return 'knockout';
+  const knockoutScheduled = matches.some((m) => m.stage !== 'group');
+  if (knockoutScheduled || anyGroupDecided(matches)) return 'transition';
+  return 'group';
 }
 
 const LIVE_STATUSES = new Set<Match['status']>(['live', 'halftime', 'pre_match']);
@@ -55,8 +97,12 @@ export function selectDashboardState(
   // Hero: the most important live match, otherwise the next upcoming match.
   const heroMatch = liveMatches[0] ?? nextMatch;
 
-  // Context panel: group standings during group stage, bracket during knockout.
-  const showBracket = data.tournamentPhase === 'knockout';
+  // Context panel: group standings during the group stage, both standings and the
+  // forming bracket during the transition, the bracket alone during knockout.
+  // Derived from the matches (not the server-set phase) so the transition window
+  // is detected the moment the bracket starts to form.
+  const contextPhase = deriveContextPhase(data.matches);
+  const showBracket = contextPhase === 'knockout';
 
   // Resolve the static bracket skeleton against live standings + results. Pure
   // (clock-independent), so it's safe to recompute here every render.
@@ -80,6 +126,7 @@ export function selectDashboardState(
     featuredGroup,
     featuredStandings,
     showBracket,
+    contextPhase,
     bracket,
   };
 }
