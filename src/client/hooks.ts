@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { DashboardData } from '../shared/types.js';
 import { DEFAULT_TIMEZONE } from '../shared/constants.js';
 
@@ -15,44 +15,70 @@ export function useTimeZone(): string {
 
 export interface DashboardFeed {
   data: DashboardData | null;
+  loading: boolean;
+  error: string | null;
   /** True once a fetch has failed and we're showing last-known data. */
   stale: boolean;
   lastUpdated: Date | null;
+  retry: () => void;
+}
+
+export function dashboardFetchErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  return 'Unable to load dashboard data';
 }
 
 // Fetch /api/dashboard every 60s. On failure, keep showing the last good data
 // and flag it stale rather than blanking the screen (spec §11).
 export function useDashboardFeed(): DashboardFeed {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stale, setStale] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const load = useCallback(async (isActive: () => boolean = () => true) => {
+    if (!isActive()) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/dashboard');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = (await res.json()) as DashboardData;
+      if (!isActive()) return;
+      setData(json);
+      setError(null);
+      setStale(Boolean(json.stale));
+      setLastUpdated(new Date());
+    } catch (err) {
+      if (!isActive()) return;
+      setError(dashboardFetchErrorMessage(err));
+      setStale(true);
+    } finally {
+      if (isActive()) setLoading(false);
+    }
+  }, []);
+
+  const retry = useCallback(() => {
+    void load();
+  }, [load]);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
-      try {
-        const res = await fetch('/api/dashboard');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = (await res.json()) as DashboardData;
-        if (cancelled) return;
-        setData(json);
-        setStale(Boolean(json.stale));
-        setLastUpdated(new Date());
-      } catch {
-        if (!cancelled) setStale(true);
-      }
-    }
+    const isActive = () => !cancelled;
+    const loadIfMounted = () => {
+      void load(isActive);
+    };
 
-    load();
-    const id = setInterval(load, REFRESH_MS);
+    loadIfMounted();
+    const id = setInterval(loadIfMounted, REFRESH_MS);
     return () => {
       cancelled = true;
       clearInterval(id);
     };
-  }, []);
+  }, [load]);
 
-  return { data, stale, lastUpdated };
+  return { data, loading, error, stale, lastUpdated, retry };
 }
 
 // A clock that re-renders every second, for the header time and live countdowns.

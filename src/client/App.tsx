@@ -28,14 +28,24 @@ const BASE_W = 1280;
 const BASE_H = 720;
 
 export function App() {
-  const { data, stale, lastUpdated } = useDashboardFeed();
+  const { data, loading, error, stale, lastUpdated, retry } = useDashboardFeed();
   const now = useNow();
   const scale = useFitScale(BASE_W, BASE_H);
 
   if (!data) {
     return (
       <div className="viewport" style={{ display: 'grid', placeItems: 'center' }}>
-        <div className="loading-text">Loading World Cup dashboard…</div>
+        {error ? (
+          <div className="load-error" role="alert">
+            <div className="load-error__title">World Cup dashboard unavailable</div>
+            <div className="load-error__message">{error}</div>
+            <button className="load-error__retry" type="button" onClick={retry} disabled={loading}>
+              {loading ? 'Retrying...' : 'Retry'}
+            </button>
+          </div>
+        ) : (
+          <div className="loading-text">Loading World Cup dashboard...</div>
+        )}
       </div>
     );
   }
