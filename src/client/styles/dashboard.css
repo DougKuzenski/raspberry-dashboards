@@ -290,11 +290,14 @@
 
 /* ---- Group → knockout transition: standings + forming bracket together ---- */
 /* Stacks the two existing panels in the context column so both stay full-width
-   (the 4-col group grid and the bracket columns both need the room). Each pane
-   is a min-height:0 flex track so the panels share the height without clipping. */
+   (the 4-col group grid and the bracket columns both need the room). The
+   standings pane is sized to its content (`auto`) so all 12 groups stay fully
+   visible — never squeezed into a fixed half that would clip — and the bracket
+   pane takes the remaining height. The standings are condensed (below) so their
+   content height leaves the bracket plenty of legible room. */
 .transition {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
   height: 100%;
   min-height: 0;
@@ -308,6 +311,23 @@
   flex: 1;
   min-height: 0;
 }
+/* Content-sized standings pane: its panel grows to fit the grid (no inner
+   scroll/clip), the bracket pane below absorbs the rest. */
+.transition__pane:first-child { min-height: max-content; }
+.transition__pane:first-child > .panel { overflow: visible; }
+.transition__pane:first-child > .panel > .groups-grid { overflow: visible; flex: 0 0 auto; }
+
+/* Condensed standings for the shared transition column: 6 columns × 2 rows
+   (instead of the group-only state's 4 × 3) with smaller cells, tighter grid and
+   panel chrome, so all 12 groups fit in roughly half the column and the forming
+   bracket below keeps a legible half. Scoped to .transition* only — the
+   group-only and knockout-only states keep the base sizing. */
+.transition .panel { padding: 12px 14px; }
+.transition .panel__title { margin-bottom: 6px; font-size: var(--fs-base); }
+.transition .groups-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.transition .group-card { padding: 4px 7px; border-radius: 6px; }
+.transition .group-card__title { font-size: calc(var(--fs-base) * 0.7); margin-bottom: 0.15em; }
+.transition .group-card__row { font-size: calc(var(--fs-base) * 0.68); padding: 0.05em 0; }
 
 /* ---- Upcoming strip ---- */
 .upcoming {
