@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { DashboardData } from '../shared/types.js';
 import { DEFAULT_TIMEZONE } from '../shared/constants.js';
 
@@ -28,6 +28,53 @@ export function dashboardFetchErrorMessage(error: unknown): string {
   return 'Unable to load dashboard data';
 }
 
+interface DashboardFeedLoadOptions {
+  isActive: () => boolean;
+  isInFlight: () => boolean;
+  setInFlight: (inFlight: boolean) => void;
+  setLoading: (loading: boolean) => void;
+  setData: (data: DashboardData) => void;
+  setError: (error: string | null) => void;
+  setStale: (stale: boolean) => void;
+  setLastUpdated: (date: Date) => void;
+  fetchDashboard?: typeof fetch;
+}
+
+export async function loadDashboardFeedOnce({
+  isActive,
+  isInFlight,
+  setInFlight,
+  setLoading,
+  setData,
+  setError,
+  setStale,
+  setLastUpdated,
+  fetchDashboard = fetch,
+}: DashboardFeedLoadOptions): Promise<void> {
+  if (!isActive() || isInFlight()) return;
+
+  setInFlight(true);
+  setLoading(true);
+
+  try {
+    const res = await fetchDashboard('/api/dashboard');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = (await res.json()) as DashboardData;
+    if (!isActive()) return;
+    setData(json);
+    setError(null);
+    setStale(Boolean(json.stale));
+    setLastUpdated(new Date());
+  } catch (err) {
+    if (!isActive()) return;
+    setError(dashboardFetchErrorMessage(err));
+    setStale(true);
+  } finally {
+    setInFlight(false);
+    if (isActive()) setLoading(false);
+  }
+}
+
 // Fetch /api/dashboard every 60s. On failure, keep showing the last good data
 // and flag it stale rather than blanking the screen (spec §11).
 export function useDashboardFeed(): DashboardFeed {
@@ -36,44 +83,35 @@ export function useDashboardFeed(): DashboardFeed {
   const [error, setError] = useState<string | null>(null);
   const [stale, setStale] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const activeRef = useRef(false);
+  const inFlightRef = useRef(false);
 
-  const load = useCallback(async (isActive: () => boolean = () => true) => {
-    if (!isActive()) return;
-    setLoading(true);
-    try {
-      const res = await fetch('/api/dashboard');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = (await res.json()) as DashboardData;
-      if (!isActive()) return;
-      setData(json);
-      setError(null);
-      setStale(Boolean(json.stale));
-      setLastUpdated(new Date());
-    } catch (err) {
-      if (!isActive()) return;
-      setError(dashboardFetchErrorMessage(err));
-      setStale(true);
-    } finally {
-      if (isActive()) setLoading(false);
-    }
+  const load = useCallback(() => {
+    void loadDashboardFeedOnce({
+      isActive: () => activeRef.current,
+      isInFlight: () => inFlightRef.current,
+      setInFlight: (inFlight) => {
+        inFlightRef.current = inFlight;
+      },
+      setLoading,
+      setData,
+      setError,
+      setStale,
+      setLastUpdated,
+    });
   }, []);
 
   const retry = useCallback(() => {
-    void load();
+    load();
   }, [load]);
 
   useEffect(() => {
-    let cancelled = false;
+    activeRef.current = true;
 
-    const isActive = () => !cancelled;
-    const loadIfMounted = () => {
-      void load(isActive);
-    };
-
-    loadIfMounted();
-    const id = setInterval(loadIfMounted, REFRESH_MS);
+    load();
+    const id = setInterval(load, REFRESH_MS);
     return () => {
-      cancelled = true;
+      activeRef.current = false;
       clearInterval(id);
     };
   }, [load]);
