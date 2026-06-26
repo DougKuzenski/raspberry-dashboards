@@ -279,8 +279,23 @@
   border-radius: 8px;
   overflow: hidden;
 }
-.bracket__slot { padding: 0.4em 0.6em; font-size: calc(var(--fs-base) * 0.85); }
+.bracket__slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.4em 0.6em;
+  font-size: calc(var(--fs-base) * 0.85);
+}
 .bracket__slot + .bracket__slot { border-top: 1px solid var(--line); }
+.bracket__team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bracket__score { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--text-dim); }
+.bracket__slot--tbd .bracket__team { color: var(--text-dim); }
+.bracket__slot--favorite .bracket__team { color: var(--favorite); }
+.bracket__slot--winner { font-weight: 800; }
+.bracket__slot--winner .bracket__team { color: var(--accent); }
+.bracket__slot--winner .bracket__score { color: var(--accent); }
+.bracket__node--decided { border-color: var(--line); }
 
 /* ---- Upcoming strip ---- */
 .upcoming {
