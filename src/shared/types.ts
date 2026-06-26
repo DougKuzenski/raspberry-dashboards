@@ -70,6 +70,42 @@ export interface BracketNode {
   winnerFeedsTo?: string;
 }
 
+// ---- Resolved bracket (derived) -------------------------------------------
+// `BracketNode` (above) is the static skeleton: which slot pulls from which
+// group/prior match. `ResolvedBracketNode` is what the seeding engine produces
+// for the UI once standings and knockout results are known — see
+// `resolveBracket.ts`. The transition panel consumes this same shape.
+
+export interface BracketSlot {
+  /** The static source label this slot pulls from, e.g. "Winner Group A". */
+  source: string;
+  /** The real team once the source is resolved; undefined while undecided. */
+  team?: TeamRef;
+  /** This slot's goals in the node's match, when the match has a score. */
+  score?: number;
+  /** True when this slot's team won the node's match. */
+  isWinner: boolean;
+}
+
+export interface ResolvedBracketNode {
+  id: string;
+  stage: Stage;
+  label: string;
+  /** The match backing this node, if one has been linked/found. */
+  matchId?: string;
+  winnerFeedsTo?: string;
+  home: BracketSlot;
+  away: BracketSlot;
+  /** Status of the backing match, when known (live/finished/…). */
+  status?: MatchStatus;
+  /** Kickoff of the backing match (UTC ISO), when known. */
+  kickoffUtc?: string;
+  /** The team that won this node's match, once decided. */
+  winner?: TeamRef;
+  /** True when both slots have resolved to real teams. */
+  decided: boolean;
+}
+
 export type TournamentPhase = 'group' | 'knockout';
 
 export interface DashboardData {
@@ -103,4 +139,6 @@ export interface DashboardView {
   featuredGroup?: string;
   featuredStandings: Standing[];
   showBracket: boolean;
+  /** The knockout bracket with sources resolved to real teams + scores. */
+  bracket: ResolvedBracketNode[];
 }

@@ -70,7 +70,7 @@ export function App() {
 
         <section className="dashboard__context">
           {view.showBracket ? (
-            <BracketView nodes={data.bracket} />
+            <BracketView nodes={view.bracket} />
           ) : (
             <GroupStandings standings={data.standings} featuredGroup={view.featuredGroup} />
           )}

@@ -4,6 +4,7 @@
 import type { DashboardData, DashboardView, Match, TournamentPhase } from './types.js';
 import { DEFAULT_TIMEZONE, RECENT_RESULT_WINDOW_HOURS } from './constants.js';
 import { isSameLocalDay } from './time.js';
+import { resolveBracket } from './resolveBracket.js';
 
 // The tournament is in its group phase while any group match has yet to finish;
 // once every group game is done (or the dataset has no group games left), we're
@@ -57,6 +58,10 @@ export function selectDashboardState(
   // Context panel: group standings during group stage, bracket during knockout.
   const showBracket = data.tournamentPhase === 'knockout';
 
+  // Resolve the static bracket skeleton against live standings + results. Pure
+  // (clock-independent), so it's safe to recompute here every render.
+  const bracket = resolveBracket(data.matches, data.standings, data.bracket);
+
   const featuredGroup =
     !showBracket && heroMatch?.stage === 'group' ? heroMatch.group : undefined;
 
@@ -75,5 +80,6 @@ export function selectDashboardState(
     featuredGroup,
     featuredStandings,
     showBracket,
+    bracket,
   };
 }
