@@ -106,6 +106,29 @@
   color: var(--text-dim);
   font-weight: 700;
 }
+.hero__teams,
+.hero .match-row__teams {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: var(--fs-hero);
+  font-weight: 800;
+  line-height: 1.05;
+  flex-wrap: wrap;
+}
+.hero .match-row__score {
+  color: var(--text);
+}
+.hero .match-row__score:not(.match-row__score--final) {
+  color: var(--text-dim);
+  font-size: 0.5em;
+}
+.hero .match-row__venue {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: var(--fs-base);
+}
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
@@ -173,39 +196,6 @@
   text-overflow: ellipsis;
 }
 .match-row__venue--home { color: var(--home); font-weight: 700; }
-.match-row--hero {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  padding: 24px;
-  border-left: 2px solid var(--line);
-}
-.match-row--hero.match-row--live { border-left-color: var(--live); }
-.match-row--hero.match-row--home {
-  background: linear-gradient(140deg, rgba(90, 240, 140, 0.14), var(--bg-panel));
-}
-.match-row--hero .match-row__teams {
-  gap: 22px;
-  font-size: var(--fs-hero);
-  font-weight: 800;
-  line-height: 1.05;
-  flex-wrap: wrap;
-}
-.match-row--hero .match-row__score {
-  color: var(--text);
-}
-.match-row--hero .match-row__score:not(.match-row__score--final) {
-  color: var(--text-dim);
-  font-size: 0.5em;
-}
-.match-row--hero .match-row__venue {
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
-  font-size: var(--fs-base);
-}
-
 /* ---- Team label ---- */
 .team { display: inline-flex; align-items: center; gap: 0.4em; }
 .team__flag { font-size: 1.1em; }

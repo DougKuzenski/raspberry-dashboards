@@ -61,12 +61,7 @@ export function MatchRow({ match, variant, timeZone, label, timeLabel, countdown
   if (variant === 'hero') {
     const channel = [match.tv, match.stream].filter(Boolean).join(' / ');
     const badge = statusBadge(match, timeZone);
-    const className = [
-      'hero',
-      `hero--${badge.variant}`,
-      matchAccentClassNames('hero', match),
-      rowClassName(match, variant, timeZone),
-    ]
+    const className = ['hero', `hero--${badge.variant}`, accent.home ? 'hero--home' : undefined]
       .filter(Boolean)
       .join(' ');
 
