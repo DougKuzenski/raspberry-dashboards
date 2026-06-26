@@ -97,7 +97,6 @@
 .hero--live { border-color: var(--live); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.25); }
 .hero--home { border-color: var(--home); box-shadow: 0 0 0 2px rgba(90, 240, 140, 0.25); }
 .hero--home.hero--live { border-color: var(--live); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.25); }
-.hero__venue--home { color: var(--home); font-weight: 700; }
 .hero__eyebrow {
   display: flex;
   align-items: center;
@@ -107,7 +106,8 @@
   color: var(--text-dim);
   font-weight: 700;
 }
-.hero__teams {
+.hero__teams,
+.hero .match-row__teams {
   display: flex;
   align-items: center;
   gap: 22px;
@@ -116,9 +116,19 @@
   line-height: 1.05;
   flex-wrap: wrap;
 }
-.hero__vs { color: var(--text-dim); font-size: 0.5em; }
-.hero__score { font-variant-numeric: tabular-nums; }
-.hero__score-sep { color: var(--text-dim); }
+.hero .match-row__score {
+  color: var(--text);
+}
+.hero .match-row__score:not(.match-row__score--final) {
+  color: var(--text-dim);
+  font-size: 0.5em;
+}
+.hero .match-row__venue {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: var(--fs-base);
+}
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
@@ -131,7 +141,6 @@
   color: var(--accent);
   font-weight: 700;
 }
-.hero__venue { white-space: nowrap; }
 .hero__notes { color: var(--favorite); font-size: calc(var(--fs-base) * 0.95); }
 .hero--empty { justify-content: center; align-items: center; color: var(--text-dim); }
 
@@ -178,6 +187,7 @@
 .match-row__main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .match-row__teams { display: flex; align-items: center; gap: 13px; font-weight: 700; }
 .match-row__score { color: var(--accent); font-variant-numeric: tabular-nums; }
+.match-row__score--final { color: var(--text); }
 .match-row__venue {
   color: var(--text-dim);
   font-size: calc(var(--fs-base) * 0.78);
@@ -186,7 +196,6 @@
   text-overflow: ellipsis;
 }
 .match-row__venue--home { color: var(--home); font-weight: 700; }
-
 /* ---- Team label ---- */
 .team { display: inline-flex; align-items: center; gap: 0.4em; }
 .team__flag { font-size: 1.1em; }
@@ -285,12 +294,63 @@
 }
 .upcoming__label { color: var(--accent); font-weight: 800; letter-spacing: 0.1em; font-size: 0.85em; }
 .upcoming__list { list-style: none; display: flex; gap: 24px; flex: 1; overflow: hidden; }
-.upcoming__item { display: flex; flex-direction: column; white-space: nowrap; }
-.upcoming__item--favorite .upcoming__teams { color: var(--favorite); font-weight: 700; }
-.upcoming__time { color: var(--text-dim); font-size: 0.8em; }
-.upcoming__venue { color: var(--text-dim); font-size: 0.72em; opacity: 0.85; }
-.upcoming__item--home .upcoming__teams { color: var(--home); font-weight: 700; }
-.upcoming__venue--home { color: var(--home); opacity: 1; font-weight: 700; }
+.upcoming .match-row--compact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  max-width: 210px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  white-space: nowrap;
+}
+.upcoming .match-row--compact .match-row__main {
+  gap: 2px;
+  max-width: 100%;
+}
+.upcoming .match-row--compact .match-row__teams {
+  gap: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.upcoming .match-row--compact .team {
+  min-width: 0;
+}
+.upcoming .match-row--compact .team__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.upcoming .match-row--compact .match-row__score {
+  color: var(--text-dim);
+  font-size: 0.8em;
+}
+.upcoming .match-row--compact.match-row--favorite .match-row__teams {
+  color: var(--favorite);
+  font-weight: 700;
+}
+.upcoming .match-row--compact .match-row__time {
+  color: var(--text-dim);
+  font-size: 0.8em;
+}
+.upcoming .match-row--compact .match-row__venue {
+  color: var(--text-dim);
+  font-size: 0.72em;
+  opacity: 0.85;
+  max-width: 100%;
+}
+.upcoming .match-row--compact.match-row--home .match-row__teams {
+  color: var(--home);
+  font-weight: 700;
+}
+.upcoming .match-row--compact .match-row__venue--home {
+  color: var(--home);
+  opacity: 1;
+}
 
 /* ---- Footer ticker ---- */
 .ticker {

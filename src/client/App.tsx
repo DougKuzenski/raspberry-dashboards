@@ -65,7 +65,7 @@ export function App() {
         </section>
 
         <section className="dashboard__today">
-          <TodayMatches matches={view.todayMatches} now={now} />
+          <TodayMatches matches={view.todayMatches} />
         </section>
 
         <section className="dashboard__context">
@@ -77,7 +77,11 @@ export function App() {
         </section>
       </main>
 
-      <UpcomingMatches matches={view.upcomingMatches} now={now} />
+      <UpcomingMatches
+        matches={view.upcomingMatches}
+        now={now}
+        excludeMatchId={view.heroMatch?.id}
+      />
 
       <FooterTicker
         recent={view.recentResults}
