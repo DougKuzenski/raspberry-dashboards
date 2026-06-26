@@ -7,6 +7,7 @@ import { TodayMatches } from './components/TodayMatches.js';
 import { UpcomingMatches } from './components/UpcomingMatches.js';
 import { GroupStandings } from './components/GroupStandings.js';
 import { BracketView } from './components/BracketView.js';
+import { TransitionContext } from './components/TransitionContext.js';
 import { FooterTicker } from './components/FooterTicker.js';
 import { ConnectionStatus } from './components/ConnectionStatus.js';
 
@@ -79,8 +80,14 @@ export function App() {
         </section>
 
         <section className="dashboard__context">
-          {view.showBracket ? (
+          {view.contextPhase === 'knockout' ? (
             <BracketView nodes={view.bracket} />
+          ) : view.contextPhase === 'transition' ? (
+            <TransitionContext
+              standings={data.standings}
+              featuredGroup={view.featuredGroup}
+              bracket={view.bracket}
+            />
           ) : (
             <GroupStandings standings={data.standings} featuredGroup={view.featuredGroup} />
           )}

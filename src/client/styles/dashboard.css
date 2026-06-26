@@ -330,6 +330,27 @@
 .bracket__slot--winner .bracket__score { color: var(--accent); }
 .bracket__node--decided { border-color: var(--line); }
 
+/* ---- Group → knockout transition: standings + forming bracket together ---- */
+/* Stacks the two existing panels in the context column so both stay full-width
+   (the 4-col group grid and the bracket columns both need the room). Each pane
+   is a min-height:0 flex track so the panels share the height without clipping. */
+.transition {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+.transition__pane {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+}
+.transition__pane > .panel {
+  flex: 1;
+  min-height: 0;
+}
+
 /* ---- Upcoming strip ---- */
 .upcoming {
   display: flex;

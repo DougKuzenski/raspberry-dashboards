@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { selectDashboardState } from '../src/shared/selectDashboardState.js';
+import {
+  selectDashboardState,
+  deriveContextPhase,
+} from '../src/shared/selectDashboardState.js';
 import type { DashboardData, Match } from '../src/shared/types.js';
 
 function match(partial: Partial<Match> & Pick<Match, 'id' | 'kickoffUtc' | 'status'>): Match {
@@ -68,6 +71,15 @@ describe('selectDashboardState', () => {
     expect(view.featuredGroup).toBeUndefined();
   });
 
+  it('exposes a transition context phase once the bracket starts forming', () => {
+    // Group B fully decided, group A still playing -> transition.
+    const decided = match({ id: 'b1', group: 'B', kickoffUtc: '2026-06-10T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
+    const playing = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T20:00:00Z', status: 'scheduled' });
+    const view = selectDashboardState(data([decided, playing]), now);
+    expect(view.contextPhase).toBe('transition');
+    expect(view.showBracket).toBe(false);
+  });
+
   it('buckets today vs recent results correctly', () => {
     const recent = match({ id: 'm0', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
     const tomorrow = match({ id: 'm9', kickoffUtc: '2026-06-12T20:00:00Z', status: 'scheduled' });
@@ -75,5 +87,39 @@ describe('selectDashboardState', () => {
     expect(view.recentResults.map((m) => m.id)).toContain('m0');
     expect(view.todayMatches.map((m) => m.id)).toContain('m0');
     expect(view.todayMatches.map((m) => m.id)).not.toContain('m9');
+  });
+});
+
+describe('deriveContextPhase', () => {
+  it("stays 'group' while every group is still mid-play and no knockout is scheduled", () => {
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
+    const a2 = match({ id: 'a2', group: 'A', kickoffUtc: '2026-06-14T15:00:00Z', status: 'scheduled' });
+    const b1 = match({ id: 'b1', group: 'B', kickoffUtc: '2026-06-12T15:00:00Z', status: 'scheduled' });
+    expect(deriveContextPhase([a1, a2, b1])).toBe('group');
+  });
+
+  it("enters 'transition' once one group is mathematically decided", () => {
+    // Group A's only match is finished (decided); group B still has a game left.
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
+    const b1 = match({ id: 'b1', group: 'B', kickoffUtc: '2026-06-12T15:00:00Z', status: 'scheduled' });
+    expect(deriveContextPhase([a1, b1])).toBe('transition');
+  });
+
+  it("enters 'transition' once a knockout match is scheduled, even with no group decided", () => {
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-12T15:00:00Z', status: 'scheduled' });
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'scheduled' });
+    expect(deriveContextPhase([a1, r32])).toBe('transition');
+  });
+
+  it("enters full 'knockout' once no group match remains unfinished", () => {
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'scheduled' });
+    expect(deriveContextPhase([a1, r32])).toBe('knockout');
+  });
+
+  it("treats a cancelled group match as not blocking knockout", () => {
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
+    const a2 = match({ id: 'a2', group: 'A', kickoffUtc: '2026-06-14T15:00:00Z', status: 'cancelled' });
+    expect(deriveContextPhase([a1, a2])).toBe('knockout');
   });
 });
