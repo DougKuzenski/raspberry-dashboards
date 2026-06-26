@@ -372,19 +372,32 @@
 .transition .group-card__row { font-size: calc(var(--fs-base) * 0.54); padding: 0; line-height: 1.06; }
 
 /* Condensed forming bracket for the shared transition column. The knockout-only
-   state gives the bracket the entire context column; here it shares the column
-   *below* the standings, so the Round-of-32's 16 two-slot nodes have to pack into
-   a much shorter pane. Mirror the standings density treatment above: pack the
-   columns from the top (no space-around stretch), stop the nodes/slots from
-   flex-shrinking to nothing, and shrink the per-node gap, slot padding and font so
-   all six rounds and every R32 slot label stay fully visible instead of being
-   crushed and clipped by the base `.bracket { overflow: hidden }`. Scoped to
-   .transition* only — the knockout-only bracket keeps the base sizing untouched. */
-.transition .bracket { gap: 8px; }
-.transition .bracket__col { justify-content: flex-start; gap: 1px; }
+   state gives the bracket the entire context column; here the bracket shares the
+   column *below* the standings, in a pane that is wide but short (and whose height
+   varies with the live/today match count in the left column). The Round-of-32 has
+   16 two-slot nodes — far more than any later round (≤8) — so a single tall R32
+   column would need a ~5px font to avoid the base `.bracket { overflow: hidden }`
+   clipping it. Instead, spend the pane's spare *horizontal* room: flow R32's nodes
+   into two sub-columns (so its effective height halves to ~8 rows, matching R16)
+   and keep a legible slot font. Scoped to .transition* only — the knockout-only
+   bracket, which gets the whole column, keeps the base sizing untouched. */
+.transition .bracket { gap: 7px; }
+.transition .bracket__col { justify-content: flex-start; gap: 2px; flex: 1 1 0; min-width: 0; }
 .transition .bracket__node { flex: 0 0 auto; border-radius: 3px; }
-.transition .bracket__slot { flex: 0 0 auto; font-size: calc(var(--fs-base) * 0.33); line-height: 1.05; padding: 0.01em 0.4em; gap: 0.3em; }
-.transition .bracket__round { font-size: 0.46em; margin-bottom: 0; line-height: 1; }
+.transition .bracket__slot { flex: 0 0 auto; font-size: calc(var(--fs-base) * 0.43); line-height: 1.12; padding: 0.06em 0.22em; gap: 0.22em; }
+.transition .bracket__round { font-size: 0.44em; margin-bottom: 2px; line-height: 1; letter-spacing: 0.03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* R32 (first column): two-up multicol flow + a double-width track so all 16 nodes
+   fit at the legible size above without a tall single column. The 2.7 grow keeps
+   each sub-column ~1.3× the later rounds' width, matching R32's longer placeholder
+   labels ("Runner-up Group I") so they stay un-truncated alongside R16's. */
+.transition .bracket__col:first-child {
+  flex: 2.7 1 0;
+  display: block;
+  columns: 2;
+  column-gap: 6px;
+}
+.transition .bracket__col:first-child .bracket__round { column-span: all; }
+.transition .bracket__col:first-child .bracket__node { break-inside: avoid; margin: 0 0 2px; }
 
 /* ---- Upcoming strip ---- */
 .upcoming {
