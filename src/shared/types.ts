@@ -108,6 +108,13 @@ export interface ResolvedBracketNode {
 
 export type TournamentPhase = 'group' | 'knockout';
 
+// The context-panel phase is a finer-grained, UI-only derivation of the same
+// tournament progress. It adds a 'transition' state for the window when group
+// games are wrapping up but the knockout bracket is already forming, so the panel
+// can show group standings AND the forming bracket together. Derived purely from
+// the matches by `deriveContextPhase` — never set by the server, never clock-based.
+export type ContextPhase = 'group' | 'transition' | 'knockout';
+
 export interface DashboardData {
   generatedAtUtc: string;
   tournamentPhase: TournamentPhase;
@@ -139,6 +146,13 @@ export interface DashboardView {
   featuredGroup?: string;
   featuredStandings: Standing[];
   showBracket: boolean;
+  /**
+   * Three-state context-panel phase (group / transition / knockout). The panel
+   * shows standings only in 'group', both standings and the forming bracket in
+   * 'transition', and the bracket only in 'knockout'. (`showBracket` stays as the
+   * boolean for the 'knockout' case.)
+   */
+  contextPhase: ContextPhase;
   /** The knockout bracket with sources resolved to real teams + scores. */
   bracket: ResolvedBracketNode[];
 }
