@@ -148,3 +148,98 @@ describe('resolveBracket — full skeleton', () => {
     expect(resolved.find((n) => n.id === 'final')?.home.source).toBe('Winner SF-1');
   });
 });
+
+describe('resolveBracket — best-thirds selection + ordering', () => {
+  // All 12 groups (A–L). Each group's rank-3 team is crafted so the global
+  // ranking exercises every tiebreak level of the documented rule, in order:
+  //   points → goal difference → goals for → fewest goals against → team name.
+  // Stats per group: [points, goalDifference, goalsFor, goalsAgainst].
+  const THIRD_STATS: Record<string, [number, number, number, number]> = {
+    A: [6, 3, 5, 2], // ties B on pts/gd/gf/ga → split by name (T_A < T_B)
+    B: [6, 3, 5, 2], // ↑
+    C: [6, 3, 5, 4], // ties A/B on pts/gd/gf but worse ga → ranks below them
+    D: [6, 3, 7, 2], // ties on pts/gd but higher gf → above A/B/C
+    E: [6, 5, 5, 2], // ties on pts but higher gd → above all other pts-6
+    F: [7, 4, 6, 2], // highest points → overall #1
+    G: [4, 1, 3, 2], // pts-4, lower gd than H
+    H: [4, 2, 3, 2], // pts-4, higher gd → above G
+    I: [3, 1, 2, 2], // pts-3, above J on gd  — excluded (9th)
+    J: [3, 0, 2, 2], // pts-3                 — excluded (10th)
+    K: [1, 0, 1, 2], //                        — excluded (11th)
+    L: [0, -1, 1, 3], //                       — excluded (12th)
+  };
+  const GROUPS = Object.keys(THIRD_STATS);
+
+  // Documented order, best first. Top 8 advance; I/J/K/L are cut.
+  const EXPECTED_ORDER = ['T_F', 'T_E', 'T_D', 'T_A', 'T_B', 'T_C', 'T_H', 'T_G'];
+  const EXCLUDED = ['T_I', 'T_J', 'T_K', 'T_L'];
+
+  function thirdsStandings(): Standing[] {
+    return GROUPS.map((g) => {
+      const [points, goalDifference, goalsFor, goalsAgainst] = THIRD_STATS[g];
+      return standing(g, `T_${g}`, 3, { points, goalDifference, goalsFor, goalsAgainst });
+    });
+  }
+
+  // One bracket node per best-third slot (#1..#8); the away slot stays unresolved.
+  const nodes: BracketNode[] = Array.from({ length: 8 }, (_, i) => ({
+    id: `r32-${i + 1}`,
+    stage: 'round_of_32',
+    label: `R32 ${i + 1}`,
+    homeSource: `Best 3rd #${i + 1}`,
+    awaySource: 'Winner R32-99', // intentionally never resolves
+  }));
+
+  it('selects exactly the 8 best thirds and orders them deterministically by the documented rule', () => {
+    // Every group finished -> the cross-group third-place gate is open.
+    const matches = GROUPS.map((g) => gm(g, `${g}1`, `${g}2`, 1, 0));
+    const resolved = resolveBracket(matches, thirdsStandings(), nodes);
+
+    const selected = resolved.map((n) => n.home.team?.id);
+    // (a) exactly 8 slots resolve to a team.
+    expect(selected.filter((id) => id != null)).toHaveLength(8);
+    // (b) they are the correct 8 — none of the cut teams appear.
+    expect(selected).toEqual(expect.arrayContaining(EXPECTED_ORDER));
+    for (const cut of EXCLUDED) expect(selected).not.toContain(cut);
+    // (c) tiebreak ordering resolves deterministically, slot #n = nth best third.
+    expect(selected).toEqual(EXPECTED_ORDER);
+  });
+
+  it('resolves no best-third until every group is finished (cross-group gate)', () => {
+    // Same data, but one group's match is still scheduled -> gate stays closed.
+    const matches = GROUPS.map((g, i) =>
+      i === 0
+        ? { ...gm(g, `${g}1`, `${g}2`, 1, 0), status: 'scheduled' as const, homeScore: undefined, awayScore: undefined }
+        : gm(g, `${g}1`, `${g}2`, 1, 0),
+    );
+    const resolved = resolveBracket(matches, thirdsStandings(), nodes);
+    expect(resolved.every((n) => n.home.team == null)).toBe(true);
+  });
+});
+
+describe('resolveBracket — third-place loser-pull vs final winner-feed', () => {
+  it('routes the two semifinal losers to the third-place node and the winners to the final', () => {
+    const nodes: BracketNode[] = [
+      { id: 'sf-1', stage: 'semifinal', label: 'SF 1', matchId: 's1', homeSource: 'Winner QF-1', awaySource: 'Winner QF-2', winnerFeedsTo: 'final' },
+      { id: 'sf-2', stage: 'semifinal', label: 'SF 2', matchId: 's2', homeSource: 'Winner QF-3', awaySource: 'Winner QF-4', winnerFeedsTo: 'final' },
+      { id: 'third-place', stage: 'third_place', label: '3rd', homeSource: 'Loser SF-1', awaySource: 'Loser SF-2' },
+      { id: 'final', stage: 'final', label: 'Final', homeSource: 'Winner SF-1', awaySource: 'Winner SF-2' },
+    ];
+    const matches: Match[] = [
+      // SF-1: SEA beats POR; SF-2: ARG beats BRA.
+      { id: 's1', stage: 'semifinal', homeTeam: team('SEA'), awayTeam: team('POR'), kickoffUtc: '2026-07-14T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 1, winnerTeamId: 'SEA' },
+      { id: 's2', stage: 'semifinal', homeTeam: team('BRA'), awayTeam: team('ARG'), kickoffUtc: '2026-07-15T19:00:00Z', status: 'finished', homeScore: 0, awayScore: 1, winnerTeamId: 'ARG' },
+    ];
+    const resolved = resolveBracket(matches, [], nodes);
+
+    const third = resolved.find((n) => n.id === 'third-place')!;
+    expect(third.home.team?.id).toBe('POR'); // loser of SF-1, not SEA
+    expect(third.away.team?.id).toBe('BRA'); // loser of SF-2, not ARG
+    expect(third.decided).toBe(true);
+
+    const final = resolved.find((n) => n.id === 'final')!;
+    expect(final.home.team?.id).toBe('SEA'); // winner of SF-1
+    expect(final.away.team?.id).toBe('ARG'); // winner of SF-2
+    expect(final.decided).toBe(true);
+  });
+});
