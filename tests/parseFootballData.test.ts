@@ -63,3 +63,114 @@ describe('parseFootballData', () => {
     expect(m.homeScore).toBeUndefined();
   });
 });
+
+describe('parseFootballData — extra-time and penalty-shootout handling', () => {
+  it('PENALTY_SHOOTOUT: displayed score uses regularTime not aggregate fullTime', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 42,
+        utcDate: '2022-12-05T14:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_16',
+        group: null,
+        homeTeam: { id: 10, name: 'Japan', tla: 'JPN' },
+        awayTeam: { id: 11, name: 'Croatia', tla: 'CRO' },
+        score: {
+          winner: 'AWAY_TEAM',
+          duration: 'PENALTY_SHOOTOUT',
+          regularTime: { home: 1, away: 1 },
+          fullTime: { home: 1, away: 1 },
+          extraTime: { home: 1, away: 1 },
+          penalties: { home: 1, away: 3 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.homeScore).toBe(1);
+    expect(m.awayScore).toBe(1);
+    expect(m.winnerTeamId).toBe('CRO');
+    expect(m.decidedBy).toBe('PENALTY_SHOOTOUT');
+    expect(m.penaltyHome).toBe(1);
+    expect(m.penaltyAway).toBe(3);
+  });
+
+  it('PENALTY_SHOOTOUT: falls back to fullTime when regularTime is absent', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 43,
+        utcDate: '2022-12-05T18:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_16',
+        group: null,
+        homeTeam: { id: 12, name: 'Morocco', tla: 'MAR' },
+        awayTeam: { id: 13, name: 'Spain', tla: 'ESP' },
+        score: {
+          winner: 'HOME_TEAM',
+          duration: 'PENALTY_SHOOTOUT',
+          fullTime: { home: 0, away: 0 },
+          penalties: { home: 3, away: 0 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.homeScore).toBe(0);
+    expect(m.awayScore).toBe(0);
+    expect(m.winnerTeamId).toBe('MAR');
+    expect(m.penaltyHome).toBe(3);
+    expect(m.penaltyAway).toBe(0);
+  });
+
+  it('EXTRA_TIME: displayed score uses regularTime, decidedBy is EXTRA_TIME, no penalty fields', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 44,
+        utcDate: '2022-12-06T14:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_16',
+        group: null,
+        homeTeam: { id: 14, name: 'France', tla: 'FRA' },
+        awayTeam: { id: 15, name: 'Poland', tla: 'POL' },
+        score: {
+          winner: 'HOME_TEAM',
+          duration: 'EXTRA_TIME',
+          regularTime: { home: 1, away: 1 },
+          fullTime: { home: 3, away: 1 },
+          extraTime: { home: 3, away: 1 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.homeScore).toBe(1);
+    expect(m.awayScore).toBe(1);
+    expect(m.winnerTeamId).toBe('FRA');
+    expect(m.decidedBy).toBe('EXTRA_TIME');
+    expect(m.penaltyHome).toBeUndefined();
+    expect(m.penaltyAway).toBeUndefined();
+  });
+
+  it('REGULAR: existing behavior unchanged', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 45,
+        utcDate: '2022-12-06T18:00:00Z',
+        status: 'FINISHED',
+        stage: 'GROUP_STAGE',
+        group: 'GROUP_A',
+        homeTeam: { id: 16, name: 'Canada', tla: 'CAN' },
+        awayTeam: { id: 17, name: 'Belgium', tla: 'BEL' },
+        score: {
+          winner: 'AWAY_TEAM',
+          duration: 'REGULAR',
+          fullTime: { home: 0, away: 1 },
+          halfTime: { home: 0, away: 0 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.homeScore).toBe(0);
+    expect(m.awayScore).toBe(1);
+    expect(m.winnerTeamId).toBe('BEL');
+    expect(m.decidedBy).toBe('REGULAR');
+    expect(m.penaltyHome).toBeUndefined();
+  });
+});

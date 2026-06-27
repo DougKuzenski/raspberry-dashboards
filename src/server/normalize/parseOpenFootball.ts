@@ -1,4 +1,4 @@
-import type { Match, MatchStatus, Stage, TeamRef } from '../../shared/types.js';
+import type { DecidedBy, Match, MatchStatus, Stage, TeamRef } from '../../shared/types.js';
 import { resolveTeam } from '../providers/teams.js';
 
 // Adapter for the OpenFootball worldcup.json shape:
@@ -17,7 +17,14 @@ export interface OpenFootballMatch {
   group?: string;
   ground?: string;
   // OpenFootball score shapes seen across tournaments; all optional.
-  score?: { ft?: [number, number]; ht?: [number, number] };
+  score?: {
+    ft?: [number, number];
+    ht?: [number, number];
+    /** Cumulative score after extra time (includes ET goals, present when ET was played). */
+    et?: [number, number];
+    /** Penalty shootout tally [home, away] (present iff match went to penalties). */
+    p?: [number, number];
+  };
   score1?: number;
   score2?: number;
 }
@@ -84,7 +91,7 @@ function resolveSlot(name: string | undefined): TeamRef {
   return resolveTeam(raw);
 }
 
-function readScore(m: OpenFootballMatch): [number, number] | undefined {
+function readFt(m: OpenFootballMatch): [number, number] | undefined {
   if (m.score?.ft && m.score.ft.length === 2) return m.score.ft;
   if (typeof m.score1 === 'number' && typeof m.score2 === 'number') return [m.score1, m.score2];
   return undefined;
@@ -108,12 +115,41 @@ export function parseOpenFootball(file: OpenFootballFile, now: Date = new Date()
     const stage = stageFromRound(m.round, hasGroup);
     const homeTeam = resolveSlot(m.team1);
     const awayTeam = resolveSlot(m.team2);
-    const score = readScore(m);
-    const status = inferStatus(kickoffUtc, Boolean(score), now);
+    const ft = readFt(m);
+    const status = inferStatus(kickoffUtc, Boolean(ft), now);
 
     let winnerTeamId: string | undefined;
-    if (score && status === 'finished' && score[0] !== score[1]) {
-      winnerTeamId = score[0] > score[1] ? homeTeam.id : awayTeam.id;
+    let penaltyHome: number | undefined;
+    let penaltyAway: number | undefined;
+    let decidedBy: DecidedBy | undefined;
+    // Displayed score defaults to ft; overridden to et for AET/pens matches.
+    let displayHome: number | undefined = ft?.[0];
+    let displayAway: number | undefined = ft?.[1];
+
+    if (ft && status === 'finished') {
+      const et = m.score?.et;
+      const p = m.score?.p;
+
+      if (ft[0] !== ft[1]) {
+        winnerTeamId = ft[0] > ft[1] ? homeTeam.id : awayTeam.id;
+        decidedBy = 'REGULAR';
+      } else if (p && p.length === 2) {
+        // Penalty shootout: display the AET score (cumulative including ET goals).
+        const aet = et ?? ft;
+        displayHome = aet[0];
+        displayAway = aet[1];
+        penaltyHome = p[0];
+        penaltyAway = p[1];
+        decidedBy = 'PENALTY_SHOOTOUT';
+        if (p[0] > p[1]) winnerTeamId = homeTeam.id;
+        else if (p[1] > p[0]) winnerTeamId = awayTeam.id;
+      } else if (et && et.length === 2 && et[0] !== et[1]) {
+        // Decided in extra time without penalties.
+        displayHome = et[0];
+        displayAway = et[1];
+        winnerTeamId = et[0] > et[1] ? homeTeam.id : awayTeam.id;
+        decidedBy = 'EXTRA_TIME';
+      }
     }
 
     return {
@@ -126,9 +162,12 @@ export function parseOpenFootball(file: OpenFootballFile, now: Date = new Date()
       venue: m.ground,
       city: m.ground,
       status,
-      homeScore: score?.[0],
-      awayScore: score?.[1],
+      homeScore: displayHome,
+      awayScore: displayAway,
       winnerTeamId,
+      penaltyHome,
+      penaltyAway,
+      decidedBy,
     };
   });
 }

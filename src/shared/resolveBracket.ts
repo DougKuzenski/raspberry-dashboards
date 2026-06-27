@@ -227,6 +227,10 @@ export function resolveBracket(
           rnode.winner = winner;
           changed = true;
         }
+        // Propagate penalty/AET metadata for UI display.
+        rnode.decidedBy = match.decidedBy;
+        rnode.penaltyHome = match.penaltyHome;
+        rnode.penaltyAway = match.penaltyAway;
       }
 
       // Pull losers for the third-place node ("Loser SF-1").

@@ -60,6 +60,12 @@ export function KnockoutWindow({ bracket }: Props) {
                 >
                   <SlotLine slot={node.home} base="kwindow" />
                   <SlotLine slot={node.away} base="kwindow" />
+                  {node.decidedBy === 'PENALTY_SHOOTOUT' && node.penaltyHome != null && node.penaltyAway != null && (
+                    <div className="kwindow__tag">{node.penaltyHome}–{node.penaltyAway} pens</div>
+                  )}
+                  {node.decidedBy === 'EXTRA_TIME' && (
+                    <div className="kwindow__tag">aet</div>
+                  )}
                 </div>
               ))}
             </div>

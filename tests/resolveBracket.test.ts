@@ -217,6 +217,49 @@ describe('resolveBracket — best-thirds selection + ordering', () => {
   });
 });
 
+describe('resolveBracket — penalty-decided R32 propagates winner to R16', () => {
+  it('fills the next-round slot when a knockout match is decided on penalties', () => {
+    const nodes: BracketNode[] = [
+      { id: 'r32-1', stage: 'round_of_32', label: 'R32 1', homeSource: 'Winner Group A', awaySource: 'Runner-up Group A', winnerFeedsTo: 'r16-1' },
+      { id: 'r32-2', stage: 'round_of_32', label: 'R32 2', homeSource: 'Winner Group B', awaySource: 'Runner-up Group B', winnerFeedsTo: 'r16-1' },
+      { id: 'r16-1', stage: 'round_of_16', label: 'R16 1', homeSource: 'Winner R32-1', awaySource: 'Winner R32-2' },
+    ];
+    const matches: Match[] = [
+      gm('A', 'JPN', 'XXX', 2, 0),
+      gm('A', 'CRO', 'YYY', 2, 0),
+      gm('B', 'EEE', 'FFF', 2, 0),
+      gm('B', 'GGG', 'HHH', 1, 0),
+      // Japan vs Croatia: ft 1-1, decided on pens 1-3 -> Croatia wins.
+      {
+        id: 'k1', stage: 'round_of_32',
+        homeTeam: { id: 'JPN', name: 'Japan' }, awayTeam: { id: 'CRO', name: 'Croatia' },
+        kickoffUtc: '2022-12-05T14:00:00Z', status: 'finished',
+        homeScore: 1, awayScore: 1,
+        winnerTeamId: 'CRO',
+        decidedBy: 'PENALTY_SHOOTOUT', penaltyHome: 1, penaltyAway: 3,
+      },
+      { id: 'k2', stage: 'round_of_32', homeTeam: { id: 'EEE', name: 'EEE' }, awayTeam: { id: 'GGG', name: 'GGG' }, kickoffUtc: '2022-12-05T18:00:00Z', status: 'finished', homeScore: 2, awayScore: 1, winnerTeamId: 'EEE' },
+    ];
+    const standings = [
+      standing('A', 'JPN', 1), standing('A', 'CRO', 2),
+      standing('B', 'EEE', 1), standing('B', 'GGG', 2),
+    ];
+    const resolved = resolveBracket(matches, standings, nodes);
+
+    const r32 = resolved.find((n) => n.id === 'r32-1')!;
+    expect(r32.winner?.id).toBe('CRO');
+    expect(r32.decidedBy).toBe('PENALTY_SHOOTOUT');
+    expect(r32.penaltyHome).toBe(1);
+    expect(r32.penaltyAway).toBe(3);
+
+    // Winner propagated forward: R16-1 now has Croatia in its home slot.
+    const r16 = resolved.find((n) => n.id === 'r16-1')!;
+    expect(r16.home.team?.id).toBe('CRO');
+    expect(r16.away.team?.id).toBe('EEE');
+    expect(r16.decided).toBe(true);
+  });
+});
+
 describe('resolveBracket — third-place loser-pull vs final winner-feed', () => {
   it('routes the two semifinal losers to the third-place node and the winners to the final', () => {
     const nodes: BracketNode[] = [

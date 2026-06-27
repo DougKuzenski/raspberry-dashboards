@@ -1,4 +1,4 @@
-import type { Match, MatchStatus, Stage, TeamRef } from '../../shared/types.js';
+import type { DecidedBy, Match, MatchStatus, Stage, TeamRef } from '../../shared/types.js';
 import { resolveTeam } from '../providers/teams.js';
 
 // Adapter for the football-data.org v4 match shape
@@ -15,8 +15,12 @@ interface FDTeam {
 
 interface FDScore {
   winner?: 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' | null;
+  duration?: 'REGULAR' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | null;
   fullTime?: { home: number | null; away: number | null };
   halfTime?: { home: number | null; away: number | null };
+  regularTime?: { home: number | null; away: number | null };
+  extraTime?: { home: number | null; away: number | null };
+  penalties?: { home: number | null; away: number | null };
 }
 
 export interface FDMatch {
@@ -89,13 +93,35 @@ export function parseFootballData(data: FootballDataResponse): Match[] {
     const status = mapStatus(m.status);
     const home = toTeam(m.homeTeam);
     const away = toTeam(m.awayTeam);
-    const ft = m.score?.fullTime;
-    const homeScore = ft?.home ?? undefined;
-    const awayScore = ft?.away ?? undefined;
+    const duration = m.score?.duration;
+
+    // When duration is non-REGULAR, use regularTime as the 90-min displayed score
+    // (fullTime may be the aggregate including ET/pens goals per the API docs).
+    // Guard: if regularTime is absent, fall back to fullTime to avoid a regression.
+    const scoreObj =
+      duration && duration !== 'REGULAR' && m.score?.regularTime != null
+        ? m.score.regularTime
+        : m.score?.fullTime;
+
+    const homeScore = scoreObj?.home ?? undefined;
+    const awayScore = scoreObj?.away ?? undefined;
 
     let winnerTeamId: string | undefined;
     if (m.score?.winner === 'HOME_TEAM') winnerTeamId = home.id;
     else if (m.score?.winner === 'AWAY_TEAM') winnerTeamId = away.id;
+
+    let decidedBy: DecidedBy | undefined;
+    let penaltyHome: number | undefined;
+    let penaltyAway: number | undefined;
+    if (duration === 'PENALTY_SHOOTOUT') {
+      decidedBy = 'PENALTY_SHOOTOUT';
+      penaltyHome = m.score?.penalties?.home ?? undefined;
+      penaltyAway = m.score?.penalties?.away ?? undefined;
+    } else if (duration === 'EXTRA_TIME') {
+      decidedBy = 'EXTRA_TIME';
+    } else if (duration === 'REGULAR') {
+      decidedBy = 'REGULAR';
+    }
 
     return {
       id: `fd-${m.id}`,
@@ -109,6 +135,9 @@ export function parseFootballData(data: FootballDataResponse): Match[] {
       homeScore,
       awayScore,
       winnerTeamId,
+      penaltyHome,
+      penaltyAway,
+      decidedBy,
     };
   });
 }
