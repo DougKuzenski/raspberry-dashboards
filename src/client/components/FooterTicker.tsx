@@ -19,9 +19,8 @@ function recentLabel(m: Match): string {
     : `${code(m, 'home')} v ${code(m, 'away')} (FT)`;
 }
 
-// Footer ticker: a manual message if set, otherwise recent results. Upcoming
-// matches are no longer duplicated here — the "UP NEXT" strip above owns them —
-// so when there's nothing to say the ticker collapses and gives the body room.
+// Footer ticker: a manual message if set, otherwise recent results. When there's
+// nothing to say the ticker collapses (returns null) and gives the body room.
 export function FooterTicker({ recent, message }: Props) {
   let content: string;
   if (message) {

@@ -138,11 +138,10 @@ export interface DashboardData {
 export interface DashboardView {
   data: DashboardData;
   liveMatches: Match[];
-  todayMatches: Match[];
-  upcomingMatches: Match[];
+  /** Every game from the start of today through the end of tomorrow (target zone). */
+  todayTomorrowMatches: Match[];
   recentResults: Match[];
   nextMatch?: Match;
-  heroMatch?: Match;
   featuredGroup?: string;
   featuredStandings: Standing[];
   showBracket: boolean;

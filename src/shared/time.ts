@@ -67,6 +67,32 @@ export function isSameLocalDay(a: Date, b: Date, timeZone = DEFAULT_TIMEZONE): b
 }
 
 /**
+ * The local calendar day immediately after `date`'s local day, as YYYY-MM-DD.
+ * Derived from the civil date string (not +24h arithmetic) so it stays correct
+ * across DST transitions.
+ */
+function nextLocalDayKey(date: Date, timeZone = DEFAULT_TIMEZONE): string {
+  const [y, m, d] = localDayKey(date, timeZone).split('-').map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d));
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next.toISOString().slice(0, 10);
+}
+
+/**
+ * True when `date` falls on the same local day as `now` OR the next local day —
+ * the "today + tomorrow" window (in the target zone). Compares civil-day keys, so
+ * it's DST-safe and avoids hand-rolled offset math.
+ */
+export function isTodayOrTomorrowLocal(
+  date: Date,
+  now: Date = new Date(),
+  timeZone = DEFAULT_TIMEZONE,
+): boolean {
+  const key = localDayKey(date, timeZone);
+  return key === localDayKey(now, timeZone) || key === nextLocalDayKey(now, timeZone);
+}
+
+/**
  * Label for an upcoming kickoff: just the time ("5:00 PM") when it's today in
  * the target zone, otherwise weekday + time ("Fri 9:00 AM"). Keeps today's
  * matches reading as imminent rather than buried under a redundant weekday.

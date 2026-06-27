@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Match } from '../src/shared/types.js';
-import { matchAccent, matchAccentClassNames, uniqueVenueParts, venueIcon } from '../src/client/components/matchPresentation.js';
+import {
+  COMFORTABLE_ROW_LIMIT,
+  matchAccent,
+  matchAccentClassNames,
+  matchListDensity,
+  venueIcon,
+} from '../src/client/components/matchPresentation.js';
 
 const baseMatch: Match = {
   id: 'match-1',
@@ -19,16 +25,30 @@ describe('match presentation helpers', () => {
     expect(matchAccentClassNames('match-row', baseMatch)).toBe('match-row--favorite match-row--home');
   });
 
-  it('deduplicates venue and city labels for focal matches', () => {
-    expect(uniqueVenueParts(baseMatch)).toBe('Seattle');
+  it('flags the home-city venue icon', () => {
     expect(venueIcon(baseMatch)).toBe('📍');
   });
 
-  it('keeps non-home venue labels distinct', () => {
+  it('flags a non-home match accent and venue icon', () => {
     const match = { ...baseMatch, venue: 'MetLife Stadium', city: 'New York New Jersey' };
 
     expect(matchAccent(match)).toEqual({ favorite: true, home: false });
-    expect(uniqueVenueParts(match)).toBe('MetLife Stadium, New York New Jersey');
     expect(venueIcon(match)).toBe('🏟');
+  });
+});
+
+describe('matchListDensity', () => {
+  it('keeps comfortable rows up to and including the comfortable limit', () => {
+    expect(matchListDensity(0)).toBe('comfortable');
+    expect(matchListDensity(1)).toBe('comfortable');
+    expect(matchListDensity(COMFORTABLE_ROW_LIMIT)).toBe('comfortable');
+  });
+
+  it('switches to compact rows once the list exceeds the comfortable limit', () => {
+    expect(matchListDensity(COMFORTABLE_ROW_LIMIT + 1)).toBe('compact');
+    // A busy two-day group-stage window (~14 games) and beyond stays compact, so
+    // every match fits the full-height panel with no scrolling.
+    expect(matchListDensity(14)).toBe('compact');
+    expect(matchListDensity(16)).toBe('compact');
   });
 });
