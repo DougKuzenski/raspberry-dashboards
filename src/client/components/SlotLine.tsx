@@ -1,5 +1,6 @@
 import type { BracketSlot } from '../../shared/types.js';
 import { isFavoriteTeam } from '../../shared/constants.js';
+import { formatBracketSource } from './bracketLabel.js';
 
 interface Props {
   slot: BracketSlot;
@@ -8,7 +9,7 @@ interface Props {
 }
 
 // One slot of a bracket node: the resolved team (flag + short name) or, while the
-// source is still undecided, its placeholder label ("Winner Group A"), with the
+// source is still undecided, its compact placeholder label ("GRP A #1"), with the
 // score and a winner highlight once the match is played. Shared by the windowed
 // knockout view and the transition R32 pairings grid, parameterized by `base` so
 // each surface keeps its own scoped CSS.
@@ -20,7 +21,7 @@ export function SlotLine({ slot, base }: Props) {
 
   const label = slot.team
     ? `${slot.team.flagEmoji ? `${slot.team.flagEmoji} ` : ''}${slot.team.shortName ?? slot.team.name}`
-    : slot.source;
+    : formatBracketSource(slot.source);
 
   return (
     <div className={classes.join(' ')}>
