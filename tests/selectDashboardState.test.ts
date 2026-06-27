@@ -133,6 +133,17 @@ describe('deriveContextPhase', () => {
     // The cancelled group game doesn't keep us out of knockout once R32 has a result.
     expect(deriveContextPhase([a1, a2, r32])).toBe('knockout');
   });
+
+  it("stays in 'transition' for a decided NON-R32 match with no R32 result (out-of-order data)", () => {
+    // Group stage complete, but the only decided knockout game is a 'final' (and a
+    // 'third_place') — no round_of_32 result. The boundary is gated on R32 specifically,
+    // so odd/out-of-order data must NOT flip us into 'knockout' early.
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'scheduled' });
+    const final = match({ id: 'f1', stage: 'final', group: undefined, kickoffUtc: '2026-07-19T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
+    const third = match({ id: 't1', stage: 'third_place', group: undefined, kickoffUtc: '2026-07-18T15:00:00Z', status: 'finished', homeScore: 0, awayScore: 0 });
+    expect(deriveContextPhase([a1, r32, final, third])).toBe('transition');
+  });
 });
 
 describe('shouldShowGroupRankings', () => {
@@ -161,5 +172,14 @@ describe('shouldShowGroupRankings', () => {
     const a2 = groupA('a2', 'scheduled');
     const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
     expect(shouldShowGroupRankings([a1, a2, r32])).toBe(true);
+  });
+
+  it('still shows rankings for a decided NON-R32 match with no R32 result (out-of-order data)', () => {
+    // Group stage complete, a 'final' is somehow finished but no round_of_32 result —
+    // rankings must stay visible because the R32-gated boundary has not been crossed.
+    const a1 = groupA('a1', 'finished', 1, 0);
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'scheduled' });
+    const final = match({ id: 'f1', stage: 'final', group: undefined, kickoffUtc: '2026-07-19T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
+    expect(shouldShowGroupRankings([a1, r32, final])).toBe(true);
   });
 });

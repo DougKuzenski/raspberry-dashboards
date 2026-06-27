@@ -44,19 +44,21 @@ export function deriveTournamentPhase(matches: Match[]): TournamentPhase {
   return groupMatchesRemaining(matches) ? 'group' : 'knockout';
 }
 
-// True once a knockout match has produced a result (the first R32 game, in
-// practice — R32 is the first knockout round). This is the boundary where group
-// rankings disappear and the windowed knockout view takes over.
-function anyKnockoutResult(matches: Match[]): boolean {
-  return matches.some((m) => m.stage !== 'group' && matchIsDecided(m));
+// True once a round-of-32 match has produced a result. R32 is the first knockout
+// round, so this is the precise boundary (spec §6) where group rankings disappear
+// and the windowed knockout view takes over. Gated specifically on round_of_32 —
+// not any non-group match — so out-of-order/odd data (e.g. a decided 'final' or
+// 'third_place' present without any R32 result) cannot flip the phase early.
+function anyRoundOf32Result(matches: Match[]): boolean {
+  return matches.some((m) => m.stage === 'round_of_32' && matchIsDecided(m));
 }
 
 // The windowed knockout view is active once the group stage is officially complete
-// AND the first knockout result has landed (spec §6 boundary). Before that we are
+// AND the first round-of-32 result has landed (spec §6 boundary). Before that we are
 // still showing group rankings (in 'group' or 'transition'). Single source of truth
 // shared by deriveContextPhase and shouldShowGroupRankings so they cannot drift.
 function knockoutWindowingActive(matches: Match[]): boolean {
-  return !groupMatchesRemaining(matches) && anyKnockoutResult(matches);
+  return !groupMatchesRemaining(matches) && anyRoundOf32Result(matches);
 }
 
 // Three-state context-panel phase (spec §6: group → transition → knockout):
