@@ -175,6 +175,26 @@
   text-overflow: ellipsis;
 }
 .match-row__venue--home { color: var(--home); font-weight: 700; }
+
+/* Compact (single-line) tier for a busy two-day window: venue hidden, smaller
+   type, tighter line-height/padding/gap so every match fits with no scrolling.
+   Fit (design px): list height ≈ 479px. A compact row ≈ 22px (2×2 padding +
+   ~18px tallest line) and the gap is 2px ⇒ floor((479 + 2) / (22 + 2)) ≈ 20
+   rows — comfortably past the ~14 worst-case and the ≥16 requirement, with
+   headroom for metric variance. All fonts stay ≥ ~12px and the live left-border
+   / status pill styling is inherited unchanged. */
+.match-list--compact { gap: 2px; }
+.match-list--compact .match-row {
+  padding: 2px 12px;
+  font-size: calc(var(--fs-base) * 0.8); /* 14.4px */
+  line-height: 1.1;
+}
+.match-list--compact .match-row__venue { display: none; }
+.match-list--compact .status {
+  font-size: calc(var(--fs-base) * 0.78); /* 14.04px */
+  padding: 0.12em 0.55em;
+}
+
 /* ---- Team label ---- */
 .team { display: inline-flex; align-items: center; gap: 0.4em; }
 .team__flag { font-size: 1.1em; }
