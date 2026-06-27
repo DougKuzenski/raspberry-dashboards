@@ -27,6 +27,8 @@ export interface TeamRef {
   flagEmoji?: string;
 }
 
+export type DecidedBy = 'REGULAR' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT';
+
 export interface Match {
   id: string;
   stage: Stage;
@@ -41,6 +43,11 @@ export interface Match {
   homeScore?: number;
   awayScore?: number;
   winnerTeamId?: string;
+  /** Goals scored by each side in the penalty shootout. Present iff decidedBy === 'PENALTY_SHOOTOUT'. */
+  penaltyHome?: number;
+  penaltyAway?: number;
+  /** How the match was ultimately decided. Omitted for unfinished or group-stage draws. */
+  decidedBy?: DecidedBy;
   tv?: string;
   stream?: string;
   notes?: string;
@@ -104,6 +111,12 @@ export interface ResolvedBracketNode {
   winner?: TeamRef;
   /** True when both slots have resolved to real teams. */
   decided: boolean;
+  /** How the match was decided (propagated from the backing Match). */
+  decidedBy?: DecidedBy;
+  /** Penalty shootout goals for the home side (present iff decidedBy === 'PENALTY_SHOOTOUT'). */
+  penaltyHome?: number;
+  /** Penalty shootout goals for the away side (present iff decidedBy === 'PENALTY_SHOOTOUT'). */
+  penaltyAway?: number;
 }
 
 export type TournamentPhase = 'group' | 'knockout';

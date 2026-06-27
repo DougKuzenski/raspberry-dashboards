@@ -316,6 +316,14 @@
 .kwindow__slot--winner .kwindow__team { color: var(--accent); }
 .kwindow__slot--winner .kwindow__score { color: var(--accent); }
 .kwindow__node--decided { border-color: var(--line); }
+.kwindow__tag {
+  font-size: calc(var(--fs-base) * 0.72);
+  color: var(--text-dim);
+  text-align: center;
+  padding: 0.1em 0.4em;
+  border-top: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---- Knockout pairings grid (transition R32 box) ---- */
 /* 16 R32 matchups as a compact multi-column grid of two-line chips (not a tall
@@ -352,6 +360,14 @@
 .pairing__slot--winner .pairing__team { color: var(--accent); }
 .pairing__slot--winner .pairing__score { color: var(--accent); }
 .pairing--decided { border-color: var(--line); }
+.pairing__tag {
+  font-size: calc(var(--fs-base) * 0.72);
+  color: var(--text-dim);
+  text-align: center;
+  padding: 0.1em 0.4em;
+  border-top: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---- Group → knockout transition: rankings + R32 pairings together ---- */
 /* Group rankings and the 16 R32 pairings sit SIDE BY SIDE so each gets the full

@@ -33,5 +33,11 @@ export function hasScore(match: Match): boolean {
 }
 
 export function scoreText(match: Match): string {
-  return hasScore(match) ? `${match.homeScore} – ${match.awayScore}` : 'vs';
+  if (!hasScore(match)) return 'vs';
+  const base = `${match.homeScore} – ${match.awayScore}`;
+  if (match.decidedBy === 'PENALTY_SHOOTOUT' && match.penaltyHome != null && match.penaltyAway != null) {
+    return `${base} (${match.penaltyHome}–${match.penaltyAway} pens)`;
+  }
+  if (match.decidedBy === 'EXTRA_TIME') return `${base} aet`;
+  return base;
 }

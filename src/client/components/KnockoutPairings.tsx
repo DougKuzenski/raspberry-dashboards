@@ -34,6 +34,12 @@ export function KnockoutPairings({ nodes, title }: Props) {
           >
             <SlotLine slot={node.home} base="pairing" />
             <SlotLine slot={node.away} base="pairing" />
+            {node.decidedBy === 'PENALTY_SHOOTOUT' && node.penaltyHome != null && node.penaltyAway != null && (
+              <div className="pairing__tag">{node.penaltyHome}–{node.penaltyAway} pens</div>
+            )}
+            {node.decidedBy === 'EXTRA_TIME' && (
+              <div className="pairing__tag">aet</div>
+            )}
           </div>
         ))}
       </div>
