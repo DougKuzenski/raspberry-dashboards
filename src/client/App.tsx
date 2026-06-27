@@ -6,7 +6,7 @@ import { HeroMatchCard } from './components/HeroMatchCard.js';
 import { TodayMatches } from './components/TodayMatches.js';
 import { UpcomingMatches } from './components/UpcomingMatches.js';
 import { GroupStandings } from './components/GroupStandings.js';
-import { BracketView } from './components/BracketView.js';
+import { KnockoutWindow } from './components/KnockoutWindow.js';
 import { TransitionContext } from './components/TransitionContext.js';
 import { FooterTicker } from './components/FooterTicker.js';
 import { ConnectionStatus } from './components/ConnectionStatus.js';
@@ -81,7 +81,7 @@ export function App() {
 
         <section className="dashboard__context">
           {view.contextPhase === 'knockout' ? (
-            <BracketView nodes={view.bracket} />
+            <KnockoutWindow bracket={view.bracket} />
           ) : view.contextPhase === 'transition' ? (
             <TransitionContext
               standings={data.standings}

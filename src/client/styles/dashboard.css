@@ -302,44 +302,102 @@
 .group-card__pts { color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
 .group-card__row--favorite .group-card__team { color: var(--favorite); }
 
-/* ---- Bracket ---- */
-.bracket { display: flex; gap: 20px; overflow: hidden; }
-.bracket__col { display: flex; flex-direction: column; justify-content: space-around; gap: 13px; flex: 1; }
-.bracket__round { color: var(--text-dim); font-size: 0.8em; letter-spacing: 0.08em; text-transform: uppercase; }
-.bracket__node {
+/* ---- Knockout window: at-most-two adjacent rounds (spec §6) ---- */
+/* current round on the LEFT, next round on the RIGHT. With rankings gone the two
+   columns share the full context width; each round's nodes wrap into sub-columns
+   (R32's 16 -> 2 sub-cols of 8) via an inline grid-template so even the busiest
+   round stays >= ~12px and never clips. flex-grow is set per column to the node
+   sub-column count so the busier round gets proportionally more width. */
+.kwindow { display: flex; gap: 16px; height: 100%; min-height: 0; }
+.kwindow__col { display: flex; flex-direction: column; flex-basis: 0; min-width: 0; min-height: 0; }
+.kwindow__round {
+  color: var(--text-dim);
+  font-size: calc(var(--fs-base) * 0.85);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.kwindow__nodes {
+  display: grid;
+  gap: 8px 10px;
+  align-content: space-around;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.kwindow__node {
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
 }
-.bracket__slot {
+.kwindow__slot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5em;
-  padding: 0.4em 0.6em;
-  font-size: calc(var(--fs-base) * 0.85);
+  padding: 0.25em 0.6em;
+  font-size: calc(var(--fs-base) * 0.8);
+  line-height: 1.1;
 }
-.bracket__slot + .bracket__slot { border-top: 1px solid var(--line); }
-.bracket__team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bracket__score { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--text-dim); }
-.bracket__slot--tbd .bracket__team { color: var(--text-dim); }
-.bracket__slot--favorite .bracket__team { color: var(--favorite); }
-.bracket__slot--winner { font-weight: 800; }
-.bracket__slot--winner .bracket__team { color: var(--accent); }
-.bracket__slot--winner .bracket__score { color: var(--accent); }
-.bracket__node--decided { border-color: var(--line); }
+.kwindow__slot + .kwindow__slot { border-top: 1px solid var(--line); }
+.kwindow__team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kwindow__score { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--text-dim); }
+.kwindow__slot--tbd .kwindow__team { color: var(--text-dim); }
+.kwindow__slot--favorite .kwindow__team { color: var(--favorite); }
+.kwindow__slot--winner { font-weight: 800; }
+.kwindow__slot--winner .kwindow__team { color: var(--accent); }
+.kwindow__slot--winner .kwindow__score { color: var(--accent); }
+.kwindow__node--decided { border-color: var(--line); }
 
-/* ---- Group → knockout transition: standings + forming bracket together ---- */
-/* Stacks the two existing panels in the context column so both stay full-width
-   (the 4-col group grid and the bracket columns both need the room). The
-   standings pane is sized to its content (`auto`) so all 12 groups stay fully
-   visible — never squeezed into a fixed half that would clip — and the bracket
-   pane takes the remaining height. The standings are condensed (below) so their
-   content height leaves the bracket plenty of legible room. */
+/* ---- Knockout pairings grid (transition R32 box) ---- */
+/* 16 R32 matchups as a compact multi-column grid of two-line chips (not a tall
+   column) so they all fit beside the group rankings and stay legible. */
+.pairings-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  align-content: space-around;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.pairing {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pairing__slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4em;
+  padding: 0.2em 0.45em;
+  font-size: calc(var(--fs-base) * 0.72);
+}
+.pairing__slot + .pairing__slot { border-top: 1px solid var(--line); }
+.pairing__team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pairing__score { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--text-dim); }
+.pairing__slot--tbd .pairing__team { color: var(--text-dim); }
+.pairing__slot--favorite .pairing__team { color: var(--favorite); }
+.pairing__slot--winner { font-weight: 800; }
+.pairing__slot--winner .pairing__team { color: var(--accent); }
+.pairing__slot--winner .pairing__score { color: var(--accent); }
+.pairing--decided { border-color: var(--line); }
+
+/* ---- Group → knockout transition: rankings + R32 pairings together ---- */
+/* Group rankings and the 16 R32 pairings sit SIDE BY SIDE so each gets the full
+   context-column height. Stacking them starved the pairings whenever the context
+   column was short (e.g. a tall Upcoming strip), forcing chip text below the 12px
+   floor; side by side, both panes keep the full height regardless of column height
+   so the pairings stay >= 12px and never clip. Groups get slightly more width
+   (12 four-row cards) than the narrow pairing chips. Scoped to .transition* so the
+   group-only and knockout-only states are untouched. */
 .transition {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: 1.05fr 1fr;
   gap: 12px;
   height: 100%;
   min-height: 0;
@@ -353,23 +411,18 @@
   flex: 1;
   min-height: 0;
 }
-/* Content-sized standings pane: its panel grows to fit the grid (no inner
-   scroll/clip), the bracket pane below absorbs the rest. */
-.transition__pane:first-child { min-height: max-content; }
-.transition__pane:first-child > .panel { overflow: visible; }
-.transition__pane:first-child > .panel > .groups-grid { overflow: visible; flex: 0 0 auto; }
 
-/* Condensed standings for the shared transition column: 6 columns × 2 rows
-   (instead of the group-only state's 4 × 3) with smaller cells, tighter grid and
-   panel chrome, so all 12 groups fit in roughly half the column and the forming
-   bracket below keeps a legible half. Scoped to .transition* only — the
-   group-only and knockout-only states keep the base sizing. */
-.transition .panel { padding: 12px 14px; }
+/* Condensed chrome + denser grids for the shared (half-width) transition panes:
+   groups in 3 columns × 4 rows, pairings in 2 columns × 8 rows, so all 12 groups
+   and all 16 pairings fit their half at >= 12px. */
+.transition .panel { padding: 10px 14px; }
 .transition .panel__title { margin-bottom: 6px; font-size: var(--fs-base); }
-.transition .groups-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
-.transition .group-card { padding: 4px 7px; border-radius: 6px; }
-.transition .group-card__title { font-size: calc(var(--fs-base) * 0.7); margin-bottom: 0.15em; }
-.transition .group-card__row { font-size: calc(var(--fs-base) * 0.68); padding: 0.05em 0; }
+.transition .groups-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; align-content: space-around; }
+.transition .group-card { padding: 3px 7px; border-radius: 6px; }
+.transition .group-card__title { font-size: calc(var(--fs-base) * 0.72); margin-bottom: 0.1em; }
+.transition .group-card__row { font-size: calc(var(--fs-base) * 0.68); line-height: 1.1; padding: 0.03em 0; }
+.transition .pairings-grid { grid-template-columns: repeat(2, 1fr); gap: 5px 8px; }
+.transition .pairing__slot { font-size: calc(var(--fs-base) * 0.72); line-height: 1.1; padding: 0.18em 0.5em; }
 
 /* ---- Upcoming strip ---- */
 .upcoming {

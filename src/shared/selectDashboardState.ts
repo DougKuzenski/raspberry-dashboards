@@ -10,7 +10,7 @@ import type {
 } from './types.js';
 import { DEFAULT_TIMEZONE, RECENT_RESULT_WINDOW_HOURS } from './constants.js';
 import { isSameLocalDay } from './time.js';
-import { resolveBracket } from './resolveBracket.js';
+import { resolveBracket, matchIsDecided } from './resolveBracket.js';
 
 // A group match still left to play (cancelled games don't block, matching the
 // server-side phase rule).
@@ -44,19 +44,46 @@ export function deriveTournamentPhase(matches: Match[]): TournamentPhase {
   return groupMatchesRemaining(matches) ? 'group' : 'knockout';
 }
 
-// Three-state context-panel phase (spec §6: group → knockout transition). The
-// rule (confirmed with the product owner) is deliberately the simplest:
-//   - 'knockout'   once NO group match remains unfinished (== TournamentPhase),
-//   - 'transition' while still in the group stage BUT either a knockout match is
-//     already scheduled (any non-group match exists) OR at least one group is
-//     mathematically decided — i.e. the bracket has started to form,
+// True once a round-of-32 match has produced a result. R32 is the first knockout
+// round, so this is the precise boundary (spec §6) where group rankings disappear
+// and the windowed knockout view takes over. Gated specifically on round_of_32 —
+// not any non-group match — so out-of-order/odd data (e.g. a decided 'final' or
+// 'third_place' present without any R32 result) cannot flip the phase early.
+function anyRoundOf32Result(matches: Match[]): boolean {
+  return matches.some((m) => m.stage === 'round_of_32' && matchIsDecided(m));
+}
+
+// The windowed knockout view is active once the group stage is officially complete
+// AND the first round-of-32 result has landed (spec §6 boundary). Before that we are
+// still showing group rankings (in 'group' or 'transition'). Single source of truth
+// shared by deriveContextPhase and shouldShowGroupRankings so they cannot drift.
+function knockoutWindowingActive(matches: Match[]): boolean {
+  return !groupMatchesRemaining(matches) && anyRoundOf32Result(matches);
+}
+
+// Three-state context-panel phase (spec §6: group → transition → knockout):
+//   - 'knockout'   once the group stage is complete AND the first knockout result
+//                  has landed — rankings drop, the windowed current+next rounds show,
+//   - 'transition' while the bracket is forming but no knockout result yet: a
+//     knockout match is already scheduled (any non-group match exists) OR at least
+//     one group is mathematically decided — shown as rankings + the R32 pairings box,
 //   - 'group'      before any of that.
-// Pure and clock-independent, like the rest of the selector.
+// Pure and clock-independent, like the rest of the selector. Note the boundary into
+// 'knockout' is the first R32 RESULT, not merely the group stage finishing — until a
+// knockout game is decided we stay in 'transition' (rankings + R32 box).
 export function deriveContextPhase(matches: Match[]): ContextPhase {
-  if (!groupMatchesRemaining(matches)) return 'knockout';
+  if (knockoutWindowingActive(matches)) return 'knockout';
   const knockoutScheduled = matches.some((m) => m.stage !== 'group');
   if (knockoutScheduled || anyGroupDecided(matches)) return 'transition';
   return 'group';
+}
+
+// Group rankings visibility (spec §6): show them through the group stage AND the
+// transition, hiding only once the group stage is complete AND >= 1 knockout result
+// has landed — i.e. exactly when the windowed knockout view begins. Exposed as its
+// own pure predicate for clarity and direct unit testing.
+export function shouldShowGroupRankings(matches: Match[]): boolean {
+  return !knockoutWindowingActive(matches);
 }
 
 const LIVE_STATUSES = new Set<Match['status']>(['live', 'halftime', 'pre_match']);
