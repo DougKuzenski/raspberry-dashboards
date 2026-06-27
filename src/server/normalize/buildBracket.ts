@@ -1,4 +1,4 @@
-import type { BracketNode } from '../../shared/types.js';
+import type { BracketNode, Match, Stage } from '../../shared/types.js';
 
 // The static 48-team 2026 World Cup knockout skeleton (spec §6).
 //
@@ -107,4 +107,72 @@ export function buildKnockoutSkeleton(): BracketNode[] {
   });
 
   return nodes;
+}
+
+// Knockout rounds in the order they appear in the bracket. We process them in
+// this sequence so the positional mapping below applies within each round.
+const KNOCKOUT_STAGE_ORDER: Stage[] = [
+  'round_of_32',
+  'round_of_16',
+  'quarterfinal',
+  'semifinal',
+  'third_place',
+  'final',
+];
+
+/**
+ * Annotate the bracket skeleton with `matchId`s derived from the published
+ * fixture list (spec §6 — fixture-driven matchups).
+ *
+ * For each knockout round, the published fixtures are sorted by kickoff time
+ * (with the match id as a stable tiebreaker for same-day games) and mapped
+ * positionally to the skeleton nodes in that round. This relies on one
+ * assumption: the tournament plays each round's matches in bracket-slot order,
+ * which is how FIFA schedules single-elimination knockout rounds. The football-
+ * data.org API returns matches in this order; OpenFootball preserves the same
+ * schedule ordering.
+ *
+ * Effect on `resolveBracket`: once a node carries a `matchId`, the resolver
+ * finds the linked match by ID (bypassing the team-matching fallback). If the
+ * fixture already names both real, non-placeholder teams — as football-data
+ * does for R32 fixtures even during the group stage — the resolver populates
+ * those teams into the bracket slots immediately, without waiting for all
+ * group standings to resolve. TBD/placeholder teams in the fixture are ignored
+ * by the resolver, so group-derived placeholders are kept for those slots.
+ *
+ * Nodes that already carry a `matchId` (e.g. set by `applyManualOverrides`)
+ * are left untouched so manual data always wins.
+ */
+export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): BracketNode[] {
+  // Build a per-stage list of published fixtures in kickoff order.
+  const fixturesByStage = new Map<Stage, Match[]>();
+  for (const stage of KNOCKOUT_STAGE_ORDER) {
+    const stageMatches = matches
+      .filter((m) => m.stage === stage)
+      .sort((a, b) => {
+        const timeDiff =
+          new Date(a.kickoffUtc).getTime() - new Date(b.kickoffUtc).getTime();
+        return timeDiff !== 0 ? timeDiff : a.id.localeCompare(b.id);
+      });
+    fixturesByStage.set(stage, stageMatches);
+  }
+
+  // Shallow-copy the nodes so the caller's skeleton is not mutated.
+  const result = nodes.map((n) => ({ ...n }));
+
+  for (const stage of KNOCKOUT_STAGE_ORDER) {
+    const fixtures = fixturesByStage.get(stage) ?? [];
+    const stageNodes = result.filter((n) => n.stage === stage);
+    // Positional mapping: fixture[i] corresponds to skeleton node[i].
+    for (let i = 0; i < Math.min(fixtures.length, stageNodes.length); i++) {
+      const node = stageNodes[i];
+      const fixture = fixtures[i];
+      // Respect any matchId already set (e.g. by manual overrides).
+      if (!node.matchId) {
+        node.matchId = fixture.id;
+      }
+    }
+  }
+
+  return result;
 }
