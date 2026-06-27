@@ -94,7 +94,7 @@ function sourceRefsNode(source: string, node: BracketNode): boolean {
 
 // --- match helpers ---------------------------------------------------------
 
-function matchIsDecided(match: Match): boolean {
+export function matchIsDecided(match: Match): boolean {
   if (match.status !== 'finished') return false;
   if (match.winnerTeamId) return true;
   return (

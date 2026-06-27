@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   selectDashboardState,
   deriveContextPhase,
+  shouldShowGroupRankings,
 } from '../src/shared/selectDashboardState.js';
 import type { DashboardData, Match } from '../src/shared/types.js';
 
@@ -64,9 +65,10 @@ describe('selectDashboardState', () => {
     expect(view.featuredStandings.every((s) => s.group === 'A')).toBe(true);
   });
 
-  it('shows the bracket during the knockout phase', () => {
-    const hero = match({ id: 'm1', stage: 'round_of_16', group: undefined, kickoffUtc: '2026-06-20T20:00:00Z', status: 'scheduled' });
-    const view = selectDashboardState(data([hero], 'knockout'), now);
+  it('shows the bracket once a knockout result has landed', () => {
+    // Group stage done (no group games) AND a decided R32 match -> knockout phase.
+    const r32 = match({ id: 'm1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-06-20T20:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
+    const view = selectDashboardState(data([r32], 'knockout'), now);
     expect(view.showBracket).toBe(true);
     expect(view.featuredGroup).toBeUndefined();
   });
@@ -111,15 +113,53 @@ describe('deriveContextPhase', () => {
     expect(deriveContextPhase([a1, r32])).toBe('transition');
   });
 
-  it("enters full 'knockout' once no group match remains unfinished", () => {
+  it("stays in 'transition' after the group stage completes but before any R32 result", () => {
+    // No group game remains, R32 is scheduled but undecided -> rankings + R32 box.
     const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
     const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'scheduled' });
+    expect(deriveContextPhase([a1, r32])).toBe('transition');
+  });
+
+  it("enters full 'knockout' on the first R32 result (group stage complete)", () => {
+    const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
     expect(deriveContextPhase([a1, r32])).toBe('knockout');
   });
 
-  it("treats a cancelled group match as not blocking knockout", () => {
+  it("treats a cancelled group match as not blocking the knockout boundary", () => {
     const a1 = match({ id: 'a1', group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status: 'finished', homeScore: 1, awayScore: 0 });
     const a2 = match({ id: 'a2', group: 'A', kickoffUtc: '2026-06-14T15:00:00Z', status: 'cancelled' });
-    expect(deriveContextPhase([a1, a2])).toBe('knockout');
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'finished', homeScore: 3, awayScore: 0 });
+    // The cancelled group game doesn't keep us out of knockout once R32 has a result.
+    expect(deriveContextPhase([a1, a2, r32])).toBe('knockout');
+  });
+});
+
+describe('shouldShowGroupRankings', () => {
+  const groupA = (id: string, status: Match['status'], hs?: number, as?: number) =>
+    match({ id, group: 'A', kickoffUtc: '2026-06-11T15:00:00Z', status, homeScore: hs, awayScore: as });
+
+  it('shows rankings during the group stage', () => {
+    expect(shouldShowGroupRankings([groupA('a1', 'scheduled')])).toBe(true);
+  });
+
+  it('shows rankings during the transition (group done, no R32 result yet)', () => {
+    const a1 = groupA('a1', 'finished', 1, 0);
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'scheduled' });
+    expect(shouldShowGroupRankings([a1, r32])).toBe(true);
+  });
+
+  it('hides rankings once the group stage is complete AND the first R32 result lands', () => {
+    const a1 = groupA('a1', 'finished', 1, 0);
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
+    expect(shouldShowGroupRankings([a1, r32])).toBe(false);
+  });
+
+  it('still shows rankings if a knockout result somehow precedes the group stage finishing', () => {
+    // Group A still has a game to play -> rankings stay even with an R32 result.
+    const a1 = groupA('a1', 'finished', 1, 0);
+    const a2 = groupA('a2', 'scheduled');
+    const r32 = match({ id: 'r1', stage: 'round_of_32', group: undefined, kickoffUtc: '2026-07-01T15:00:00Z', status: 'finished', homeScore: 2, awayScore: 1 });
+    expect(shouldShowGroupRankings([a1, a2, r32])).toBe(true);
   });
 });
