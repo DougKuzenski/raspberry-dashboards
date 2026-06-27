@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   formatCountdown,
   isSameLocalDay,
+  isTodayOrTomorrowLocal,
   localDayKey,
   formatKickoffPacific,
   formatUpcomingLabel,
@@ -31,6 +32,27 @@ describe('time helpers', () => {
     expect(formatUpcomingLabel('2026-06-11T19:00:00Z', now)).toBe('12:00 PM');
     // Different Pacific day -> weekday + time.
     expect(formatUpcomingLabel('2026-06-12T16:00:00Z', now)).toBe('Fri 9:00 AM');
+  });
+
+  it('includes today and tomorrow (Pacific) in the today-or-tomorrow window', () => {
+    const now = new Date('2026-06-11T18:00:00Z'); // 11:00 AM PT, Jun 11
+    // Earlier today (already finished) — still in window.
+    expect(isTodayOrTomorrowLocal(new Date('2026-06-11T15:00:00Z'), now)).toBe(true);
+    // Later today.
+    expect(isTodayOrTomorrowLocal(new Date('2026-06-11T22:00:00Z'), now)).toBe(true);
+    // Tomorrow.
+    expect(isTodayOrTomorrowLocal(new Date('2026-06-12T20:00:00Z'), now)).toBe(true);
+    // 2026-06-13T05:00Z == 2026-06-12 22:00 PT -> still local "tomorrow".
+    expect(isTodayOrTomorrowLocal(new Date('2026-06-13T05:00:00Z'), now)).toBe(true);
+    // Yesterday and two-days-out are excluded.
+    expect(isTodayOrTomorrowLocal(new Date('2026-06-10T20:00:00Z'), now)).toBe(false);
+    expect(isTodayOrTomorrowLocal(new Date('2026-06-13T20:00:00Z'), now)).toBe(false);
+  });
+
+  it('rolls the tomorrow boundary across month end', () => {
+    const now = new Date('2026-06-30T18:00:00Z'); // 11:00 AM PT, Jun 30
+    expect(isTodayOrTomorrowLocal(new Date('2026-07-01T20:00:00Z'), now)).toBe(true); // Jul 1 PT
+    expect(isTodayOrTomorrowLocal(new Date('2026-07-02T20:00:00Z'), now)).toBe(false);
   });
 
   it('formats a countdown and returns undefined for past times', () => {

@@ -2,9 +2,7 @@ import { useDashboardFeed, useNow, useFitScale, TimeZoneProvider } from './hooks
 import { selectDashboardState } from '../shared/selectDashboardState.js';
 import { DEFAULT_TIMEZONE } from '../shared/constants.js';
 import { Header } from './components/Header.js';
-import { HeroMatchCard } from './components/HeroMatchCard.js';
 import { TodayMatches } from './components/TodayMatches.js';
-import { UpcomingMatches } from './components/UpcomingMatches.js';
 import { GroupStandings } from './components/GroupStandings.js';
 import { KnockoutWindow } from './components/KnockoutWindow.js';
 import { TransitionContext } from './components/TransitionContext.js';
@@ -71,12 +69,8 @@ export function App() {
       />
 
       <main className="dashboard__body">
-        <section className="dashboard__hero">
-          <HeroMatchCard match={view.heroMatch} now={now} />
-        </section>
-
         <section className="dashboard__today">
-          <TodayMatches matches={view.todayMatches} />
+          <TodayMatches matches={view.todayTomorrowMatches} now={now} />
         </section>
 
         <section className="dashboard__context">
@@ -93,12 +87,6 @@ export function App() {
           )}
         </section>
       </main>
-
-      <UpcomingMatches
-        matches={view.upcomingMatches}
-        now={now}
-        excludeMatchId={view.heroMatch?.id}
-      />
 
       <FooterTicker
         recent={view.recentResults}

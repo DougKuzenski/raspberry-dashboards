@@ -9,7 +9,7 @@ import type {
   TournamentPhase,
 } from './types.js';
 import { DEFAULT_TIMEZONE, RECENT_RESULT_WINDOW_HOURS } from './constants.js';
-import { isSameLocalDay } from './time.js';
+import { isTodayOrTomorrowLocal } from './time.js';
 import { resolveBracket, matchIsDecided } from './resolveBracket.js';
 
 // A group match still left to play (cancelled games don't block, matching the
@@ -108,7 +108,13 @@ export function selectDashboardState(
 
   const liveMatches = matches.filter((m) => LIVE_STATUSES.has(m.status));
 
-  const todayMatches = matches.filter((m) => isSameLocalDay(new Date(m.kickoffUtc), now, timeZone));
+  // The primary panel's window: every game from the start of today through the
+  // end of tomorrow (target zone), kickoff-ascending (matches are pre-sorted).
+  // Includes games earlier today that have already finished, today's remaining
+  // games, and all of tomorrow's.
+  const todayTomorrowMatches = matches.filter((m) =>
+    isTodayOrTomorrowLocal(new Date(m.kickoffUtc), now, timeZone),
+  );
 
   const upcomingMatches = matches.filter(
     (m) => (m.status === 'scheduled' || m.status === 'pre_match') && kickoff(m) >= nowMs,
@@ -121,8 +127,9 @@ export function selectDashboardState(
     .filter((m) => m.status === 'finished' && nowMs - kickoff(m) <= recentWindowMs)
     .sort((a, b) => kickoff(b) - kickoff(a));
 
-  // Hero: the most important live match, otherwise the next upcoming match.
-  const heroMatch = liveMatches[0] ?? nextMatch;
+  // Focus match (UI accent only): the most important live match, otherwise the
+  // next upcoming match. Used to pick which group's standings to feature.
+  const focusMatch = liveMatches[0] ?? nextMatch;
 
   // Context panel: group standings during the group stage, both standings and the
   // forming bracket during the transition, the bracket alone during knockout.
@@ -136,7 +143,7 @@ export function selectDashboardState(
   const bracket = resolveBracket(data.matches, data.standings, data.bracket);
 
   const featuredGroup =
-    !showBracket && heroMatch?.stage === 'group' ? heroMatch.group : undefined;
+    !showBracket && focusMatch?.stage === 'group' ? focusMatch.group : undefined;
 
   const featuredStandings = featuredGroup
     ? data.standings.filter((s) => s.group === featuredGroup).sort((a, b) => a.rank - b.rank)
@@ -145,11 +152,9 @@ export function selectDashboardState(
   return {
     data,
     liveMatches,
-    todayMatches,
-    upcomingMatches,
+    todayTomorrowMatches,
     recentResults,
     nextMatch,
-    heroMatch,
     featuredGroup,
     featuredStandings,
     showBracket,
