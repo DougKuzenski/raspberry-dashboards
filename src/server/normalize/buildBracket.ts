@@ -201,42 +201,85 @@ function fixtureFitsNode(home: SideProv, away: SideProv, node: BracketNode): boo
   );
 }
 
+// The group-W / group-R slots a node exposes (a node like [Runner-up A, Runner-up D]
+// exposes two runner groups; [Winner F, Runner-up E] exposes one of each).
+function nodeGroupRanks(node: BracketNode): { winners: string[]; runners: string[] } {
+  const winners: string[] = [];
+  const runners: string[] = [];
+  for (const src of [node.homeSource, node.awaySource]) {
+    const s = parseSource(src);
+    if (s.kind === 'group') (s.rank === 'W' ? winners : runners).push(s.group);
+  }
+  return { winners, runners };
+}
+
+// FIX 1 — rank-inversion guard. A real team is trusted to pin its *group*, never
+// to pick winner-vs-runner-up. If a fixture's full (taken-agnostic) candidate set
+// contains both the Winner-of-G node and the Runner-up-of-G node for some group G,
+// then the only thing linking the fixture to those nodes is a rank-agnostic real
+// team — choosing one would be guessing rank. Such a fixture is refused entirely,
+// so no later elimination of the "correct" node can strand it on the opposite-rank
+// sibling. (Exact "Winner/Runner-up Group X" placeholders carry their own rank and
+// never produce such a pair, so this only ever fires on real-team ambiguity.)
+function hasRankSiblingPair(candidateNodes: BracketNode[]): boolean {
+  const winnerGroups = new Set<string>();
+  const runnerGroups = new Set<string>();
+  for (const node of candidateNodes) {
+    const gr = nodeGroupRanks(node);
+    gr.winners.forEach((g) => winnerGroups.add(g));
+    gr.runners.forEach((g) => runnerGroups.add(g));
+  }
+  for (const g of winnerGroups) if (runnerGroups.has(g)) return true;
+  return false;
+}
+
 /**
  * Annotate the bracket skeleton with `matchId`s derived from published fixtures
  * (spec §6 — fixture-driven matchups), by *slot identity* — never by chronology.
  *
- * Each published knockout fixture is mapped to the skeleton node whose source
- * slots it uniquely satisfies (see the grammar above). Identity comes from one
- * of two places:
+ * SCOPE (Option A — ship a safe core). Only the Round of 32 and the single-node
+ * stages (Final, Third-place playoff) are mapped by `matchId` here. The Round of
+ * 16, Quarterfinals and Semifinals are *intentionally* not matchId-mapped: their
+ * slots are feeds ("Winner R32-1") that no provider keys reliably — football-data
+ * publishes a bare TBD for an undecided knockout slot and exposes no predecessor
+ * metadata — so there is nothing to map them by. Those rounds are resolved
+ * downstream by `resolveBracket`: winners propagate forward along `winnerFeedsTo`,
+ * and its team-pair fallback attaches each match once both teams are known. This
+ * is a deliberate, tested design choice (see buildBracket.test.ts), not a gap.
+ *
+ * R32 identity comes from one of two places:
  *   - the fixture's placeholder slot labels — OpenFootball encodes them as
  *     "Winner Group A" / "Runner-up Group B" / "3rd Group C"; or
  *   - a real, named team's group origin — derived from the group-stage matches,
  *     so a knockout fixture that names actual nations (as football-data.org does)
- *     pins to the node referencing those groups.
+ *     pins to the node referencing those groups. A real team pins a GROUP only,
+ *     never a winner-vs-runner-up rank (see `hasRankSiblingPair`).
  *
  * The mapping is order-independent and therefore immune to the failure modes of
  * positional/chronological mapping: equal kickoff times, postponed/rescheduled
  * fixtures, and partial publication (only some of a round's fixtures present) all
  * map each fixture to its correct slot regardless.
  *
- * INVARIANT — fail safe over guess. A fixture is annotated onto a node only when
- * it satisfies *exactly one* open node and that node is claimed by *exactly one*
- * fixture. Anything ambiguous (a real team that could be a best-third of several
- * nodes, an unidentifiable TBD/feed fixture, two fixtures resolving to the same
- * node) is left unannotated: the node keeps its synthesized placeholder and
- * `resolveBracket`'s team-pair fallback attaches the match once standings make
- * the pairing unambiguous. We never risk a wrong `matchId`.
+ * ALGORITHM — iterative constraint propagation, fail safe over guessing:
+ *   1. For each knockout fixture compute its *full* structural candidate nodes
+ *      (taken-agnostic), then drop the fixture if those candidates require a rank
+ *      guess (FIX 1) or if none survive. The remaining candidates exclude nodes
+ *      already carrying a `matchId` (manual overrides — never touched).
+ *   2. Repeat to a fixed point: any fixture left with exactly one open candidate
+ *      is assigned to it, and that node is removed from every other fixture's
+ *      candidate set. This keeps assigning fixtures that only become uniquely
+ *      identifiable after an earlier one is placed, instead of dropping them.
+ *   3. Two fixtures forced onto the same node (a contradiction) are both dropped;
+ *      anything still ambiguous (>1 candidate) is left unannotated. We never risk
+ *      a wrong `matchId`.
  *
  * Relies on the skeleton's R32 group layout (R32_PAIRINGS) matching FIFA's real
  * bracket so that a named team's group identifies its node.
- *
- * Nodes that already carry a `matchId` (e.g. from `applyManualOverrides`) are
- * never touched and never reassigned, so a pre-set/override node cannot shift or
- * mis-align the mapping of the remaining fixtures.
  */
 export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): BracketNode[] {
   // Shallow-copy the nodes so the caller's skeleton is not mutated.
   const result = nodes.map((n) => ({ ...n }));
+  const byId = new Map(result.map((n) => [n.id, n]));
 
   // team id -> group, from the group-stage fixtures (status-independent).
   const teamGroup = new Map<string, string>();
@@ -247,9 +290,9 @@ export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): B
     }
   }
 
-  // Phase 1: each fixture proposes the node it uniquely fits (among open nodes —
-  // those without a pre-set/override matchId). No unique fit -> no proposal.
-  const proposalsByNode = new Map<string, string[]>(); // node id -> fixture ids
+  // Step 1: build each fixture's open candidate set.
+  const taken = new Set(result.filter((n) => n.matchId).map((n) => n.id));
+  const candidates = new Map<string, Set<string>>(); // fixture id -> open node ids
   for (const fixture of matches) {
     if (!KNOCKOUT_STAGES.has(fixture.stage)) continue;
     const home = sideProvenance(fixture.homeTeam, teamGroup);
@@ -257,23 +300,47 @@ export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): B
     // A fixture with no identifying side carries no slot identity at all.
     if (home.kind === 'unknown' && away.kind === 'unknown') continue;
 
-    const fits = result.filter(
-      (n) => n.stage === fixture.stage && !n.matchId && fixtureFitsNode(home, away, n),
-    );
-    if (fits.length !== 1) continue; // ambiguous or no fit -> fail safe
+    const full = result.filter((n) => n.stage === fixture.stage && fixtureFitsNode(home, away, n));
+    if (full.length === 0) continue;
+    if (hasRankSiblingPair(full)) continue; // FIX 1: refuse rank guesses outright
 
-    const nodeId = fits[0].id;
-    const list = proposalsByNode.get(nodeId);
-    if (list) list.push(fixture.id);
-    else proposalsByNode.set(nodeId, [fixture.id]);
+    const open = new Set(full.filter((n) => !taken.has(n.id)).map((n) => n.id));
+    if (open.size > 0) candidates.set(fixture.id, open);
   }
 
-  // Phase 2: assign only nodes claimed by exactly one fixture (else fail safe).
-  const byId = new Map(result.map((n) => [n.id, n]));
-  for (const [nodeId, fixtureIds] of proposalsByNode) {
-    if (fixtureIds.length !== 1) continue;
-    const node = byId.get(nodeId);
-    if (node && !node.matchId) node.matchId = fixtureIds[0];
+  // Step 2: iterative elimination to a fixed point.
+  let progress = true;
+  while (progress) {
+    progress = false;
+
+    // Collect fixtures forced to a single remaining candidate, grouped by node.
+    const claimants = new Map<string, string[]>(); // node id -> forced fixture ids
+    for (const [fixtureId, open] of candidates) {
+      if (open.size !== 1) continue;
+      const nodeId = [...open][0];
+      const list = claimants.get(nodeId);
+      if (list) list.push(fixtureId);
+      else claimants.set(nodeId, [fixtureId]);
+    }
+
+    for (const [nodeId, fixtureIds] of claimants) {
+      if (fixtureIds.length === 1) {
+        const node = byId.get(nodeId);
+        if (node && !node.matchId) node.matchId = fixtureIds[0];
+        candidates.delete(fixtureIds[0]);
+      } else {
+        // Contradiction: two fixtures want the same slot -> drop both (fail safe).
+        for (const fixtureId of fixtureIds) candidates.delete(fixtureId);
+      }
+      // The node is now consumed either way; free no fixture to grab it again.
+      for (const open of candidates.values()) open.delete(nodeId);
+      progress = true;
+    }
+
+    // Drop fixtures stranded with no remaining candidate (their slot was claimed).
+    for (const [fixtureId, open] of [...candidates]) {
+      if (open.size === 0) candidates.delete(fixtureId);
+    }
   }
 
   return result;

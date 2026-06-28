@@ -74,6 +74,11 @@ const GROUPS: Match[] = [
   groupMatch('J', 'JPN', 'JJ'),
   groupMatch('H', 'MAR', 'HH'),
   groupMatch('E', 'CRO', 'EE'),
+  groupMatch('A', 'ARG', 'AA'),
+  groupMatch('G', 'GHA', 'GG'),
+  groupMatch('I', 'ITA', 'II'),
+  groupMatch('B', 'BEL', 'BB'),
+  groupMatch('C', 'CMR', 'CC'),
 ];
 
 function matchId(nodes: ReturnType<typeof buildKnockoutSkeleton>, id: string) {
@@ -197,13 +202,111 @@ describe('mergeKnockoutFixtures — fail safe over guessing', () => {
     expect(result.filter((n) => n.matchId != null)).toHaveLength(0);
   });
 
-  it('leaves R16/QF/SF feed fixtures unannotated (feed slots are not keyable)', () => {
-    // Two real-team R16 fixtures: feed slots ("Winner R32-n") can't be keyed, so
-    // a fixture fits ALL eight R16 nodes -> ambiguous -> none annotated.
-    const r16a = koMatch('fd-r16a', 'round_of_16', 'USA', 'JPN');
-    const r16b = koMatch('fd-r16b', 'round_of_16', 'BIH', 'MAR');
-    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r16a, r16b]);
-    expect(result.filter((n) => n.stage === 'round_of_16' && n.matchId != null)).toHaveLength(0);
+});
+
+// ---------------------------------------------------------------------------
+// FIX 1 — rank inversion is impossible (a real team pins a GROUP, never W vs R)
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — no rank-inverted annotation', () => {
+  it('refuses a [group-A, group-D] fixture: cannot tell winner from runner-up', () => {
+    // ARG (Group A) vs USA (Group D) structurally fits r32-1 [Winner A, ...],
+    // r32-3 [Winner D, ...] and r32-10 [Runner-up A, Runner-up D]. The link to the
+    // W-node and the R-node of BOTH groups is rank-agnostic -> refuse outright.
+    const fixture = koMatch('fd-rank', 'round_of_32', 'ARG', 'USA');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, fixture]);
+    expect(result.filter((n) => n.matchId != null)).toHaveLength(0);
+  });
+
+  it('does NOT fall back to the opposite-rank node even when the correct nodes are taken', () => {
+    // Pre-claim r32-1 (Winner A) and r32-3 (Winner D) via overrides. A naive
+    // "assign to the last remaining open candidate" would now strand ARG/USA onto
+    // r32-10 [Runner-up A, Runner-up D] — a rank-inverted guess. It must not.
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-1')!.matchId = 'override-1';
+    skeleton.find((n) => n.id === 'r32-3')!.matchId = 'override-3';
+    const fixture = koMatch('fd-rank', 'round_of_32', 'ARG', 'USA');
+    const result = mergeKnockoutFixtures(skeleton, [...GROUPS, fixture]);
+    expect(matchId(result, 'r32-10')).toBeUndefined();
+    expect(result.some((n) => n.matchId === 'fd-rank')).toBe(false);
+    // Overrides untouched.
+    expect(matchId(result, 'r32-1')).toBe('override-1');
+    expect(matchId(result, 'r32-3')).toBe('override-3');
+  });
+
+  it('still maps the unambiguous case (USA/BIH): rank is forced by structure, not guessed', () => {
+    // USA can only be Winner D here (the Runner-up D node r32-10 needs a Group-A
+    // partner, and BIH is Group F), so there is no rank ambiguity to refuse.
+    const fixture = koMatch('fd-ok', 'round_of_32', 'USA', 'BIH');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, fixture]);
+    expect(matchId(result, 'r32-3')).toBe('fd-ok');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// FIX 2 — iterative elimination never drops a resolvable fixture
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — iterative, order-independent assignment', () => {
+  // A mixed batch: two cleanly-resolvable fixtures, one cross-group-ambiguous,
+  // one rank-ambiguous. The resolvable two must ALWAYS map; the other two never.
+  // All fixtures use distinct teams (each nation plays one R32 match, as in reality).
+  const resolvableA = koMatch('fd-3', 'round_of_32', 'USA', 'BIH'); // -> r32-3
+  const resolvableB = koMatch('fd-7', 'round_of_32', 'JPN', 'MAR'); // -> r32-7
+  const crossAmbiguous = koMatch('fd-amb', 'round_of_32', 'GHA', 'ITA'); // r32-5 or r32-13
+  const rankAmbiguous = koMatch('fd-rank', 'round_of_32', 'BEL', 'CMR'); // [Group B, Group C] -> rank-poisoned
+
+  function permute<T>(arr: T[], seed: number): T[] {
+    const out = [...arr];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = (i * 7 + seed) % (i + 1);
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  }
+
+  it('assigns every uniquely-resolvable fixture regardless of input order', () => {
+    const all = [resolvableA, resolvableB, crossAmbiguous, rankAmbiguous];
+    for (let seed = 0; seed < 5; seed++) {
+      const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, ...permute(all, seed)]);
+      // Note: fd-3 and fd-amb both contain USA; whichever wins r32-3, only the
+      // unambiguous fd-3 may be assigned and fd-amb must stay unmapped.
+      expect(matchId(result, 'r32-3')).toBe('fd-3');
+      expect(matchId(result, 'r32-7')).toBe('fd-7');
+      // Nothing else is ever annotated.
+      const annotated = result.filter((n) => n.matchId != null).map((n) => n.id).sort();
+      expect(annotated).toEqual(['r32-3', 'r32-7']);
+    }
+  });
+
+  it('an override consuming a slot does not strand or shift independent fixtures', () => {
+    // r32-3 is pre-claimed by an override whose fixture is ABSENT. The override is
+    // preserved, USA/BIH (which only fits the taken r32-3) is dropped via the
+    // elimination loop, and the independent JPN/MAR still resolves to r32-7.
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-3')!.matchId = 'manual-absent';
+    const result = mergeKnockoutFixtures(skeleton, [...GROUPS, resolvableA, resolvableB]);
+    expect(matchId(result, 'r32-3')).toBe('manual-absent');
+    expect(matchId(result, 'r32-7')).toBe('fd-7');
+    expect(result.some((n) => n.matchId === 'fd-3')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// FIX 3 — later rounds resolve by propagation, not matchId (intended design)
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — feed rounds are propagation-driven by design', () => {
+  it('intentionally leaves R16/QF/SF feed fixtures unannotated (no keyable slot id)', () => {
+    // Feed slots ("Winner R32-n") carry no group identity and providers publish
+    // TBD for undecided knockout slots, so these rounds are NOT matchId-mapped —
+    // resolveBracket advances them via winner propagation instead (see below).
+    const r16 = koMatch('fd-r16', 'round_of_16', 'USA', 'JPN');
+    const qf = koMatch('fd-qf', 'quarterfinal', 'BIH', 'MAR');
+    const sf = koMatch('fd-sf', 'semifinal', 'USA', 'CRO');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r16, qf, sf]);
+    const feedStages = ['round_of_16', 'quarterfinal', 'semifinal'] as const;
+    expect(result.filter((n) => feedStages.includes(n.stage as never) && n.matchId != null)).toHaveLength(0);
   });
 });
 
@@ -361,5 +464,35 @@ describe('fixture-driven bracket — resolveBracket integration', () => {
     // r16-2 home source = "Winner R32-3" -> receives USA via propagation.
     const r16_2 = resolved.find((n) => n.id === 'r16-2')!;
     expect(r16_2.home.team?.id).toBe('USA');
+  });
+
+  it('(d) advances the bracket through R16 by propagation alone — no R16 matchId', () => {
+    // Two finished R32 results (linked by matchId, as the merge / overrides would
+    // do for r32-1 and r32-2). The R16 node they both feed must populate with the
+    // correct propagated winners WITHOUT any matchId of its own — proving feed
+    // rounds advance via winner propagation, the intended Option-A design.
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-1')!.matchId = 'm1';
+    skeleton.find((n) => n.id === 'r32-2')!.matchId = 'm2';
+
+    const m1: Match = {
+      id: 'm1', stage: 'round_of_32',
+      homeTeam: team('AAA'), awayTeam: team('BBB'),
+      kickoffUtc: '2026-07-01T18:00:00Z', status: 'finished',
+      homeScore: 2, awayScore: 1, winnerTeamId: 'AAA',
+    };
+    const m2: Match = {
+      id: 'm2', stage: 'round_of_32',
+      homeTeam: team('CCC'), awayTeam: team('DDD'),
+      kickoffUtc: '2026-07-02T18:00:00Z', status: 'finished',
+      homeScore: 0, awayScore: 3, winnerTeamId: 'DDD',
+    };
+
+    const resolved = resolveBracket([m1, m2], [], skeleton);
+    const r16_1 = resolved.find((n) => n.id === 'r16-1')!; // fed by Winner R32-1/R32-2
+    expect(r16_1.matchId).toBeUndefined(); // not identity-mapped
+    expect(r16_1.home.team?.id).toBe('AAA'); // winner of r32-1
+    expect(r16_1.away.team?.id).toBe('DDD'); // winner of r32-2
+    expect(r16_1.decided).toBe(true);
   });
 });
