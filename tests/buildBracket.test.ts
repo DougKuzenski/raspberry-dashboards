@@ -1,26 +1,275 @@
 import { describe, it, expect } from 'vitest';
 import { buildKnockoutSkeleton, mergeKnockoutFixtures } from '../src/server/normalize/buildBracket.js';
 import { resolveBracket } from '../src/shared/resolveBracket.js';
-import type { Match, Standing } from '../src/shared/types.js';
+import type { Match, Stage, Standing, TeamRef } from '../src/shared/types.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
+//
+// These tests prove the mapping keys off *slot identity*, never chronology, so
+// kickoff times are deliberately irrelevant / out of order in most cases.
 // ---------------------------------------------------------------------------
 
-function team(id: string, name: string = id) {
+function team(id: string, name: string = id): TeamRef {
   return { id, name };
 }
 
-function r32Match(id: string, homeId: string, awayId: string, kickoffUtc: string): Match {
+// A group-stage fixture, used purely to establish a team's group origin (the
+// merge derives team -> group from these; status is irrelevant).
+function groupMatch(group: string, homeId: string, awayId: string): Match {
   return {
-    id,
-    stage: 'round_of_32',
+    id: `g-${group}-${homeId}-${awayId}`,
+    stage: 'group',
+    group,
     homeTeam: team(homeId),
     awayTeam: team(awayId),
+    kickoffUtc: '2026-06-15T18:00:00Z',
+    status: 'scheduled',
+  };
+}
+
+// A knockout fixture naming two real teams.
+function koMatch(
+  id: string,
+  stage: Stage,
+  homeId: string,
+  awayId: string,
+  kickoffUtc = '2026-07-01T18:00:00Z',
+): Match {
+  return {
+    id,
+    stage,
+    homeTeam: team(homeId, homeId),
+    awayTeam: team(awayId, awayId),
     kickoffUtc,
     status: 'scheduled',
   };
 }
+
+// A knockout fixture carrying OpenFootball-style placeholder slot labels.
+function placeholderMatch(
+  id: string,
+  stage: Stage,
+  homeLabel: string,
+  awayLabel: string,
+): Match {
+  return {
+    id,
+    stage,
+    homeTeam: { id: homeLabel, name: homeLabel },
+    awayTeam: { id: awayLabel, name: awayLabel },
+    kickoffUtc: '2026-07-01T18:00:00Z',
+    status: 'scheduled',
+  };
+}
+
+// A shared group context. Each team is pinned to a group so real-team knockout
+// fixtures can be mapped to the node referencing that group. The groups are
+// chosen so the example fixtures below are UNAMBIGUOUS (see comments per test):
+//   USA=D, BIH=F, JPN=J, MAR=H  -> clean partner groups (winner node not a third)
+//   CRO=E                       -> used to construct a deliberately ambiguous case
+const GROUPS: Match[] = [
+  groupMatch('D', 'USA', 'DD'),
+  groupMatch('F', 'BIH', 'FF'),
+  groupMatch('J', 'JPN', 'JJ'),
+  groupMatch('H', 'MAR', 'HH'),
+  groupMatch('E', 'CRO', 'EE'),
+];
+
+function matchId(nodes: ReturnType<typeof buildKnockoutSkeleton>, id: string) {
+  return nodes.find((n) => n.id === id)!.matchId;
+}
+
+// ---------------------------------------------------------------------------
+// Slot identity from placeholder labels (OpenFootball-style)
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — placeholder slot labels', () => {
+  it('maps a "Winner Group X" / "3rd Group" fixture onto the matching node by label', () => {
+    // r32-1 = [Winner Group A, Best 3rd #1]. "Winner Group A" uniquely identifies it.
+    const fixture = placeholderMatch('of-1', 'round_of_32', 'Winner Group A', '3rd Group E');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [fixture]);
+    expect(matchId(result, 'r32-1')).toBe('of-1');
+    // No other node is annotated.
+    expect(result.filter((n) => n.id !== 'r32-1' && n.matchId != null)).toHaveLength(0);
+  });
+
+  it('maps a [Runner-up B, Runner-up C] fixture onto r32-2 (both labels agree)', () => {
+    const fixture = placeholderMatch('of-2', 'round_of_32', 'Runner-up Group B', 'Runner-up Group C');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [fixture]);
+    expect(matchId(result, 'r32-2')).toBe('of-2');
+  });
+
+  it('ignores home/away orientation — swapped labels still hit the same node', () => {
+    const fixture = placeholderMatch('of-3', 'round_of_32', '3rd Group E', 'Winner Group D');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [fixture]);
+    expect(matchId(result, 'r32-3')).toBe('of-3'); // r32-3 = [Winner Group D, Best 3rd #2]
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slot identity from real teams (football-data-style), via group origin
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — real teams mapped by group origin', () => {
+  it('maps USA (Group D) vs BIH (Group F) onto r32-3 = [Winner Group D, Best 3rd #2]', () => {
+    // USA pins the "Winner Group D" slot; BIH (Group F) can only be the best-third
+    // here — Group F's own winner node (r32-4) pairs with a runner-up, not a third,
+    // so there is no rival interpretation. Unambiguous.
+    const fixture = koMatch('fd-537421', 'round_of_32', 'USA', 'BIH');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, fixture]);
+    expect(matchId(result, 'r32-3')).toBe('fd-537421');
+    expect(result.filter((n) => n.id !== 'r32-3' && n.matchId != null)).toHaveLength(0);
+  });
+
+  it('does NOT use chronology: a later-slot fixture with an EARLIER kickoff keeps its own slot', () => {
+    // r32-7 (JPN/MAR) kicks off BEFORE r32-3 (USA/BIH). Positional/chronological
+    // mapping would put the earlier-kickoff fixture in r32-1/r32-3; identity must not.
+    const r32_3 = koMatch('fd-3', 'round_of_32', 'USA', 'BIH', '2026-07-10T18:00:00Z');
+    const r32_7 = koMatch('fd-7', 'round_of_32', 'JPN', 'MAR', '2026-07-01T18:00:00Z');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r32_3, r32_7]);
+    expect(matchId(result, 'r32-3')).toBe('fd-3'); // r32-3 = [Winner D, Best 3rd #2]
+    expect(matchId(result, 'r32-7')).toBe('fd-7'); // r32-7 = [Winner J, Best 3rd #4]
+  });
+
+  it('handles equal kickoff times within a round — each fixture lands on its own slot', () => {
+    const sameTime = '2026-07-01T18:00:00Z';
+    const r32_3 = koMatch('fd-a', 'round_of_32', 'USA', 'BIH', sameTime);
+    const r32_7 = koMatch('fd-b', 'round_of_32', 'JPN', 'MAR', sameTime);
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r32_3, r32_7]);
+    expect(matchId(result, 'r32-3')).toBe('fd-a');
+    expect(matchId(result, 'r32-7')).toBe('fd-b');
+  });
+
+  it('partial publication: only later-slot fixtures published still map to their CORRECT slots', () => {
+    // Earlier R32 slots (r32-1, r32-2, ...) are NOT published. The USA/BIH fixture
+    // must still land on r32-3 (not get pulled forward to r32-1), and JPN/MAR on r32-7.
+    const r32_3 = koMatch('fd-3', 'round_of_32', 'USA', 'BIH');
+    const r32_7 = koMatch('fd-7', 'round_of_32', 'JPN', 'MAR');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r32_3, r32_7]);
+    expect(matchId(result, 'r32-3')).toBe('fd-3');
+    expect(matchId(result, 'r32-7')).toBe('fd-7');
+    expect(matchId(result, 'r32-1')).toBeUndefined();
+    expect(matchId(result, 'r32-2')).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Fail-safe: ambiguous / unidentifiable fixtures are left unannotated
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — fail safe over guessing', () => {
+  it('leaves an ambiguous real-team fixture UNANNOTATED rather than guessing a slot', () => {
+    // USA (Group D) vs CRO (Group E). This fits TWO nodes:
+    //   r32-3  = [Winner D, Best 3rd #2]  -> USA=Winner D, CRO=best-third
+    //   r32-11 = [Winner E, Best 3rd #6]  -> CRO=Winner E, USA=best-third
+    // Cannot tell which without final standings, so neither node is annotated.
+    const fixture = koMatch('fd-amb', 'round_of_32', 'USA', 'CRO');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, fixture]);
+    expect(matchId(result, 'r32-3')).toBeUndefined();
+    expect(matchId(result, 'r32-11')).toBeUndefined();
+    expect(result.filter((n) => n.matchId != null)).toHaveLength(0);
+  });
+
+  it('leaves a TBD-vs-TBD fixture unannotated (no slot identity at all)', () => {
+    const fixture: Match = {
+      id: 'fd-tbd',
+      stage: 'round_of_32',
+      homeTeam: { id: 'TBD', name: 'TBD' },
+      awayTeam: { id: 'TBD2', name: 'TBD' },
+      kickoffUtc: '2026-07-01T18:00:00Z',
+      status: 'scheduled',
+    };
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [fixture]);
+    expect(result.filter((n) => n.matchId != null)).toHaveLength(0);
+  });
+
+  it('leaves a real-team fixture with one TBD side unannotated (cannot pin the slot)', () => {
+    const fixture: Match = {
+      id: 'fd-half',
+      stage: 'round_of_32',
+      homeTeam: team('USA'),
+      awayTeam: { id: 'TBD', name: 'TBD' },
+      kickoffUtc: '2026-07-01T18:00:00Z',
+      status: 'scheduled',
+    };
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, fixture]);
+    expect(result.filter((n) => n.matchId != null)).toHaveLength(0);
+  });
+
+  it('leaves R16/QF/SF feed fixtures unannotated (feed slots are not keyable)', () => {
+    // Two real-team R16 fixtures: feed slots ("Winner R32-n") can't be keyed, so
+    // a fixture fits ALL eight R16 nodes -> ambiguous -> none annotated.
+    const r16a = koMatch('fd-r16a', 'round_of_16', 'USA', 'JPN');
+    const r16b = koMatch('fd-r16b', 'round_of_16', 'BIH', 'MAR');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r16a, r16b]);
+    expect(result.filter((n) => n.stage === 'round_of_16' && n.matchId != null)).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Single-node stages (third-place, final) map unambiguously
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — single-node stages', () => {
+  it('maps a final fixture onto the one final node, independent of other stages', () => {
+    const r32 = koMatch('fd-3', 'round_of_32', 'USA', 'BIH'); // -> r32-3
+    const final = koMatch('fd-final', 'final', 'USA', 'JPN');
+    const third = koMatch('fd-third', 'third_place', 'BIH', 'MAR');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, r32, final, third]);
+    expect(matchId(result, 'final')).toBe('fd-final');
+    expect(matchId(result, 'third-place')).toBe('fd-third');
+    // Per-stage independence: the R32 mapping is unaffected.
+    expect(matchId(result, 'r32-3')).toBe('fd-3');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Manual overrides / pre-set matchIds
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — manual overrides', () => {
+  it('preserves a pre-set matchId and never overwrites it', () => {
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-3')!.matchId = 'manual-override';
+    const fixture = koMatch('fd-3', 'round_of_32', 'USA', 'BIH'); // would otherwise hit r32-3
+    const result = mergeKnockoutFixtures(skeleton, [...GROUPS, fixture]);
+    expect(matchId(result, 'r32-3')).toBe('manual-override');
+  });
+
+  it('an override node whose fixture is ABSENT does not shift/misalign other fixtures', () => {
+    // r32-3 is overridden to a fixture NOT present in `matches`. The published
+    // USA/BIH fixture (which targets r32-3) must NOT steal another slot, and the
+    // unrelated JPN/MAR fixture must still map to r32-7 correctly.
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-3')!.matchId = 'manual-absent';
+    const usaBih = koMatch('fd-3', 'round_of_32', 'USA', 'BIH'); // targets the taken r32-3
+    const jpnMar = koMatch('fd-7', 'round_of_32', 'JPN', 'MAR'); // targets r32-7
+    const result = mergeKnockoutFixtures(skeleton, [...GROUPS, usaBih, jpnMar]);
+
+    expect(matchId(result, 'r32-3')).toBe('manual-absent'); // override preserved
+    expect(matchId(result, 'r32-7')).toBe('fd-7'); // remaining fixture still correct
+    // The displaced USA/BIH fixture was NOT mis-assigned to any other node.
+    expect(result.some((n) => n.matchId === 'fd-3')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Non-mutation
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — purity', () => {
+  it('does not mutate the original skeleton nodes', () => {
+    const skeleton = buildKnockoutSkeleton();
+    const origR32_3 = skeleton.find((n) => n.id === 'r32-3')!;
+    mergeKnockoutFixtures(skeleton, [...GROUPS, koMatch('fd-3', 'round_of_32', 'USA', 'BIH')]);
+    expect(origR32_3.matchId).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveBracket integration
+// ---------------------------------------------------------------------------
 
 function standing(group: string, id: string, rank: number): Standing {
   return {
@@ -32,77 +281,11 @@ function standing(group: string, id: string, rank: number): Standing {
   };
 }
 
-// ---------------------------------------------------------------------------
-// mergeKnockoutFixtures — positional matchId annotation
-// ---------------------------------------------------------------------------
-
-describe('mergeKnockoutFixtures', () => {
-  it('sets matchId on the first R32 node from the first (earliest) R32 fixture', () => {
-    const skeleton = buildKnockoutSkeleton();
-    const fixture = r32Match('fd-100', 'USA', 'MEX', '2026-07-01T18:00:00Z');
-    const result = mergeKnockoutFixtures(skeleton, [fixture]);
-    // r32-1 is the first node; it should now carry the fixture's id.
-    const r32_1 = result.find((n) => n.id === 'r32-1')!;
-    expect(r32_1.matchId).toBe('fd-100');
-    // Other nodes must NOT have a matchId (no fixtures for them).
-    expect(result.filter((n) => n.id !== 'r32-1' && n.matchId != null)).toHaveLength(0);
-  });
-
-  it('maps multiple R32 fixtures to nodes in kickoff order (earliest → r32-1, next → r32-2)', () => {
-    const skeleton = buildKnockoutSkeleton();
-    // Two fixtures; fd-200 kicks off earlier, so it should be r32-1.
-    const fixtures = [
-      r32Match('fd-201', 'GER', 'FRA', '2026-07-02T18:00:00Z'),
-      r32Match('fd-200', 'USA', 'BIH', '2026-07-01T18:00:00Z'),
-    ];
-    const result = mergeKnockoutFixtures(skeleton, fixtures);
-    expect(result.find((n) => n.id === 'r32-1')!.matchId).toBe('fd-200');
-    expect(result.find((n) => n.id === 'r32-2')!.matchId).toBe('fd-201');
-  });
-
-  it('does not overwrite a matchId already set on a node', () => {
-    const skeleton = buildKnockoutSkeleton();
-    skeleton[0].matchId = 'manual-override';          // r32-1
-    const fixture = r32Match('fd-100', 'USA', 'BIH', '2026-07-01T18:00:00Z');
-    const result = mergeKnockoutFixtures(skeleton, [fixture]);
-    expect(result.find((n) => n.id === 'r32-1')!.matchId).toBe('manual-override');
-  });
-
-  it('does not mutate the original skeleton nodes', () => {
-    const skeleton = buildKnockoutSkeleton();
-    const origFirst = skeleton[0];
-    const fixture = r32Match('fd-100', 'USA', 'BIH', '2026-07-01T18:00:00Z');
-    mergeKnockoutFixtures(skeleton, [fixture]);
-    // Skeleton's first node must be unchanged.
-    expect(origFirst.matchId).toBeUndefined();
-  });
-
-  it('maps R16 fixtures positionally when present', () => {
-    const skeleton = buildKnockoutSkeleton();
-    const r16Fixture: Match = {
-      id: 'fd-300',
-      stage: 'round_of_16',
-      homeTeam: team('USA'),
-      awayTeam: team('GER'),
-      kickoffUtc: '2026-07-15T18:00:00Z',
-      status: 'scheduled',
-    };
-    const result = mergeKnockoutFixtures(skeleton, [r16Fixture]);
-    expect(result.find((n) => n.id === 'r16-1')!.matchId).toBe('fd-300');
-    // R32 nodes must have no matchId (no R32 fixtures provided).
-    expect(result.filter((n) => n.stage === 'round_of_32' && n.matchId != null)).toHaveLength(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// (a) Fixture-named slot resolves to real teams + matchId in resolveBracket
-// ---------------------------------------------------------------------------
-
-describe('fixture-driven bracket — (a) real teams from published fixture', () => {
-  it('populates real teams and matchId on a bracket node whose fixture names both teams', () => {
-    // Simulate: football-data publishes R32 fixture 3 (r32-3: Winner D vs Best 3rd #2)
-    // as "USA vs Bosnia" before the group stage ends.
-    const usaBihFixture: Match = {
+describe('fixture-driven bracket — resolveBracket integration', () => {
+  it('(a) shows real teams from a published fixture before the group stage ends', () => {
+    // football-data names USA vs BIH on the r32-3 fixture while Group D is still in
+    // progress. Identity mapping pins it to r32-3; the resolver shows both teams.
+    const usaBih: Match = {
       id: 'fd-537421',
       stage: 'round_of_32',
       homeTeam: team('USA', 'United States'),
@@ -110,45 +293,29 @@ describe('fixture-driven bracket — (a) real teams from published fixture', () 
       kickoffUtc: '2026-07-01T20:00:00Z',
       status: 'scheduled',
     };
+    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, usaBih]);
+    expect(matchId(augmented, 'r32-3')).toBe('fd-537421');
 
-    // Two earlier R32 fixtures to push usaBihFixture to position 3 (r32-3).
-    const earlier1 = r32Match('fd-537419', 'MEX', 'CAN', '2026-06-29T18:00:00Z');
-    const earlier2 = r32Match('fd-537420', 'BRA', 'ARG', '2026-06-30T18:00:00Z');
-
-    const allFixtures = [earlier1, earlier2, usaBihFixture];
-    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), allFixtures);
-
-    // r32-3 should be annotated with the USA vs BIH fixture.
-    const r32_3node = augmented.find((n) => n.id === 'r32-3')!;
-    expect(r32_3node.matchId).toBe('fd-537421');
-
-    // Groups are NOT yet decided — pass no group matches and no standings.
-    // Even without group resolution, resolveBracket should pull USA and BIH
-    // from the fixture because both are non-placeholder teams.
-    const resolved = resolveBracket([usaBihFixture, earlier1, earlier2], [], augmented);
-
+    // Groups are NOT decided (group fixtures are still 'scheduled'), so the resolver
+    // must lean on the matchId, not standings.
+    const resolved = resolveBracket([...GROUPS, usaBih], [], augmented);
     const r32_3 = resolved.find((n) => n.id === 'r32-3')!;
     expect(r32_3.matchId).toBe('fd-537421');
     expect(r32_3.home.team?.id).toBe('USA');
     expect(r32_3.away.team?.id).toBe('BIH');
     expect(r32_3.decided).toBe(true);
   });
-});
 
-// ---------------------------------------------------------------------------
-// (b) TBD slot falls back to synthesized placeholder
-// ---------------------------------------------------------------------------
-
-describe('fixture-driven bracket — (b) TBD fixture keeps synthesized placeholder', () => {
-  it('does not override a resolved group slot with a TBD team from the fixture', () => {
-    // Group A is decided; Winner Group A = AAA.
+  it('(b) a placeholder/TBD slot keeps its synthesized label (no wrong override)', () => {
+    // Group A decided -> Winner A = AAA from standings. An unannotated r32-1 keeps
+    // the group-derived team on the home slot and the placeholder on the third slot.
     const groupMatches: Match[] = [
       { id: 'g1', stage: 'group', group: 'A', homeTeam: team('AAA'), awayTeam: team('BBB'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 0, winnerTeamId: 'AAA' },
       { id: 'g2', stage: 'group', group: 'A', homeTeam: team('CCC'), awayTeam: team('DDD'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 1, awayScore: 0, winnerTeamId: 'CCC' },
     ];
     const standings = [standing('A', 'AAA', 1), standing('A', 'CCC', 2)];
 
-    // The R32 fixture for r32-1 has TBD for both sides.
+    // A TBD fixture carries no identity -> r32-1 is left unannotated (fail safe).
     const tbdFixture: Match = {
       id: 'fd-tbd-1',
       stage: 'round_of_32',
@@ -157,53 +324,21 @@ describe('fixture-driven bracket — (b) TBD fixture keeps synthesized placehold
       kickoffUtc: '2026-07-01T18:00:00Z',
       status: 'scheduled',
     };
-
-    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [tbdFixture]);
-    // r32-1 has the TBD fixture as matchId.
-    expect(augmented.find((n) => n.id === 'r32-1')!.matchId).toBe('fd-tbd-1');
+    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...groupMatches, tbdFixture]);
+    expect(matchId(augmented, 'r32-1')).toBeUndefined();
 
     const resolved = resolveBracket([...groupMatches, tbdFixture], standings, augmented);
-
     const r32_1 = resolved.find((n) => n.id === 'r32-1')!;
-    // TBD teams from the fixture must NOT override the group-resolved team.
     expect(r32_1.home.team?.id).toBe('AAA'); // Winner Group A from standings
-    // Away slot: still 'Best 3rd #1', not resolved (no cross-group ranking yet).
-    expect(r32_1.away.team).toBeUndefined();
-    expect(r32_1.decided).toBe(false);
-  });
-
-  it('leaves both slots as placeholders when the fixture has TBD teams and the group is not yet decided', () => {
-    const tbdFixture: Match = {
-      id: 'fd-tbd-2',
-      stage: 'round_of_32',
-      homeTeam: { id: 'TBD', name: 'TBD' },
-      awayTeam: { id: 'TBD2', name: 'TBD' },
-      kickoffUtc: '2026-07-01T18:00:00Z',
-      status: 'scheduled',
-    };
-
-    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [tbdFixture]);
-    const resolved = resolveBracket([tbdFixture], [], augmented);
-
-    const r32_1 = resolved.find((n) => n.id === 'r32-1')!;
-    expect(r32_1.home.team).toBeUndefined();
-    expect(r32_1.away.team).toBeUndefined();
-    expect(r32_1.decided).toBe(false);
-    // Source labels (synthesized placeholders) are preserved.
+    expect(r32_1.away.team).toBeUndefined(); // Best 3rd #1 not yet known
     expect(r32_1.home.source).toBe('Winner Group A');
     expect(r32_1.away.source).toBe('Best 3rd #1');
+    expect(r32_1.decided).toBe(false);
   });
-});
 
-// ---------------------------------------------------------------------------
-// (c) Winner propagation still advances a resolved winner
-// ---------------------------------------------------------------------------
-
-describe('fixture-driven bracket — (c) winner propagation after fixture resolution', () => {
-  it('propagates the fixture winner into the next-round node', () => {
-    // r32-1 (USA vs BIH) and r32-2 (GER vs FRA) both have real teams.
-    // USA wins r32-1; GER wins r32-2.  The winner of each should appear in r16-1.
-    const r32_1Fixture: Match = {
+  it('(c) propagates the winner of a fixture-mapped node into the next round', () => {
+    // USA beat BIH in r32-3; the winner should flow into r16-2 (fed by Winner R32-3).
+    const usaBih: Match = {
       id: 'fd-001',
       stage: 'round_of_32',
       homeTeam: team('USA', 'United States'),
@@ -214,87 +349,17 @@ describe('fixture-driven bracket — (c) winner propagation after fixture resolu
       awayScore: 0,
       winnerTeamId: 'USA',
     };
-    const r32_2Fixture: Match = {
-      id: 'fd-002',
-      stage: 'round_of_32',
-      homeTeam: team('GER', 'Germany'),
-      awayTeam: team('FRA', 'France'),
-      kickoffUtc: '2026-07-02T18:00:00Z',
-      status: 'finished',
-      homeScore: 1,
-      awayScore: 0,
-      winnerTeamId: 'GER',
-    };
+    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...GROUPS, usaBih]);
+    expect(matchId(augmented, 'r32-3')).toBe('fd-001');
 
-    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [r32_1Fixture, r32_2Fixture]);
+    const resolved = resolveBracket([...GROUPS, usaBih], [], augmented);
+    const r32_3 = resolved.find((n) => n.id === 'r32-3')!;
+    expect(r32_3.winner?.id).toBe('USA');
+    expect(r32_3.home.isWinner).toBe(true);
+    expect(r32_3.home.score).toBe(2);
 
-    // r32-1 and r32-2 annotated; r16-1 gets its teams from winner propagation.
-    const resolved = resolveBracket([r32_1Fixture, r32_2Fixture], [], augmented);
-
-    const r32_1 = resolved.find((n) => n.id === 'r32-1')!;
-    expect(r32_1.winner?.id).toBe('USA');
-    expect(r32_1.home.isWinner).toBe(true);
-    expect(r32_1.home.score).toBe(2);
-    expect(r32_1.away.score).toBe(0);
-
-    const r32_2 = resolved.find((n) => n.id === 'r32-2')!;
-    expect(r32_2.winner?.id).toBe('GER');
-
-    // r16-1 is fed by r32-1 (home) and r32-2 (away) via winnerFeedsTo.
-    const r16_1 = resolved.find((n) => n.id === 'r16-1')!;
-    expect(r16_1.home.team?.id).toBe('USA');
-    expect(r16_1.away.team?.id).toBe('GER');
-    expect(r16_1.decided).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// (d) Mapping works across R32 and an R16 round
-// ---------------------------------------------------------------------------
-
-describe('fixture-driven bracket — (d) mapping across R32 and R16', () => {
-  it('annotates R32 and R16 nodes independently and resolves both rounds', () => {
-    // 16 R32 fixtures — give them sequential kickoffs so the ordering is deterministic.
-    const r32Fixtures: Match[] = Array.from({ length: 16 }, (_, i) => ({
-      id: `fd-r32-${i + 1}`,
-      stage: 'round_of_32' as const,
-      homeTeam: team(`H${i + 1}`),
-      awayTeam: team(`A${i + 1}`),
-      kickoffUtc: `2026-07-${String(i + 1).padStart(2, '0')}T18:00:00Z`,
-      status: 'scheduled' as const,
-    }));
-
-    // One R16 fixture with real teams (teams from r32-1 / r32-2 outcomes).
-    const r16Fixture: Match = {
-      id: 'fd-r16-1',
-      stage: 'round_of_16',
-      homeTeam: team('H1', 'Team H1'),
-      awayTeam: team('H2', 'Team H2'),
-      kickoffUtc: '2026-07-20T18:00:00Z',
-      status: 'scheduled',
-    };
-
-    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...r32Fixtures, r16Fixture]);
-
-    // All 16 R32 nodes should be annotated.
-    for (let i = 1; i <= 16; i++) {
-      const node = augmented.find((n) => n.id === `r32-${i}`)!;
-      expect(node.matchId).toBe(`fd-r32-${i}`);
-    }
-
-    // r16-1 should be annotated with the R16 fixture.
-    expect(augmented.find((n) => n.id === 'r16-1')!.matchId).toBe('fd-r16-1');
-
-    // Later R16 nodes must not carry a matchId (only one R16 fixture was provided).
-    for (let i = 2; i <= 8; i++) {
-      expect(augmented.find((n) => n.id === `r16-${i}`)!.matchId).toBeUndefined();
-    }
-
-    // resolveBracket: R16-1 should resolve H1 and H2 from the fixture directly.
-    const resolved = resolveBracket([...r32Fixtures, r16Fixture], [], augmented);
-    const r16_1 = resolved.find((n) => n.id === 'r16-1')!;
-    expect(r16_1.matchId).toBe('fd-r16-1');
-    expect(r16_1.home.team?.id).toBe('H1');
-    expect(r16_1.away.team?.id).toBe('H2');
+    // r16-2 home source = "Winner R32-3" -> receives USA via propagation.
+    const r16_2 = resolved.find((n) => n.id === 'r16-2')!;
+    expect(r16_2.home.team?.id).toBe('USA');
   });
 });
