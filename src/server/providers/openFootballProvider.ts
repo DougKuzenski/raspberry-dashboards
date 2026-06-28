@@ -2,7 +2,7 @@ import type { DashboardData } from '../../shared/types.js';
 import type { DataProvider } from './providerTypes.js';
 import { parseOpenFootball, type OpenFootballFile } from '../normalize/parseOpenFootball.js';
 import { calculateStandings } from '../normalize/calculateStandings.js';
-import { buildKnockoutSkeleton } from '../normalize/buildBracket.js';
+import { buildKnockoutSkeleton, mergeKnockoutFixtures } from '../normalize/buildBracket.js';
 import { enrichVenues, loadVenueIndex } from '../normalize/applyVenues.js';
 import { applyManualOverrides } from '../normalize/applyManualOverrides.js';
 import { deriveTournamentPhase } from '../../shared/selectDashboardState.js';
@@ -63,7 +63,7 @@ export const openFootballProvider: DataProvider = {
       tournamentPhase: deriveTournamentPhase(matches),
       matches,
       standings,
-      bracket: buildKnockoutSkeleton(),
+      bracket: mergeKnockoutFixtures(buildKnockoutSkeleton(), matches),
       source: 'openfootball',
     };
 
