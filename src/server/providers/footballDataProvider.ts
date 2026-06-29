@@ -101,7 +101,7 @@ export const footballDataProvider: DataProvider = {
     // Serve the in-memory cache while it's still good (adaptive TTL), or while
     // we're in a rate-limit backoff window.
     if (memo && now - memo.at < memo.ttl) return memo.data;
-    if (memo && now < cooldownUntil) return memo.data;
+    if (memo && now < cooldownUntil) return { ...memo.data, stale: true };
 
     const key = process.env.FOOTBALL_DATA_API_KEY || process.env.EXTERNAL_API_KEY;
     if (!key) {

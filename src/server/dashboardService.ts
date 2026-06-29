@@ -17,11 +17,14 @@ export async function getDashboard(options: GetDashboardOptions = {}): Promise<D
   if (options.forceRefresh) provider.invalidate?.();
   try {
     const data = await provider.fetchDashboardData();
-    // Persist last-good in the background; a cache write failure must not break
-    // the live response.
-    writeCache(data).catch((err) => {
-      console.error('[cache] failed to write dashboard cache:', err);
-    });
+    // Do not overwrite a good disk cache with a stale/cooldown payload.
+    if (!data.stale) {
+      // Persist last-good in the background; a cache write failure must not break
+      // the live response.
+      writeCache(data).catch((err) => {
+        console.error('[cache] failed to write dashboard cache:', err);
+      });
+    }
     return withTimezone(data);
   } catch (err) {
     console.error(`[provider:${provider.name}] fetch failed:`, err);

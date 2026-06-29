@@ -166,4 +166,16 @@ describe('loadDashboardFeedOnce', () => {
     expect(state.stale).toBe(false);
     expect(state.inFlight).toBe(false);
   });
+
+  it('derives lastUpdated from payload generatedAtUtc, not request time', async () => {
+    const ts = '2026-06-20T10:30:00.000Z';
+    const payload = dashboardData({ generatedAtUtc: ts });
+    const fetchDashboard = vi.fn().mockResolvedValue(response(200, payload));
+    const { state, load } = createHarness(fetchDashboard);
+
+    await load();
+
+    expect(state.lastUpdated?.toISOString()).toBe(ts);
+    expect(state.stale).toBe(false);
+  });
 });
