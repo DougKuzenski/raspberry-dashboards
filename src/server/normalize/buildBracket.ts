@@ -18,22 +18,22 @@ import type { BracketNode, Match, Stage, Standing, TeamRef } from '../../shared/
 // The 16 Round-of-32 pairings. Each group winner (1x), runner-up (1x) and the 8
 // best thirds (1x) appears exactly once across the 32 slots.
 const R32_PAIRINGS: ReadonlyArray<readonly [string, string]> = [
-  ['Winner Group A', 'Best 3rd #1'],
-  ['Runner-up Group B', 'Runner-up Group C'],
-  ['Winner Group D', 'Best 3rd #2'],
-  ['Winner Group F', 'Runner-up Group E'],
-  ['Winner Group G', 'Best 3rd #3'],
-  ['Runner-up Group H', 'Runner-up Group I'],
-  ['Winner Group J', 'Best 3rd #4'],
-  ['Winner Group L', 'Runner-up Group K'],
-  ['Winner Group B', 'Best 3rd #5'],
-  ['Runner-up Group A', 'Runner-up Group D'],
-  ['Winner Group E', 'Best 3rd #6'],
-  ['Winner Group H', 'Runner-up Group G'],
-  ['Winner Group I', 'Best 3rd #7'],
-  ['Runner-up Group J', 'Runner-up Group L'],
-  ['Winner Group K', 'Best 3rd #8'],
+  ['Winner Group E', 'Best 3rd #1'],
+  ['Winner Group I', 'Best 3rd #2'],
+  ['Runner-up Group A', 'Runner-up Group B'],
+  ['Winner Group F', 'Runner-up Group C'],
+  ['Runner-up Group K', 'Runner-up Group L'],
+  ['Winner Group H', 'Runner-up Group J'],
+  ['Winner Group D', 'Best 3rd #3'],
+  ['Winner Group G', 'Best 3rd #4'],
   ['Winner Group C', 'Runner-up Group F'],
+  ['Runner-up Group E', 'Runner-up Group I'],
+  ['Winner Group A', 'Best 3rd #5'],
+  ['Winner Group L', 'Best 3rd #6'],
+  ['Winner Group J', 'Runner-up Group H'],
+  ['Runner-up Group D', 'Runner-up Group G'],
+  ['Winner Group B', 'Best 3rd #7'],
+  ['Winner Group K', 'Best 3rd #8'],
 ];
 
 export function buildKnockoutSkeleton(): BracketNode[] {
