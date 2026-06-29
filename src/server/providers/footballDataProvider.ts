@@ -124,7 +124,7 @@ export const footballDataProvider: DataProvider = {
       tournamentPhase: deriveTournamentPhase(matches),
       matches,
       standings,
-      bracket: mergeKnockoutFixtures(buildKnockoutSkeleton(), matches),
+      bracket: mergeKnockoutFixtures(buildKnockoutSkeleton(), matches, standings),
       source: 'football_data',
     };
 

@@ -1,4 +1,4 @@
-import type { BracketNode, Match, Stage, TeamRef } from '../../shared/types.js';
+import type { BracketNode, Match, Stage, Standing, TeamRef } from '../../shared/types.js';
 
 // The static 48-team 2026 World Cup knockout skeleton (spec §6).
 //
@@ -152,7 +152,7 @@ function parseSource(source: string): SlotSpec {
 type SideProv =
   | { kind: 'group'; rank: 'W' | 'R'; group: string } // "Winner/Runner-up Group X" placeholder
   | { kind: 'third'; group: string } // "3rd Group X" placeholder
-  | { kind: 'team'; group: string } // real nation, with its group-stage group known
+  | { kind: 'team'; group: string; teamId: string } // real nation, with its group-stage group known
   | { kind: 'unknown' }; // TBD / feed placeholder / ungrouped team — carries no identity
 
 function sideProvenance(team: TeamRef, teamGroup: Map<string, string>): SideProv {
@@ -167,23 +167,42 @@ function sideProvenance(team: TeamRef, teamGroup: Map<string, string>): SideProv
   if (PLACEHOLDER_RE.test(name)) return { kind: 'unknown' };
   // A real nation: its origin is the group it played its group-stage games in.
   const group = teamGroup.get(team.id);
-  return group ? { kind: 'team', group } : { kind: 'unknown' };
+  return group ? { kind: 'team', group, teamId: team.id } : { kind: 'unknown' };
 }
 
 // Can a fixture side legitimately occupy a node's source slot?
-function satisfies(side: SideProv, slot: SlotSpec): boolean {
+function satisfies(side: SideProv, slot: SlotSpec, teamRank?: Map<string, number>): boolean {
   switch (slot.kind) {
-    case 'group':
+    case 'group': {
       // A specific "Winner/Runner-up Group X" slot: an exact placeholder match,
-      // or a real team from that group (its W/R rank isn't known yet, so either
-      // rank is plausible — the uniqueness check below catches the ambiguity).
+      // or a real team from that group. If standings are known we enforce the
+      // team's actual rank (1 = winner, 2 = runner-up) to disambiguate.
       if (side.kind === 'group') return side.rank === slot.rank && side.group === slot.group;
-      if (side.kind === 'team') return side.group === slot.group;
+      if (side.kind === 'team') {
+        if (side.group !== slot.group) return false;
+        if (teamRank) {
+          const rank = teamRank.get(side.teamId);
+          if (rank != null) {
+            const expected = slot.rank === 'W' ? 1 : 2;
+            return rank === expected;
+          }
+        }
+        return true;
+      }
       return false;
-    case 'third':
-      // A best-third is some group's third-placed team: any real team or an
-      // explicit "3rd Group X" placeholder fits; a group W/R placeholder does not.
-      return side.kind === 'team' || side.kind === 'third';
+    }
+    case 'third': {
+      // A best-third is some group's third-placed team. If standings are known
+      // we restrict real teams to those actually ranked 3rd.
+      if (side.kind === 'team') {
+        if (teamRank) {
+          const rank = teamRank.get(side.teamId);
+          if (rank != null) return rank === 3;
+        }
+        return true;
+      }
+      return side.kind === 'third';
+    }
     case 'feed':
       // Feeds ("Winner R32-1") resolve by propagation and can't be keyed here, so
       // only a real team or an opaque placeholder may sit in one.
@@ -193,11 +212,12 @@ function satisfies(side: SideProv, slot: SlotSpec): boolean {
 
 // Does this fixture fit this node in either home/away orientation? The bracket is
 // agnostic to which provider lists home vs away, so we accept either.
-function fixtureFitsNode(home: SideProv, away: SideProv, node: BracketNode): boolean {
+function fixtureFitsNode(home: SideProv, away: SideProv, node: BracketNode, teamRank?: Map<string, number>): boolean {
   const h = parseSource(node.homeSource);
   const a = parseSource(node.awaySource);
   return (
-    (satisfies(home, h) && satisfies(away, a)) || (satisfies(home, a) && satisfies(away, h))
+    (satisfies(home, h, teamRank) && satisfies(away, a, teamRank)) ||
+    (satisfies(home, a, teamRank) && satisfies(away, h, teamRank))
   );
 }
 
@@ -276,7 +296,7 @@ function hasRankSiblingPair(candidateNodes: BracketNode[]): boolean {
  * Relies on the skeleton's R32 group layout (R32_PAIRINGS) matching FIFA's real
  * bracket so that a named team's group identifies its node.
  */
-export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): BracketNode[] {
+export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[], standings?: Standing[]): BracketNode[] {
   // Shallow-copy the nodes so the caller's skeleton is not mutated.
   const result = nodes.map((n) => ({ ...n }));
   const byId = new Map(result.map((n) => [n.id, n]));
@@ -290,6 +310,14 @@ export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): B
     }
   }
 
+  // team id -> rank, from standings (when available) for disambiguation.
+  const teamRank = new Map<string, number>();
+  if (standings) {
+    for (const s of standings) {
+      teamRank.set(s.team.id, s.rank);
+    }
+  }
+
   // Step 1: build each fixture's open candidate set.
   const taken = new Set(result.filter((n) => n.matchId).map((n) => n.id));
   const candidates = new Map<string, Set<string>>(); // fixture id -> open node ids
@@ -300,7 +328,7 @@ export function mergeKnockoutFixtures(nodes: BracketNode[], matches: Match[]): B
     // A fixture with no identifying side carries no slot identity at all.
     if (home.kind === 'unknown' && away.kind === 'unknown') continue;
 
-    const full = result.filter((n) => n.stage === fixture.stage && fixtureFitsNode(home, away, n));
+    const full = result.filter((n) => n.stage === fixture.stage && fixtureFitsNode(home, away, n, teamRank));
     if (full.length === 0) continue;
     if (hasRankSiblingPair(full)) continue; // FIX 1: refuse rank guesses outright
 

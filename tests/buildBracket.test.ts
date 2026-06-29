@@ -205,6 +205,56 @@ describe('mergeKnockoutFixtures — fail safe over guessing', () => {
 });
 
 // ---------------------------------------------------------------------------
+// FIX standings-aware disambiguation (cross-group winner / best-third ambiguity)
+// ---------------------------------------------------------------------------
+
+describe('mergeKnockoutFixtures — standings-aware disambiguation', () => {
+  it('resolves cross-group winner/third ambiguity when standings are known', () => {
+    // USA won Group D (rank 1); BIH finished 3rd in Group B (rank 3).
+    // Fixture USA vs BIH structurally fits r32-3 [Winner D, Best 3rd #2]
+    // AND r32-9 [Winner B, Best 3rd #5], but standings prove USA cannot be
+    // a best-third and BIH cannot be a group winner -> only r32-3 survives.
+    const groups: Match[] = [
+      groupMatch('D', 'USA', 'DD'),
+      groupMatch('B', 'BIH', 'BEL'),
+    ];
+    const standings: Standing[] = [
+      standing('D', 'USA', 1), standing('D', 'DD', 2), standing('D', 'D3', 3),
+      standing('B', 'BEL', 1), standing('B', 'B2', 2), standing('B', 'BIH', 3),
+    ];
+    const fixture = koMatch('fd-537421', 'round_of_32', 'USA', 'BIH');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...groups, fixture], standings);
+    expect(matchId(result, 'r32-3')).toBe('fd-537421');
+    expect(matchId(result, 'r32-9')).toBeUndefined();
+    expect(result.filter((n) => n.matchId != null)).toHaveLength(1);
+  });
+
+  it('assigns multiple ambiguous fixtures correctly when standings are provided', () => {
+    // Two fixtures that each have overlapping structural candidates without
+    // standings. With standings the ambiguity collapses for both and they
+    // resolve to distinct nodes.
+    const groups: Match[] = [
+      groupMatch('D', 'USA', 'DD'),
+      groupMatch('B', 'BIH', 'BEL'),
+      groupMatch('J', 'JPN', 'JJ'),
+      groupMatch('H', 'MAR', 'HH'),
+    ];
+    const standings: Standing[] = [
+      standing('D', 'USA', 1), standing('D', 'DD', 2), standing('D', 'D3', 3),
+      standing('B', 'BEL', 1), standing('B', 'B2', 2), standing('B', 'BIH', 3),
+      standing('J', 'JPN', 1), standing('J', 'JJ', 2), standing('J', 'J3', 3),
+      standing('H', 'H1', 1), standing('H', 'HH', 2), standing('H', 'MAR', 3),
+    ];
+    const usaBih = koMatch('fd-537421', 'round_of_32', 'USA', 'BIH');
+    const jpnMar = koMatch('fd-7', 'round_of_32', 'JPN', 'MAR');
+    const result = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...groups, usaBih, jpnMar], standings);
+    expect(matchId(result, 'r32-3')).toBe('fd-537421');
+    expect(matchId(result, 'r32-7')).toBe('fd-7');
+    expect(result.filter((n) => n.matchId != null)).toHaveLength(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // FIX 1 — rank inversion is impossible (a real team pins a GROUP, never W vs R)
 // ---------------------------------------------------------------------------
 
@@ -406,6 +456,49 @@ describe('fixture-driven bracket — resolveBracket integration', () => {
     expect(r32_3.matchId).toBe('fd-537421');
     expect(r32_3.home.team?.id).toBe('USA');
     expect(r32_3.away.team?.id).toBe('BIH');
+    expect(r32_3.decided).toBe(true);
+  });
+
+  it('(regression) standings-aware merge prevents USA-vs-SWE misrender', () => {
+    // Scenario: USA won Group D, BIH finished 3rd in Group B. The published
+    // fixture is USA vs BIH (fd-537421). Without standings awareness the merge
+    // sees structural ambiguity with r32-9 and may drop the fixture, leaving
+    // r32-3 without a matchId. The resolver then backfills Best 3rd #2 with the
+    // top-ranked third (here, SWE). With standings the ambiguity collapses and
+    // the fixture keeps its matchId -> resolver shows BIH.
+    const groupMatches: Match[] = [
+      // Group D decided: USA winner
+      { id: 'gd1', stage: 'group', group: 'D', homeTeam: team('USA'), awayTeam: team('DD'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 0, winnerTeamId: 'USA' },
+      { id: 'gd2', stage: 'group', group: 'D', homeTeam: team('D3'), awayTeam: team('D4'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 1, awayScore: 0, winnerTeamId: 'D3' },
+      // Group B decided: BIH 3rd
+      { id: 'gb1', stage: 'group', group: 'B', homeTeam: team('BEL'), awayTeam: team('B2'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 1, winnerTeamId: 'BEL' },
+      { id: 'gb2', stage: 'group', group: 'B', homeTeam: team('BIH'), awayTeam: team('B4'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 1, awayScore: 0, winnerTeamId: 'BIH' },
+      // Group H decided: SWE 3rd (strong points so it would be Best 3rd #2)
+      { id: 'gh1', stage: 'group', group: 'H', homeTeam: team('MAR'), awayTeam: team('HH'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 0, winnerTeamId: 'MAR' },
+      { id: 'gh2', stage: 'group', group: 'H', homeTeam: team('SWE'), awayTeam: team('H4'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 1, awayScore: 0, winnerTeamId: 'SWE' },
+    ];
+    const standings: Standing[] = [
+      standing('D', 'USA', 1), standing('D', 'DD', 2), standing('D', 'D3', 3),
+      standing('B', 'BEL', 1), standing('B', 'B2', 2), standing('B', 'BIH', 3, { points: 6, goalsFor: 5, goalsAgainst: 2, goalDifference: 3 }),
+      standing('H', 'MAR', 1), standing('H', 'HH', 2), standing('H', 'SWE', 3, { points: 7, goalsFor: 6, goalsAgainst: 2, goalDifference: 4 }),
+    ];
+    const usaBih: Match = {
+      id: 'fd-537421',
+      stage: 'round_of_32',
+      homeTeam: team('USA', 'United States'),
+      awayTeam: team('BIH', 'Bosnia-Herzegovina'),
+      kickoffUtc: '2026-07-01T20:00:00Z',
+      status: 'scheduled',
+    };
+    const augmented = mergeKnockoutFixtures(buildKnockoutSkeleton(), [...groupMatches, usaBih], standings);
+    expect(matchId(augmented, 'r32-3')).toBe('fd-537421');
+
+    const resolved = resolveBracket([...groupMatches, usaBih], standings, augmented);
+    const r32_3 = resolved.find((n) => n.id === 'r32-3')!;
+    expect(r32_3.matchId).toBe('fd-537421');
+    expect(r32_3.home.team?.id).toBe('USA');
+    expect(r32_3.away.team?.id).toBe('BIH');
+    expect(r32_3.away.team?.id).not.toBe('SWE');
     expect(r32_3.decided).toBe(true);
   });
 
