@@ -3,7 +3,7 @@
     "id": "r32-1",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 1",
-    "homeSource": "Winner Group A",
+    "homeSource": "Winner Group E",
     "awaySource": "Best 3rd #1",
     "winnerFeedsTo": "r16-1"
   },
@@ -11,16 +11,16 @@
     "id": "r32-2",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 2",
-    "homeSource": "Runner-up Group B",
-    "awaySource": "Runner-up Group C",
+    "homeSource": "Winner Group I",
+    "awaySource": "Best 3rd #2",
     "winnerFeedsTo": "r16-1"
   },
   {
     "id": "r32-3",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 3",
-    "homeSource": "Winner Group D",
-    "awaySource": "Best 3rd #2",
+    "homeSource": "Runner-up Group A",
+    "awaySource": "Runner-up Group B",
     "winnerFeedsTo": "r16-2"
   },
   {
@@ -28,103 +28,103 @@
     "stage": "round_of_32",
     "label": "Round of 32 · Match 4",
     "homeSource": "Winner Group F",
-    "awaySource": "Runner-up Group E",
+    "awaySource": "Runner-up Group C",
     "winnerFeedsTo": "r16-2"
   },
   {
     "id": "r32-5",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 5",
-    "homeSource": "Winner Group G",
-    "awaySource": "Best 3rd #3",
+    "homeSource": "Runner-up Group K",
+    "awaySource": "Runner-up Group L",
     "winnerFeedsTo": "r16-3"
   },
   {
     "id": "r32-6",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 6",
-    "homeSource": "Runner-up Group H",
-    "awaySource": "Runner-up Group I",
+    "homeSource": "Winner Group H",
+    "awaySource": "Runner-up Group J",
     "winnerFeedsTo": "r16-3"
   },
   {
     "id": "r32-7",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 7",
-    "homeSource": "Winner Group J",
-    "awaySource": "Best 3rd #4",
+    "homeSource": "Winner Group D",
+    "awaySource": "Best 3rd #3",
     "winnerFeedsTo": "r16-4"
   },
   {
     "id": "r32-8",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 8",
-    "homeSource": "Winner Group L",
-    "awaySource": "Runner-up Group K",
+    "homeSource": "Winner Group G",
+    "awaySource": "Best 3rd #4",
     "winnerFeedsTo": "r16-4"
   },
   {
     "id": "r32-9",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 9",
-    "homeSource": "Winner Group B",
-    "awaySource": "Best 3rd #5",
+    "homeSource": "Winner Group C",
+    "awaySource": "Runner-up Group F",
     "winnerFeedsTo": "r16-5"
   },
   {
     "id": "r32-10",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 10",
-    "homeSource": "Runner-up Group A",
-    "awaySource": "Runner-up Group D",
+    "homeSource": "Runner-up Group E",
+    "awaySource": "Runner-up Group I",
     "winnerFeedsTo": "r16-5"
   },
   {
     "id": "r32-11",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 11",
-    "homeSource": "Winner Group E",
-    "awaySource": "Best 3rd #6",
+    "homeSource": "Winner Group A",
+    "awaySource": "Best 3rd #5",
     "winnerFeedsTo": "r16-6"
   },
   {
     "id": "r32-12",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 12",
-    "homeSource": "Winner Group H",
-    "awaySource": "Runner-up Group G",
+    "homeSource": "Winner Group L",
+    "awaySource": "Best 3rd #6",
     "winnerFeedsTo": "r16-6"
   },
   {
     "id": "r32-13",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 13",
-    "homeSource": "Winner Group I",
-    "awaySource": "Best 3rd #7",
+    "homeSource": "Winner Group J",
+    "awaySource": "Runner-up Group H",
     "winnerFeedsTo": "r16-7"
   },
   {
     "id": "r32-14",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 14",
-    "homeSource": "Runner-up Group J",
-    "awaySource": "Runner-up Group L",
+    "homeSource": "Runner-up Group D",
+    "awaySource": "Runner-up Group G",
     "winnerFeedsTo": "r16-7"
   },
   {
     "id": "r32-15",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 15",
-    "homeSource": "Winner Group K",
-    "awaySource": "Best 3rd #8",
+    "homeSource": "Winner Group B",
+    "awaySource": "Best 3rd #7",
     "winnerFeedsTo": "r16-8"
   },
   {
     "id": "r32-16",
     "stage": "round_of_32",
     "label": "Round of 32 · Match 16",
-    "homeSource": "Winner Group C",
-    "awaySource": "Runner-up Group F",
+    "homeSource": "Winner Group K",
+    "awaySource": "Best 3rd #8",
     "winnerFeedsTo": "r16-8"
   },
   {

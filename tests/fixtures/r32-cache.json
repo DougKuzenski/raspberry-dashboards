@@ -1,0 +1,2995 @@
+{
+  "_comment": "Snapshot of the relevant slice of data/cache/dashboard.json (football-data provider) for the live-cache R32 attach regression test. data/cache/dashboard.json is git-ignored, so this committed fixture ships to CI. Contains group-stage matches (team->group origins), the 16 Round-of-32 fixtures, and standings (rank).",
+  "matches": [
+    {
+      "id": "fd-537327",
+      "stage": "group",
+      "group": "A",
+      "homeTeam": {
+        "id": "MEX",
+        "name": "Mexico",
+        "shortName": "MEX",
+        "flagEmoji": "🇲🇽"
+      },
+      "awayTeam": {
+        "id": "RSA",
+        "name": "South Africa",
+        "shortName": "RSA",
+        "flagEmoji": "🇿🇦"
+      },
+      "kickoffUtc": "2026-06-11T19:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
+      "winnerTeamId": "MEX",
+      "decidedBy": "REGULAR",
+      "venue": "Mexico City",
+      "city": "Mexico City"
+    },
+    {
+      "id": "fd-537328",
+      "stage": "group",
+      "group": "A",
+      "homeTeam": {
+        "id": "KOR",
+        "name": "South Korea",
+        "shortName": "KOR",
+        "flagEmoji": "🇰🇷"
+      },
+      "awayTeam": {
+        "id": "CZE",
+        "name": "Czechia",
+        "shortName": "CZE",
+        "flagEmoji": "🇨🇿"
+      },
+      "kickoffUtc": "2026-06-12T02:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "winnerTeamId": "KOR",
+      "decidedBy": "REGULAR",
+      "venue": "Guadalajara",
+      "city": "Guadalajara"
+    },
+    {
+      "id": "fd-537333",
+      "stage": "group",
+      "group": "B",
+      "homeTeam": {
+        "id": "CAN",
+        "name": "Canada",
+        "shortName": "CAN",
+        "flagEmoji": "🇨🇦"
+      },
+      "awayTeam": {
+        "id": "BIH",
+        "name": "Bosnia-Herzegovina",
+        "shortName": "BIH",
+        "flagEmoji": "🇧🇦"
+      },
+      "kickoffUtc": "2026-06-12T19:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Toronto",
+      "city": "Toronto"
+    },
+    {
+      "id": "fd-537345",
+      "stage": "group",
+      "group": "D",
+      "homeTeam": {
+        "id": "USA",
+        "name": "United States",
+        "shortName": "USA",
+        "flagEmoji": "🇺🇸"
+      },
+      "awayTeam": {
+        "id": "PAR",
+        "name": "Paraguay",
+        "shortName": "PAR",
+        "flagEmoji": "🇵🇾"
+      },
+      "kickoffUtc": "2026-06-13T01:00:00Z",
+      "status": "finished",
+      "homeScore": 4,
+      "awayScore": 1,
+      "winnerTeamId": "USA",
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537334",
+      "stage": "group",
+      "group": "B",
+      "homeTeam": {
+        "id": "QAT",
+        "name": "Qatar",
+        "shortName": "QAT",
+        "flagEmoji": "🇶🇦"
+      },
+      "awayTeam": {
+        "id": "SUI",
+        "name": "Switzerland",
+        "shortName": "SUI",
+        "flagEmoji": "🇨🇭"
+      },
+      "kickoffUtc": "2026-06-13T19:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "San Francisco",
+      "city": "San Francisco"
+    },
+    {
+      "id": "fd-537339",
+      "stage": "group",
+      "group": "C",
+      "homeTeam": {
+        "id": "BRA",
+        "name": "Brazil",
+        "shortName": "BRA",
+        "flagEmoji": "🇧🇷"
+      },
+      "awayTeam": {
+        "id": "MAR",
+        "name": "Morocco",
+        "shortName": "MAR",
+        "flagEmoji": "🇲🇦"
+      },
+      "kickoffUtc": "2026-06-13T22:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "New York",
+      "city": "New York"
+    },
+    {
+      "id": "fd-537340",
+      "stage": "group",
+      "group": "C",
+      "homeTeam": {
+        "id": "HAI",
+        "name": "Haiti",
+        "shortName": "HAI",
+        "flagEmoji": "🇭🇹"
+      },
+      "awayTeam": {
+        "id": "SCO",
+        "name": "Scotland",
+        "shortName": "SCO",
+        "flagEmoji": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+      },
+      "kickoffUtc": "2026-06-14T01:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "winnerTeamId": "SCO",
+      "decidedBy": "REGULAR",
+      "venue": "Boston",
+      "city": "Boston"
+    },
+    {
+      "id": "fd-537346",
+      "stage": "group",
+      "group": "D",
+      "homeTeam": {
+        "id": "AUS",
+        "name": "Australia",
+        "shortName": "AUS",
+        "flagEmoji": "🇦🇺"
+      },
+      "awayTeam": {
+        "id": "TUR",
+        "name": "Turkey",
+        "shortName": "TUR",
+        "flagEmoji": "🇹🇷"
+      },
+      "kickoffUtc": "2026-06-14T04:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
+      "winnerTeamId": "AUS",
+      "decidedBy": "REGULAR",
+      "venue": "Vancouver",
+      "city": "Vancouver"
+    },
+    {
+      "id": "fd-537351",
+      "stage": "group",
+      "group": "E",
+      "homeTeam": {
+        "id": "GER",
+        "name": "Germany",
+        "shortName": "GER",
+        "flagEmoji": "🇩🇪"
+      },
+      "awayTeam": {
+        "id": "CUW",
+        "name": "Curaçao",
+        "shortName": "CUW",
+        "flagEmoji": "🇨🇼"
+      },
+      "kickoffUtc": "2026-06-14T17:00:00Z",
+      "status": "finished",
+      "homeScore": 7,
+      "awayScore": 1,
+      "winnerTeamId": "GER",
+      "decidedBy": "REGULAR",
+      "venue": "Houston",
+      "city": "Houston"
+    },
+    {
+      "id": "fd-537357",
+      "stage": "group",
+      "group": "F",
+      "homeTeam": {
+        "id": "NED",
+        "name": "Netherlands",
+        "shortName": "NED",
+        "flagEmoji": "🇳🇱"
+      },
+      "awayTeam": {
+        "id": "JPN",
+        "name": "Japan",
+        "shortName": "JPN",
+        "flagEmoji": "🇯🇵"
+      },
+      "kickoffUtc": "2026-06-14T20:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 2,
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537352",
+      "stage": "group",
+      "group": "E",
+      "homeTeam": {
+        "id": "CIV",
+        "name": "Ivory Coast",
+        "shortName": "CIV",
+        "flagEmoji": "🇨🇮"
+      },
+      "awayTeam": {
+        "id": "ECU",
+        "name": "Ecuador",
+        "shortName": "ECU",
+        "flagEmoji": "🇪🇨"
+      },
+      "kickoffUtc": "2026-06-14T23:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
+      "winnerTeamId": "CIV",
+      "decidedBy": "REGULAR",
+      "venue": "Philadelphia",
+      "city": "Philadelphia"
+    },
+    {
+      "id": "fd-537358",
+      "stage": "group",
+      "group": "F",
+      "homeTeam": {
+        "id": "SWE",
+        "name": "Sweden",
+        "shortName": "SWE",
+        "flagEmoji": "🇸🇪"
+      },
+      "awayTeam": {
+        "id": "TUN",
+        "name": "Tunisia",
+        "shortName": "TUN",
+        "flagEmoji": "🇹🇳"
+      },
+      "kickoffUtc": "2026-06-15T02:00:00Z",
+      "status": "finished",
+      "homeScore": 5,
+      "awayScore": 1,
+      "winnerTeamId": "SWE",
+      "decidedBy": "REGULAR",
+      "venue": "Monterrey",
+      "city": "Monterrey"
+    },
+    {
+      "id": "fd-537369",
+      "stage": "group",
+      "group": "H",
+      "homeTeam": {
+        "id": "ESP",
+        "name": "Spain",
+        "shortName": "ESP",
+        "flagEmoji": "🇪🇸"
+      },
+      "awayTeam": {
+        "id": "CPV",
+        "name": "Cape Verde Islands",
+        "shortName": "CPV",
+        "flagEmoji": "🇨🇻"
+      },
+      "kickoffUtc": "2026-06-15T16:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "Atlanta",
+      "city": "Atlanta"
+    },
+    {
+      "id": "fd-537363",
+      "stage": "group",
+      "group": "G",
+      "homeTeam": {
+        "id": "BEL",
+        "name": "Belgium",
+        "shortName": "BEL",
+        "flagEmoji": "🇧🇪"
+      },
+      "awayTeam": {
+        "id": "EGY",
+        "name": "Egypt",
+        "shortName": "EGY",
+        "flagEmoji": "🇪🇬"
+      },
+      "kickoffUtc": "2026-06-15T19:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Seattle",
+      "city": "Seattle"
+    },
+    {
+      "id": "fd-537370",
+      "stage": "group",
+      "group": "H",
+      "homeTeam": {
+        "id": "KSA",
+        "name": "Saudi Arabia",
+        "shortName": "KSA",
+        "flagEmoji": "🇸🇦"
+      },
+      "awayTeam": {
+        "id": "URU",
+        "name": "Uruguay",
+        "shortName": "URU",
+        "flagEmoji": "🇺🇾"
+      },
+      "kickoffUtc": "2026-06-15T22:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Miami",
+      "city": "Miami"
+    },
+    {
+      "id": "fd-537364",
+      "stage": "group",
+      "group": "G",
+      "homeTeam": {
+        "id": "IRN",
+        "name": "Iran",
+        "shortName": "IRN",
+        "flagEmoji": "🇮🇷"
+      },
+      "awayTeam": {
+        "id": "NZL",
+        "name": "New Zealand",
+        "shortName": "NZL",
+        "flagEmoji": "🇳🇿"
+      },
+      "kickoffUtc": "2026-06-16T01:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 2,
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537391",
+      "stage": "group",
+      "group": "I",
+      "homeTeam": {
+        "id": "FRA",
+        "name": "France",
+        "shortName": "FRA",
+        "flagEmoji": "🇫🇷"
+      },
+      "awayTeam": {
+        "id": "SEN",
+        "name": "Senegal",
+        "shortName": "SEN",
+        "flagEmoji": "🇸🇳"
+      },
+      "kickoffUtc": "2026-06-16T19:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 1,
+      "winnerTeamId": "FRA",
+      "decidedBy": "REGULAR",
+      "venue": "New York",
+      "city": "New York"
+    },
+    {
+      "id": "fd-537392",
+      "stage": "group",
+      "group": "I",
+      "homeTeam": {
+        "id": "IRQ",
+        "name": "Iraq",
+        "shortName": "IRQ",
+        "flagEmoji": "🇮🇶"
+      },
+      "awayTeam": {
+        "id": "NOR",
+        "name": "Norway",
+        "shortName": "NOR",
+        "flagEmoji": "🇳🇴"
+      },
+      "kickoffUtc": "2026-06-16T22:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 4,
+      "winnerTeamId": "NOR",
+      "decidedBy": "REGULAR",
+      "venue": "Boston",
+      "city": "Boston"
+    },
+    {
+      "id": "fd-537397",
+      "stage": "group",
+      "group": "J",
+      "homeTeam": {
+        "id": "ARG",
+        "name": "Argentina",
+        "shortName": "ARG",
+        "flagEmoji": "🇦🇷"
+      },
+      "awayTeam": {
+        "id": "ALG",
+        "name": "Algeria",
+        "shortName": "ALG",
+        "flagEmoji": "🇩🇿"
+      },
+      "kickoffUtc": "2026-06-17T01:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 0,
+      "winnerTeamId": "ARG",
+      "decidedBy": "REGULAR",
+      "venue": "Kansas City",
+      "city": "Kansas City"
+    },
+    {
+      "id": "fd-537398",
+      "stage": "group",
+      "group": "J",
+      "homeTeam": {
+        "id": "AUT",
+        "name": "Austria",
+        "shortName": "AUT",
+        "flagEmoji": "🇦🇹"
+      },
+      "awayTeam": {
+        "id": "JOR",
+        "name": "Jordan",
+        "shortName": "JOR",
+        "flagEmoji": "🇯🇴"
+      },
+      "kickoffUtc": "2026-06-17T04:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 1,
+      "winnerTeamId": "AUT",
+      "decidedBy": "REGULAR",
+      "venue": "San Francisco",
+      "city": "San Francisco"
+    },
+    {
+      "id": "fd-537403",
+      "stage": "group",
+      "group": "K",
+      "homeTeam": {
+        "id": "POR",
+        "name": "Portugal",
+        "shortName": "POR",
+        "flagEmoji": "🇵🇹"
+      },
+      "awayTeam": {
+        "id": "COD",
+        "name": "Congo DR",
+        "shortName": "COD",
+        "flagEmoji": "🇨🇩"
+      },
+      "kickoffUtc": "2026-06-17T17:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Houston",
+      "city": "Houston"
+    },
+    {
+      "id": "fd-537409",
+      "stage": "group",
+      "group": "L",
+      "homeTeam": {
+        "id": "ENG",
+        "name": "England",
+        "shortName": "ENG",
+        "flagEmoji": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+      },
+      "awayTeam": {
+        "id": "CRO",
+        "name": "Croatia",
+        "shortName": "CRO",
+        "flagEmoji": "🇭🇷"
+      },
+      "kickoffUtc": "2026-06-17T20:00:00Z",
+      "status": "finished",
+      "homeScore": 4,
+      "awayScore": 2,
+      "winnerTeamId": "ENG",
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537410",
+      "stage": "group",
+      "group": "L",
+      "homeTeam": {
+        "id": "GHA",
+        "name": "Ghana",
+        "shortName": "GHA",
+        "flagEmoji": "🇬🇭"
+      },
+      "awayTeam": {
+        "id": "PAN",
+        "name": "Panama",
+        "shortName": "PAN",
+        "flagEmoji": "🇵🇦"
+      },
+      "kickoffUtc": "2026-06-17T23:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
+      "winnerTeamId": "GHA",
+      "decidedBy": "REGULAR",
+      "venue": "Toronto",
+      "city": "Toronto"
+    },
+    {
+      "id": "fd-537404",
+      "stage": "group",
+      "group": "K",
+      "homeTeam": {
+        "id": "UZB",
+        "name": "Uzbekistan",
+        "shortName": "UZB",
+        "flagEmoji": "🇺🇿"
+      },
+      "awayTeam": {
+        "id": "COL",
+        "name": "Colombia",
+        "shortName": "COL",
+        "flagEmoji": "🇨🇴"
+      },
+      "kickoffUtc": "2026-06-18T02:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "winnerTeamId": "COL",
+      "decidedBy": "REGULAR",
+      "venue": "Mexico City",
+      "city": "Mexico City"
+    },
+    {
+      "id": "fd-537329",
+      "stage": "group",
+      "group": "A",
+      "homeTeam": {
+        "id": "CZE",
+        "name": "Czechia",
+        "shortName": "CZE",
+        "flagEmoji": "🇨🇿"
+      },
+      "awayTeam": {
+        "id": "RSA",
+        "name": "South Africa",
+        "shortName": "RSA",
+        "flagEmoji": "🇿🇦"
+      },
+      "kickoffUtc": "2026-06-18T16:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Atlanta",
+      "city": "Atlanta"
+    },
+    {
+      "id": "fd-537335",
+      "stage": "group",
+      "group": "B",
+      "homeTeam": {
+        "id": "SUI",
+        "name": "Switzerland",
+        "shortName": "SUI",
+        "flagEmoji": "🇨🇭"
+      },
+      "awayTeam": {
+        "id": "BIH",
+        "name": "Bosnia-Herzegovina",
+        "shortName": "BIH",
+        "flagEmoji": "🇧🇦"
+      },
+      "kickoffUtc": "2026-06-18T19:00:00Z",
+      "status": "finished",
+      "homeScore": 4,
+      "awayScore": 1,
+      "winnerTeamId": "SUI",
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537336",
+      "stage": "group",
+      "group": "B",
+      "homeTeam": {
+        "id": "CAN",
+        "name": "Canada",
+        "shortName": "CAN",
+        "flagEmoji": "🇨🇦"
+      },
+      "awayTeam": {
+        "id": "QAT",
+        "name": "Qatar",
+        "shortName": "QAT",
+        "flagEmoji": "🇶🇦"
+      },
+      "kickoffUtc": "2026-06-18T22:00:00Z",
+      "status": "finished",
+      "homeScore": 6,
+      "awayScore": 0,
+      "winnerTeamId": "CAN",
+      "decidedBy": "REGULAR",
+      "venue": "Vancouver",
+      "city": "Vancouver"
+    },
+    {
+      "id": "fd-537330",
+      "stage": "group",
+      "group": "A",
+      "homeTeam": {
+        "id": "MEX",
+        "name": "Mexico",
+        "shortName": "MEX",
+        "flagEmoji": "🇲🇽"
+      },
+      "awayTeam": {
+        "id": "KOR",
+        "name": "South Korea",
+        "shortName": "KOR",
+        "flagEmoji": "🇰🇷"
+      },
+      "kickoffUtc": "2026-06-19T01:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
+      "winnerTeamId": "MEX",
+      "decidedBy": "REGULAR",
+      "venue": "Guadalajara",
+      "city": "Guadalajara"
+    },
+    {
+      "id": "fd-537348",
+      "stage": "group",
+      "group": "D",
+      "homeTeam": {
+        "id": "USA",
+        "name": "United States",
+        "shortName": "USA",
+        "flagEmoji": "🇺🇸"
+      },
+      "awayTeam": {
+        "id": "AUS",
+        "name": "Australia",
+        "shortName": "AUS",
+        "flagEmoji": "🇦🇺"
+      },
+      "kickoffUtc": "2026-06-19T19:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
+      "winnerTeamId": "USA",
+      "decidedBy": "REGULAR",
+      "venue": "Seattle",
+      "city": "Seattle"
+    },
+    {
+      "id": "fd-537342",
+      "stage": "group",
+      "group": "C",
+      "homeTeam": {
+        "id": "SCO",
+        "name": "Scotland",
+        "shortName": "SCO",
+        "flagEmoji": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+      },
+      "awayTeam": {
+        "id": "MAR",
+        "name": "Morocco",
+        "shortName": "MAR",
+        "flagEmoji": "🇲🇦"
+      },
+      "kickoffUtc": "2026-06-19T22:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "winnerTeamId": "MAR",
+      "decidedBy": "REGULAR",
+      "venue": "Boston",
+      "city": "Boston"
+    },
+    {
+      "id": "fd-537341",
+      "stage": "group",
+      "group": "C",
+      "homeTeam": {
+        "id": "BRA",
+        "name": "Brazil",
+        "shortName": "BRA",
+        "flagEmoji": "🇧🇷"
+      },
+      "awayTeam": {
+        "id": "HAI",
+        "name": "Haiti",
+        "shortName": "HAI",
+        "flagEmoji": "🇭🇹"
+      },
+      "kickoffUtc": "2026-06-20T00:30:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 0,
+      "winnerTeamId": "BRA",
+      "decidedBy": "REGULAR",
+      "venue": "Philadelphia",
+      "city": "Philadelphia"
+    },
+    {
+      "id": "fd-537347",
+      "stage": "group",
+      "group": "D",
+      "homeTeam": {
+        "id": "TUR",
+        "name": "Turkey",
+        "shortName": "TUR",
+        "flagEmoji": "🇹🇷"
+      },
+      "awayTeam": {
+        "id": "PAR",
+        "name": "Paraguay",
+        "shortName": "PAR",
+        "flagEmoji": "🇵🇾"
+      },
+      "kickoffUtc": "2026-06-20T03:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "winnerTeamId": "PAR",
+      "decidedBy": "REGULAR",
+      "venue": "San Francisco",
+      "city": "San Francisco"
+    },
+    {
+      "id": "fd-537359",
+      "stage": "group",
+      "group": "F",
+      "homeTeam": {
+        "id": "NED",
+        "name": "Netherlands",
+        "shortName": "NED",
+        "flagEmoji": "🇳🇱"
+      },
+      "awayTeam": {
+        "id": "SWE",
+        "name": "Sweden",
+        "shortName": "SWE",
+        "flagEmoji": "🇸🇪"
+      },
+      "kickoffUtc": "2026-06-20T17:00:00Z",
+      "status": "finished",
+      "homeScore": 5,
+      "awayScore": 1,
+      "winnerTeamId": "NED",
+      "decidedBy": "REGULAR",
+      "venue": "Houston",
+      "city": "Houston"
+    },
+    {
+      "id": "fd-537353",
+      "stage": "group",
+      "group": "E",
+      "homeTeam": {
+        "id": "GER",
+        "name": "Germany",
+        "shortName": "GER",
+        "flagEmoji": "🇩🇪"
+      },
+      "awayTeam": {
+        "id": "CIV",
+        "name": "Ivory Coast",
+        "shortName": "CIV",
+        "flagEmoji": "🇨🇮"
+      },
+      "kickoffUtc": "2026-06-20T20:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "winnerTeamId": "GER",
+      "decidedBy": "REGULAR",
+      "venue": "Toronto",
+      "city": "Toronto"
+    },
+    {
+      "id": "fd-537354",
+      "stage": "group",
+      "group": "E",
+      "homeTeam": {
+        "id": "ECU",
+        "name": "Ecuador",
+        "shortName": "ECU",
+        "flagEmoji": "🇪🇨"
+      },
+      "awayTeam": {
+        "id": "CUW",
+        "name": "Curaçao",
+        "shortName": "CUW",
+        "flagEmoji": "🇨🇼"
+      },
+      "kickoffUtc": "2026-06-21T00:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "Kansas City",
+      "city": "Kansas City"
+    },
+    {
+      "id": "fd-537360",
+      "stage": "group",
+      "group": "F",
+      "homeTeam": {
+        "id": "TUN",
+        "name": "Tunisia",
+        "shortName": "TUN",
+        "flagEmoji": "🇹🇳"
+      },
+      "awayTeam": {
+        "id": "JPN",
+        "name": "Japan",
+        "shortName": "JPN",
+        "flagEmoji": "🇯🇵"
+      },
+      "kickoffUtc": "2026-06-21T04:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 4,
+      "winnerTeamId": "JPN",
+      "decidedBy": "REGULAR",
+      "venue": "Monterrey",
+      "city": "Monterrey"
+    },
+    {
+      "id": "fd-537371",
+      "stage": "group",
+      "group": "H",
+      "homeTeam": {
+        "id": "ESP",
+        "name": "Spain",
+        "shortName": "ESP",
+        "flagEmoji": "🇪🇸"
+      },
+      "awayTeam": {
+        "id": "KSA",
+        "name": "Saudi Arabia",
+        "shortName": "KSA",
+        "flagEmoji": "🇸🇦"
+      },
+      "kickoffUtc": "2026-06-21T16:00:00Z",
+      "status": "finished",
+      "homeScore": 4,
+      "awayScore": 0,
+      "winnerTeamId": "ESP",
+      "decidedBy": "REGULAR",
+      "venue": "Atlanta",
+      "city": "Atlanta"
+    },
+    {
+      "id": "fd-537365",
+      "stage": "group",
+      "group": "G",
+      "homeTeam": {
+        "id": "BEL",
+        "name": "Belgium",
+        "shortName": "BEL",
+        "flagEmoji": "🇧🇪"
+      },
+      "awayTeam": {
+        "id": "IRN",
+        "name": "Iran",
+        "shortName": "IRN",
+        "flagEmoji": "🇮🇷"
+      },
+      "kickoffUtc": "2026-06-21T19:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537372",
+      "stage": "group",
+      "group": "H",
+      "homeTeam": {
+        "id": "URU",
+        "name": "Uruguay",
+        "shortName": "URU",
+        "flagEmoji": "🇺🇾"
+      },
+      "awayTeam": {
+        "id": "CPV",
+        "name": "Cape Verde Islands",
+        "shortName": "CPV",
+        "flagEmoji": "🇨🇻"
+      },
+      "kickoffUtc": "2026-06-21T22:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 2,
+      "decidedBy": "REGULAR",
+      "venue": "Miami",
+      "city": "Miami"
+    },
+    {
+      "id": "fd-537366",
+      "stage": "group",
+      "group": "G",
+      "homeTeam": {
+        "id": "NZL",
+        "name": "New Zealand",
+        "shortName": "NZL",
+        "flagEmoji": "🇳🇿"
+      },
+      "awayTeam": {
+        "id": "EGY",
+        "name": "Egypt",
+        "shortName": "EGY",
+        "flagEmoji": "🇪🇬"
+      },
+      "kickoffUtc": "2026-06-22T01:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "winnerTeamId": "EGY",
+      "decidedBy": "REGULAR",
+      "venue": "Vancouver",
+      "city": "Vancouver"
+    },
+    {
+      "id": "fd-537399",
+      "stage": "group",
+      "group": "J",
+      "homeTeam": {
+        "id": "ARG",
+        "name": "Argentina",
+        "shortName": "ARG",
+        "flagEmoji": "🇦🇷"
+      },
+      "awayTeam": {
+        "id": "AUT",
+        "name": "Austria",
+        "shortName": "AUT",
+        "flagEmoji": "🇦🇹"
+      },
+      "kickoffUtc": "2026-06-22T17:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
+      "winnerTeamId": "ARG",
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537393",
+      "stage": "group",
+      "group": "I",
+      "homeTeam": {
+        "id": "FRA",
+        "name": "France",
+        "shortName": "FRA",
+        "flagEmoji": "🇫🇷"
+      },
+      "awayTeam": {
+        "id": "IRQ",
+        "name": "Iraq",
+        "shortName": "IRQ",
+        "flagEmoji": "🇮🇶"
+      },
+      "kickoffUtc": "2026-06-22T21:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 0,
+      "winnerTeamId": "FRA",
+      "decidedBy": "REGULAR",
+      "venue": "Philadelphia",
+      "city": "Philadelphia"
+    },
+    {
+      "id": "fd-537394",
+      "stage": "group",
+      "group": "I",
+      "homeTeam": {
+        "id": "NOR",
+        "name": "Norway",
+        "shortName": "NOR",
+        "flagEmoji": "🇳🇴"
+      },
+      "awayTeam": {
+        "id": "SEN",
+        "name": "Senegal",
+        "shortName": "SEN",
+        "flagEmoji": "🇸🇳"
+      },
+      "kickoffUtc": "2026-06-23T00:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 2,
+      "winnerTeamId": "NOR",
+      "decidedBy": "REGULAR",
+      "venue": "New York",
+      "city": "New York"
+    },
+    {
+      "id": "fd-537400",
+      "stage": "group",
+      "group": "J",
+      "homeTeam": {
+        "id": "JOR",
+        "name": "Jordan",
+        "shortName": "JOR",
+        "flagEmoji": "🇯🇴"
+      },
+      "awayTeam": {
+        "id": "ALG",
+        "name": "Algeria",
+        "shortName": "ALG",
+        "flagEmoji": "🇩🇿"
+      },
+      "kickoffUtc": "2026-06-23T03:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 2,
+      "winnerTeamId": "ALG",
+      "decidedBy": "REGULAR",
+      "venue": "San Francisco",
+      "city": "San Francisco"
+    },
+    {
+      "id": "fd-537405",
+      "stage": "group",
+      "group": "K",
+      "homeTeam": {
+        "id": "POR",
+        "name": "Portugal",
+        "shortName": "POR",
+        "flagEmoji": "🇵🇹"
+      },
+      "awayTeam": {
+        "id": "UZB",
+        "name": "Uzbekistan",
+        "shortName": "UZB",
+        "flagEmoji": "🇺🇿"
+      },
+      "kickoffUtc": "2026-06-23T17:00:00Z",
+      "status": "finished",
+      "homeScore": 5,
+      "awayScore": 0,
+      "winnerTeamId": "POR",
+      "decidedBy": "REGULAR",
+      "venue": "Houston",
+      "city": "Houston"
+    },
+    {
+      "id": "fd-537411",
+      "stage": "group",
+      "group": "L",
+      "homeTeam": {
+        "id": "ENG",
+        "name": "England",
+        "shortName": "ENG",
+        "flagEmoji": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+      },
+      "awayTeam": {
+        "id": "GHA",
+        "name": "Ghana",
+        "shortName": "GHA",
+        "flagEmoji": "🇬🇭"
+      },
+      "kickoffUtc": "2026-06-23T20:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "Boston",
+      "city": "Boston"
+    },
+    {
+      "id": "fd-537412",
+      "stage": "group",
+      "group": "L",
+      "homeTeam": {
+        "id": "PAN",
+        "name": "Panama",
+        "shortName": "PAN",
+        "flagEmoji": "🇵🇦"
+      },
+      "awayTeam": {
+        "id": "CRO",
+        "name": "Croatia",
+        "shortName": "CRO",
+        "flagEmoji": "🇭🇷"
+      },
+      "kickoffUtc": "2026-06-23T23:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "winnerTeamId": "CRO",
+      "decidedBy": "REGULAR",
+      "venue": "Toronto",
+      "city": "Toronto"
+    },
+    {
+      "id": "fd-537406",
+      "stage": "group",
+      "group": "K",
+      "homeTeam": {
+        "id": "COL",
+        "name": "Colombia",
+        "shortName": "COL",
+        "flagEmoji": "🇨🇴"
+      },
+      "awayTeam": {
+        "id": "COD",
+        "name": "Congo DR",
+        "shortName": "COD",
+        "flagEmoji": "🇨🇩"
+      },
+      "kickoffUtc": "2026-06-24T02:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
+      "winnerTeamId": "COL",
+      "decidedBy": "REGULAR",
+      "venue": "Guadalajara",
+      "city": "Guadalajara"
+    },
+    {
+      "id": "fd-537337",
+      "stage": "group",
+      "group": "B",
+      "homeTeam": {
+        "id": "SUI",
+        "name": "Switzerland",
+        "shortName": "SUI",
+        "flagEmoji": "🇨🇭"
+      },
+      "awayTeam": {
+        "id": "CAN",
+        "name": "Canada",
+        "shortName": "CAN",
+        "flagEmoji": "🇨🇦"
+      },
+      "kickoffUtc": "2026-06-24T19:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "winnerTeamId": "SUI",
+      "decidedBy": "REGULAR",
+      "venue": "Vancouver",
+      "city": "Vancouver"
+    },
+    {
+      "id": "fd-537338",
+      "stage": "group",
+      "group": "B",
+      "homeTeam": {
+        "id": "BIH",
+        "name": "Bosnia-Herzegovina",
+        "shortName": "BIH",
+        "flagEmoji": "🇧🇦"
+      },
+      "awayTeam": {
+        "id": "QAT",
+        "name": "Qatar",
+        "shortName": "QAT",
+        "flagEmoji": "🇶🇦"
+      },
+      "kickoffUtc": "2026-06-24T19:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 1,
+      "winnerTeamId": "BIH",
+      "decidedBy": "REGULAR"
+    },
+    {
+      "id": "fd-537344",
+      "stage": "group",
+      "group": "C",
+      "homeTeam": {
+        "id": "MAR",
+        "name": "Morocco",
+        "shortName": "MAR",
+        "flagEmoji": "🇲🇦"
+      },
+      "awayTeam": {
+        "id": "HAI",
+        "name": "Haiti",
+        "shortName": "HAI",
+        "flagEmoji": "🇭🇹"
+      },
+      "kickoffUtc": "2026-06-24T22:00:00Z",
+      "status": "finished",
+      "homeScore": 4,
+      "awayScore": 2,
+      "winnerTeamId": "MAR",
+      "decidedBy": "REGULAR",
+      "venue": "Atlanta",
+      "city": "Atlanta"
+    },
+    {
+      "id": "fd-537343",
+      "stage": "group",
+      "group": "C",
+      "homeTeam": {
+        "id": "SCO",
+        "name": "Scotland",
+        "shortName": "SCO",
+        "flagEmoji": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+      },
+      "awayTeam": {
+        "id": "BRA",
+        "name": "Brazil",
+        "shortName": "BRA",
+        "flagEmoji": "🇧🇷"
+      },
+      "kickoffUtc": "2026-06-24T22:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 3,
+      "winnerTeamId": "BRA",
+      "decidedBy": "REGULAR",
+      "venue": "Miami",
+      "city": "Miami"
+    },
+    {
+      "id": "fd-537331",
+      "stage": "group",
+      "group": "A",
+      "homeTeam": {
+        "id": "CZE",
+        "name": "Czechia",
+        "shortName": "CZE",
+        "flagEmoji": "🇨🇿"
+      },
+      "awayTeam": {
+        "id": "MEX",
+        "name": "Mexico",
+        "shortName": "MEX",
+        "flagEmoji": "🇲🇽"
+      },
+      "kickoffUtc": "2026-06-25T01:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 3,
+      "winnerTeamId": "MEX",
+      "decidedBy": "REGULAR",
+      "venue": "Mexico City",
+      "city": "Mexico City"
+    },
+    {
+      "id": "fd-537332",
+      "stage": "group",
+      "group": "A",
+      "homeTeam": {
+        "id": "RSA",
+        "name": "South Africa",
+        "shortName": "RSA",
+        "flagEmoji": "🇿🇦"
+      },
+      "awayTeam": {
+        "id": "KOR",
+        "name": "South Korea",
+        "shortName": "KOR",
+        "flagEmoji": "🇰🇷"
+      },
+      "kickoffUtc": "2026-06-25T01:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
+      "winnerTeamId": "RSA",
+      "decidedBy": "REGULAR",
+      "venue": "Monterrey",
+      "city": "Monterrey"
+    },
+    {
+      "id": "fd-537355",
+      "stage": "group",
+      "group": "E",
+      "homeTeam": {
+        "id": "ECU",
+        "name": "Ecuador",
+        "shortName": "ECU",
+        "flagEmoji": "🇪🇨"
+      },
+      "awayTeam": {
+        "id": "GER",
+        "name": "Germany",
+        "shortName": "GER",
+        "flagEmoji": "🇩🇪"
+      },
+      "kickoffUtc": "2026-06-25T20:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "winnerTeamId": "ECU",
+      "decidedBy": "REGULAR",
+      "venue": "New York",
+      "city": "New York"
+    },
+    {
+      "id": "fd-537356",
+      "stage": "group",
+      "group": "E",
+      "homeTeam": {
+        "id": "CUW",
+        "name": "Curaçao",
+        "shortName": "CUW",
+        "flagEmoji": "🇨🇼"
+      },
+      "awayTeam": {
+        "id": "CIV",
+        "name": "Ivory Coast",
+        "shortName": "CIV",
+        "flagEmoji": "🇨🇮"
+      },
+      "kickoffUtc": "2026-06-25T20:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 2,
+      "winnerTeamId": "CIV",
+      "decidedBy": "REGULAR",
+      "venue": "Philadelphia",
+      "city": "Philadelphia"
+    },
+    {
+      "id": "fd-537361",
+      "stage": "group",
+      "group": "F",
+      "homeTeam": {
+        "id": "TUN",
+        "name": "Tunisia",
+        "shortName": "TUN",
+        "flagEmoji": "🇹🇳"
+      },
+      "awayTeam": {
+        "id": "NED",
+        "name": "Netherlands",
+        "shortName": "NED",
+        "flagEmoji": "🇳🇱"
+      },
+      "kickoffUtc": "2026-06-25T23:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "winnerTeamId": "NED",
+      "decidedBy": "REGULAR",
+      "venue": "Kansas City",
+      "city": "Kansas City"
+    },
+    {
+      "id": "fd-537362",
+      "stage": "group",
+      "group": "F",
+      "homeTeam": {
+        "id": "JPN",
+        "name": "Japan",
+        "shortName": "JPN",
+        "flagEmoji": "🇯🇵"
+      },
+      "awayTeam": {
+        "id": "SWE",
+        "name": "Sweden",
+        "shortName": "SWE",
+        "flagEmoji": "🇸🇪"
+      },
+      "kickoffUtc": "2026-06-25T23:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537349",
+      "stage": "group",
+      "group": "D",
+      "homeTeam": {
+        "id": "TUR",
+        "name": "Turkey",
+        "shortName": "TUR",
+        "flagEmoji": "🇹🇷"
+      },
+      "awayTeam": {
+        "id": "USA",
+        "name": "United States",
+        "shortName": "USA",
+        "flagEmoji": "🇺🇸"
+      },
+      "kickoffUtc": "2026-06-26T02:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 2,
+      "winnerTeamId": "TUR",
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537350",
+      "stage": "group",
+      "group": "D",
+      "homeTeam": {
+        "id": "PAR",
+        "name": "Paraguay",
+        "shortName": "PAR",
+        "flagEmoji": "🇵🇾"
+      },
+      "awayTeam": {
+        "id": "AUS",
+        "name": "Australia",
+        "shortName": "AUS",
+        "flagEmoji": "🇦🇺"
+      },
+      "kickoffUtc": "2026-06-26T02:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "San Francisco",
+      "city": "San Francisco"
+    },
+    {
+      "id": "fd-537395",
+      "stage": "group",
+      "group": "I",
+      "homeTeam": {
+        "id": "NOR",
+        "name": "Norway",
+        "shortName": "NOR",
+        "flagEmoji": "🇳🇴"
+      },
+      "awayTeam": {
+        "id": "FRA",
+        "name": "France",
+        "shortName": "FRA",
+        "flagEmoji": "🇫🇷"
+      },
+      "kickoffUtc": "2026-06-26T19:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 4,
+      "winnerTeamId": "FRA",
+      "decidedBy": "REGULAR",
+      "venue": "Boston",
+      "city": "Boston"
+    },
+    {
+      "id": "fd-537396",
+      "stage": "group",
+      "group": "I",
+      "homeTeam": {
+        "id": "SEN",
+        "name": "Senegal",
+        "shortName": "SEN",
+        "flagEmoji": "🇸🇳"
+      },
+      "awayTeam": {
+        "id": "IRQ",
+        "name": "Iraq",
+        "shortName": "IRQ",
+        "flagEmoji": "🇮🇶"
+      },
+      "kickoffUtc": "2026-06-26T19:00:00Z",
+      "status": "finished",
+      "homeScore": 5,
+      "awayScore": 0,
+      "winnerTeamId": "SEN",
+      "decidedBy": "REGULAR",
+      "venue": "Toronto",
+      "city": "Toronto"
+    },
+    {
+      "id": "fd-537373",
+      "stage": "group",
+      "group": "H",
+      "homeTeam": {
+        "id": "URU",
+        "name": "Uruguay",
+        "shortName": "URU",
+        "flagEmoji": "🇺🇾"
+      },
+      "awayTeam": {
+        "id": "ESP",
+        "name": "Spain",
+        "shortName": "ESP",
+        "flagEmoji": "🇪🇸"
+      },
+      "kickoffUtc": "2026-06-27T00:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "winnerTeamId": "ESP",
+      "decidedBy": "REGULAR",
+      "venue": "Guadalajara",
+      "city": "Guadalajara"
+    },
+    {
+      "id": "fd-537374",
+      "stage": "group",
+      "group": "H",
+      "homeTeam": {
+        "id": "CPV",
+        "name": "Cape Verde Islands",
+        "shortName": "CPV",
+        "flagEmoji": "🇨🇻"
+      },
+      "awayTeam": {
+        "id": "KSA",
+        "name": "Saudi Arabia",
+        "shortName": "KSA",
+        "flagEmoji": "🇸🇦"
+      },
+      "kickoffUtc": "2026-06-27T00:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "Houston",
+      "city": "Houston"
+    },
+    {
+      "id": "fd-537367",
+      "stage": "group",
+      "group": "G",
+      "homeTeam": {
+        "id": "NZL",
+        "name": "New Zealand",
+        "shortName": "NZL",
+        "flagEmoji": "🇳🇿"
+      },
+      "awayTeam": {
+        "id": "BEL",
+        "name": "Belgium",
+        "shortName": "BEL",
+        "flagEmoji": "🇧🇪"
+      },
+      "kickoffUtc": "2026-06-27T03:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 5,
+      "winnerTeamId": "BEL",
+      "decidedBy": "REGULAR",
+      "venue": "Vancouver",
+      "city": "Vancouver"
+    },
+    {
+      "id": "fd-537368",
+      "stage": "group",
+      "group": "G",
+      "homeTeam": {
+        "id": "EGY",
+        "name": "Egypt",
+        "shortName": "EGY",
+        "flagEmoji": "🇪🇬"
+      },
+      "awayTeam": {
+        "id": "IRN",
+        "name": "Iran",
+        "shortName": "IRN",
+        "flagEmoji": "🇮🇷"
+      },
+      "kickoffUtc": "2026-06-27T03:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "decidedBy": "REGULAR",
+      "venue": "Seattle",
+      "city": "Seattle"
+    },
+    {
+      "id": "fd-537413",
+      "stage": "group",
+      "group": "L",
+      "homeTeam": {
+        "id": "PAN",
+        "name": "Panama",
+        "shortName": "PAN",
+        "flagEmoji": "🇵🇦"
+      },
+      "awayTeam": {
+        "id": "ENG",
+        "name": "England",
+        "shortName": "ENG",
+        "flagEmoji": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+      },
+      "kickoffUtc": "2026-06-27T21:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 2,
+      "winnerTeamId": "ENG",
+      "decidedBy": "REGULAR",
+      "venue": "New York",
+      "city": "New York"
+    },
+    {
+      "id": "fd-537414",
+      "stage": "group",
+      "group": "L",
+      "homeTeam": {
+        "id": "CRO",
+        "name": "Croatia",
+        "shortName": "CRO",
+        "flagEmoji": "🇭🇷"
+      },
+      "awayTeam": {
+        "id": "GHA",
+        "name": "Ghana",
+        "shortName": "GHA",
+        "flagEmoji": "🇬🇭"
+      },
+      "kickoffUtc": "2026-06-27T21:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "winnerTeamId": "CRO",
+      "decidedBy": "REGULAR",
+      "venue": "Philadelphia",
+      "city": "Philadelphia"
+    },
+    {
+      "id": "fd-537407",
+      "stage": "group",
+      "group": "K",
+      "homeTeam": {
+        "id": "COL",
+        "name": "Colombia",
+        "shortName": "COL",
+        "flagEmoji": "🇨🇴"
+      },
+      "awayTeam": {
+        "id": "POR",
+        "name": "Portugal",
+        "shortName": "POR",
+        "flagEmoji": "🇵🇹"
+      },
+      "kickoffUtc": "2026-06-27T23:30:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "decidedBy": "REGULAR",
+      "venue": "Miami",
+      "city": "Miami"
+    },
+    {
+      "id": "fd-537408",
+      "stage": "group",
+      "group": "K",
+      "homeTeam": {
+        "id": "COD",
+        "name": "Congo DR",
+        "shortName": "COD",
+        "flagEmoji": "🇨🇩"
+      },
+      "awayTeam": {
+        "id": "UZB",
+        "name": "Uzbekistan",
+        "shortName": "UZB",
+        "flagEmoji": "🇺🇿"
+      },
+      "kickoffUtc": "2026-06-27T23:30:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 1,
+      "winnerTeamId": "COD",
+      "decidedBy": "REGULAR",
+      "venue": "Atlanta",
+      "city": "Atlanta"
+    },
+    {
+      "id": "fd-537401",
+      "stage": "group",
+      "group": "J",
+      "homeTeam": {
+        "id": "JOR",
+        "name": "Jordan",
+        "shortName": "JOR",
+        "flagEmoji": "🇯🇴"
+      },
+      "awayTeam": {
+        "id": "ARG",
+        "name": "Argentina",
+        "shortName": "ARG",
+        "flagEmoji": "🇦🇷"
+      },
+      "kickoffUtc": "2026-06-28T02:00:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "winnerTeamId": "ARG",
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537402",
+      "stage": "group",
+      "group": "J",
+      "homeTeam": {
+        "id": "ALG",
+        "name": "Algeria",
+        "shortName": "ALG",
+        "flagEmoji": "🇩🇿"
+      },
+      "awayTeam": {
+        "id": "AUT",
+        "name": "Austria",
+        "shortName": "AUT",
+        "flagEmoji": "🇦🇹"
+      },
+      "kickoffUtc": "2026-06-28T02:00:00Z",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 3,
+      "decidedBy": "REGULAR",
+      "venue": "Kansas City",
+      "city": "Kansas City"
+    },
+    {
+      "id": "fd-537417",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "RSA",
+        "name": "South Africa",
+        "shortName": "RSA",
+        "flagEmoji": "🇿🇦"
+      },
+      "awayTeam": {
+        "id": "CAN",
+        "name": "Canada",
+        "shortName": "CAN",
+        "flagEmoji": "🇨🇦"
+      },
+      "kickoffUtc": "2026-06-28T19:00:00Z",
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "winnerTeamId": "CAN",
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537423",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "BRA",
+        "name": "Brazil",
+        "shortName": "BRA",
+        "flagEmoji": "🇧🇷"
+      },
+      "awayTeam": {
+        "id": "JPN",
+        "name": "Japan",
+        "shortName": "JPN",
+        "flagEmoji": "🇯🇵"
+      },
+      "kickoffUtc": "2026-06-29T17:00:00Z",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "winnerTeamId": "BRA",
+      "decidedBy": "REGULAR",
+      "venue": "Houston",
+      "city": "Houston"
+    },
+    {
+      "id": "fd-537415",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "GER",
+        "name": "Germany",
+        "shortName": "GER",
+        "flagEmoji": "🇩🇪"
+      },
+      "awayTeam": {
+        "id": "PAR",
+        "name": "Paraguay",
+        "shortName": "PAR",
+        "flagEmoji": "🇵🇾"
+      },
+      "kickoffUtc": "2026-06-29T20:30:00Z",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "penaltyHome": 5,
+      "penaltyAway": 5,
+      "decidedBy": "PENALTY_SHOOTOUT",
+      "venue": "Boston",
+      "city": "Boston"
+    },
+    {
+      "id": "fd-537418",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "NED",
+        "name": "Netherlands",
+        "shortName": "NED",
+        "flagEmoji": "🇳🇱"
+      },
+      "awayTeam": {
+        "id": "MAR",
+        "name": "Morocco",
+        "shortName": "MAR",
+        "flagEmoji": "🇲🇦"
+      },
+      "kickoffUtc": "2026-06-30T01:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Monterrey",
+      "city": "Monterrey"
+    },
+    {
+      "id": "fd-537424",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "CIV",
+        "name": "Ivory Coast",
+        "shortName": "CIV",
+        "flagEmoji": "🇨🇮"
+      },
+      "awayTeam": {
+        "id": "NOR",
+        "name": "Norway",
+        "shortName": "NOR",
+        "flagEmoji": "🇳🇴"
+      },
+      "kickoffUtc": "2026-06-30T17:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537416",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "FRA",
+        "name": "France",
+        "shortName": "FRA",
+        "flagEmoji": "🇫🇷"
+      },
+      "awayTeam": {
+        "id": "SWE",
+        "name": "Sweden",
+        "shortName": "SWE",
+        "flagEmoji": "🇸🇪"
+      },
+      "kickoffUtc": "2026-06-30T21:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "New York",
+      "city": "New York"
+    },
+    {
+      "id": "fd-537425",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "MEX",
+        "name": "Mexico",
+        "shortName": "MEX",
+        "flagEmoji": "🇲🇽"
+      },
+      "awayTeam": {
+        "id": "ECU",
+        "name": "Ecuador",
+        "shortName": "ECU",
+        "flagEmoji": "🇪🇨"
+      },
+      "kickoffUtc": "2026-07-01T01:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Mexico City",
+      "city": "Mexico City"
+    },
+    {
+      "id": "fd-537426",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "ENG",
+        "name": "England",
+        "shortName": "ENG",
+        "flagEmoji": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+      },
+      "awayTeam": {
+        "id": "COD",
+        "name": "Congo DR",
+        "shortName": "COD",
+        "flagEmoji": "🇨🇩"
+      },
+      "kickoffUtc": "2026-07-01T16:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Atlanta",
+      "city": "Atlanta"
+    },
+    {
+      "id": "fd-537422",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "BEL",
+        "name": "Belgium",
+        "shortName": "BEL",
+        "flagEmoji": "🇧🇪"
+      },
+      "awayTeam": {
+        "id": "SEN",
+        "name": "Senegal",
+        "shortName": "SEN",
+        "flagEmoji": "🇸🇳"
+      },
+      "kickoffUtc": "2026-07-01T20:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Seattle",
+      "city": "Seattle"
+    },
+    {
+      "id": "fd-537421",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "USA",
+        "name": "United States",
+        "shortName": "USA",
+        "flagEmoji": "🇺🇸"
+      },
+      "awayTeam": {
+        "id": "BIH",
+        "name": "Bosnia-Herzegovina",
+        "shortName": "BIH",
+        "flagEmoji": "🇧🇦"
+      },
+      "kickoffUtc": "2026-07-02T00:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "San Francisco",
+      "city": "San Francisco"
+    },
+    {
+      "id": "fd-537420",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "ESP",
+        "name": "Spain",
+        "shortName": "ESP",
+        "flagEmoji": "🇪🇸"
+      },
+      "awayTeam": {
+        "id": "AUT",
+        "name": "Austria",
+        "shortName": "AUT",
+        "flagEmoji": "🇦🇹"
+      },
+      "kickoffUtc": "2026-07-02T19:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Los Angeles",
+      "city": "Los Angeles"
+    },
+    {
+      "id": "fd-537419",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "POR",
+        "name": "Portugal",
+        "shortName": "POR",
+        "flagEmoji": "🇵🇹"
+      },
+      "awayTeam": {
+        "id": "CRO",
+        "name": "Croatia",
+        "shortName": "CRO",
+        "flagEmoji": "🇭🇷"
+      },
+      "kickoffUtc": "2026-07-02T23:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Toronto",
+      "city": "Toronto"
+    },
+    {
+      "id": "fd-537429",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "SUI",
+        "name": "Switzerland",
+        "shortName": "SUI",
+        "flagEmoji": "🇨🇭"
+      },
+      "awayTeam": {
+        "id": "ALG",
+        "name": "Algeria",
+        "shortName": "ALG",
+        "flagEmoji": "🇩🇿"
+      },
+      "kickoffUtc": "2026-07-03T03:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Vancouver",
+      "city": "Vancouver"
+    },
+    {
+      "id": "fd-537428",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "AUS",
+        "name": "Australia",
+        "shortName": "AUS",
+        "flagEmoji": "🇦🇺"
+      },
+      "awayTeam": {
+        "id": "EGY",
+        "name": "Egypt",
+        "shortName": "EGY",
+        "flagEmoji": "🇪🇬"
+      },
+      "kickoffUtc": "2026-07-03T18:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Dallas",
+      "city": "Dallas"
+    },
+    {
+      "id": "fd-537427",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "ARG",
+        "name": "Argentina",
+        "shortName": "ARG",
+        "flagEmoji": "🇦🇷"
+      },
+      "awayTeam": {
+        "id": "CPV",
+        "name": "Cape Verde Islands",
+        "shortName": "CPV",
+        "flagEmoji": "🇨🇻"
+      },
+      "kickoffUtc": "2026-07-03T22:00:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Miami",
+      "city": "Miami"
+    },
+    {
+      "id": "fd-537430",
+      "stage": "round_of_32",
+      "homeTeam": {
+        "id": "COL",
+        "name": "Colombia",
+        "shortName": "COL",
+        "flagEmoji": "🇨🇴"
+      },
+      "awayTeam": {
+        "id": "GHA",
+        "name": "Ghana",
+        "shortName": "GHA",
+        "flagEmoji": "🇬🇭"
+      },
+      "kickoffUtc": "2026-07-04T01:30:00Z",
+      "status": "scheduled",
+      "decidedBy": "REGULAR",
+      "venue": "Kansas City",
+      "city": "Kansas City"
+    }
+  ],
+  "standings": [
+    {
+      "group": "A",
+      "team": {
+        "id": "MEX",
+        "name": "Mexico",
+        "shortName": "MEX",
+        "flagEmoji": "🇲🇽"
+      },
+      "played": 3,
+      "won": 3,
+      "drawn": 0,
+      "lost": 0,
+      "goalsFor": 6,
+      "goalsAgainst": 0,
+      "goalDifference": 6,
+      "points": 9,
+      "rank": 1
+    },
+    {
+      "group": "A",
+      "team": {
+        "id": "RSA",
+        "name": "South Africa",
+        "shortName": "RSA",
+        "flagEmoji": "🇿🇦"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 2,
+      "goalsAgainst": 3,
+      "goalDifference": -1,
+      "points": 4,
+      "rank": 2
+    },
+    {
+      "group": "A",
+      "team": {
+        "id": "KOR",
+        "name": "South Korea",
+        "shortName": "KOR",
+        "flagEmoji": "🇰🇷"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 0,
+      "lost": 2,
+      "goalsFor": 2,
+      "goalsAgainst": 3,
+      "goalDifference": -1,
+      "points": 3,
+      "rank": 3
+    },
+    {
+      "group": "A",
+      "team": {
+        "id": "CZE",
+        "name": "Czechia",
+        "shortName": "CZE",
+        "flagEmoji": "🇨🇿"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 1,
+      "lost": 2,
+      "goalsFor": 2,
+      "goalsAgainst": 6,
+      "goalDifference": -4,
+      "points": 1,
+      "rank": 4
+    },
+    {
+      "group": "B",
+      "team": {
+        "id": "SUI",
+        "name": "Switzerland",
+        "shortName": "SUI",
+        "flagEmoji": "🇨🇭"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 7,
+      "goalsAgainst": 3,
+      "goalDifference": 4,
+      "points": 7,
+      "rank": 1
+    },
+    {
+      "group": "B",
+      "team": {
+        "id": "CAN",
+        "name": "Canada",
+        "shortName": "CAN",
+        "flagEmoji": "🇨🇦"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 8,
+      "goalsAgainst": 3,
+      "goalDifference": 5,
+      "points": 4,
+      "rank": 2
+    },
+    {
+      "group": "B",
+      "team": {
+        "id": "BIH",
+        "name": "Bosnia-Herzegovina",
+        "shortName": "BIH",
+        "flagEmoji": "🇧🇦"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 5,
+      "goalsAgainst": 6,
+      "goalDifference": -1,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "B",
+      "team": {
+        "id": "QAT",
+        "name": "Qatar",
+        "shortName": "QAT",
+        "flagEmoji": "🇶🇦"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 1,
+      "lost": 2,
+      "goalsFor": 2,
+      "goalsAgainst": 10,
+      "goalDifference": -8,
+      "points": 1,
+      "rank": 4
+    },
+    {
+      "group": "D",
+      "team": {
+        "id": "USA",
+        "name": "United States",
+        "shortName": "USA",
+        "flagEmoji": "🇺🇸"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 0,
+      "lost": 1,
+      "goalsFor": 8,
+      "goalsAgainst": 4,
+      "goalDifference": 4,
+      "points": 6,
+      "rank": 1
+    },
+    {
+      "group": "D",
+      "team": {
+        "id": "AUS",
+        "name": "Australia",
+        "shortName": "AUS",
+        "flagEmoji": "🇦🇺"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 2,
+      "goalsAgainst": 2,
+      "goalDifference": 0,
+      "points": 4,
+      "rank": 2
+    },
+    {
+      "group": "D",
+      "team": {
+        "id": "PAR",
+        "name": "Paraguay",
+        "shortName": "PAR",
+        "flagEmoji": "🇵🇾"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 2,
+      "goalsAgainst": 4,
+      "goalDifference": -2,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "D",
+      "team": {
+        "id": "TUR",
+        "name": "Turkey",
+        "shortName": "TUR",
+        "flagEmoji": "🇹🇷"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 0,
+      "lost": 2,
+      "goalsFor": 3,
+      "goalsAgainst": 5,
+      "goalDifference": -2,
+      "points": 3,
+      "rank": 4
+    },
+    {
+      "group": "C",
+      "team": {
+        "id": "BRA",
+        "name": "Brazil",
+        "shortName": "BRA",
+        "flagEmoji": "🇧🇷"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 7,
+      "goalsAgainst": 1,
+      "goalDifference": 6,
+      "points": 7,
+      "rank": 1
+    },
+    {
+      "group": "C",
+      "team": {
+        "id": "MAR",
+        "name": "Morocco",
+        "shortName": "MAR",
+        "flagEmoji": "🇲🇦"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 6,
+      "goalsAgainst": 3,
+      "goalDifference": 3,
+      "points": 7,
+      "rank": 2
+    },
+    {
+      "group": "C",
+      "team": {
+        "id": "SCO",
+        "name": "Scotland",
+        "shortName": "SCO",
+        "flagEmoji": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 0,
+      "lost": 2,
+      "goalsFor": 1,
+      "goalsAgainst": 4,
+      "goalDifference": -3,
+      "points": 3,
+      "rank": 3
+    },
+    {
+      "group": "C",
+      "team": {
+        "id": "HAI",
+        "name": "Haiti",
+        "shortName": "HAI",
+        "flagEmoji": "🇭🇹"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 0,
+      "lost": 3,
+      "goalsFor": 2,
+      "goalsAgainst": 8,
+      "goalDifference": -6,
+      "points": 0,
+      "rank": 4
+    },
+    {
+      "group": "E",
+      "team": {
+        "id": "GER",
+        "name": "Germany",
+        "shortName": "GER",
+        "flagEmoji": "🇩🇪"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 0,
+      "lost": 1,
+      "goalsFor": 10,
+      "goalsAgainst": 4,
+      "goalDifference": 6,
+      "points": 6,
+      "rank": 1
+    },
+    {
+      "group": "E",
+      "team": {
+        "id": "CIV",
+        "name": "Ivory Coast",
+        "shortName": "CIV",
+        "flagEmoji": "🇨🇮"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 0,
+      "lost": 1,
+      "goalsFor": 4,
+      "goalsAgainst": 2,
+      "goalDifference": 2,
+      "points": 6,
+      "rank": 2
+    },
+    {
+      "group": "E",
+      "team": {
+        "id": "ECU",
+        "name": "Ecuador",
+        "shortName": "ECU",
+        "flagEmoji": "🇪🇨"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 2,
+      "goalsAgainst": 2,
+      "goalDifference": 0,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "E",
+      "team": {
+        "id": "CUW",
+        "name": "Curaçao",
+        "shortName": "CUW",
+        "flagEmoji": "🇨🇼"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 1,
+      "lost": 2,
+      "goalsFor": 1,
+      "goalsAgainst": 9,
+      "goalDifference": -8,
+      "points": 1,
+      "rank": 4
+    },
+    {
+      "group": "F",
+      "team": {
+        "id": "NED",
+        "name": "Netherlands",
+        "shortName": "NED",
+        "flagEmoji": "🇳🇱"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 10,
+      "goalsAgainst": 4,
+      "goalDifference": 6,
+      "points": 7,
+      "rank": 1
+    },
+    {
+      "group": "F",
+      "team": {
+        "id": "JPN",
+        "name": "Japan",
+        "shortName": "JPN",
+        "flagEmoji": "🇯🇵"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 2,
+      "lost": 0,
+      "goalsFor": 7,
+      "goalsAgainst": 3,
+      "goalDifference": 4,
+      "points": 5,
+      "rank": 2
+    },
+    {
+      "group": "F",
+      "team": {
+        "id": "SWE",
+        "name": "Sweden",
+        "shortName": "SWE",
+        "flagEmoji": "🇸🇪"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 7,
+      "goalsAgainst": 7,
+      "goalDifference": 0,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "F",
+      "team": {
+        "id": "TUN",
+        "name": "Tunisia",
+        "shortName": "TUN",
+        "flagEmoji": "🇹🇳"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 0,
+      "lost": 3,
+      "goalsFor": 2,
+      "goalsAgainst": 12,
+      "goalDifference": -10,
+      "points": 0,
+      "rank": 4
+    },
+    {
+      "group": "H",
+      "team": {
+        "id": "ESP",
+        "name": "Spain",
+        "shortName": "ESP",
+        "flagEmoji": "🇪🇸"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 5,
+      "goalsAgainst": 0,
+      "goalDifference": 5,
+      "points": 7,
+      "rank": 1
+    },
+    {
+      "group": "H",
+      "team": {
+        "id": "CPV",
+        "name": "Cape Verde Islands",
+        "shortName": "CPV",
+        "flagEmoji": "🇨🇻"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 3,
+      "lost": 0,
+      "goalsFor": 2,
+      "goalsAgainst": 2,
+      "goalDifference": 0,
+      "points": 3,
+      "rank": 2
+    },
+    {
+      "group": "H",
+      "team": {
+        "id": "URU",
+        "name": "Uruguay",
+        "shortName": "URU",
+        "flagEmoji": "🇺🇾"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 2,
+      "lost": 1,
+      "goalsFor": 3,
+      "goalsAgainst": 4,
+      "goalDifference": -1,
+      "points": 2,
+      "rank": 3
+    },
+    {
+      "group": "H",
+      "team": {
+        "id": "KSA",
+        "name": "Saudi Arabia",
+        "shortName": "KSA",
+        "flagEmoji": "🇸🇦"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 2,
+      "lost": 1,
+      "goalsFor": 1,
+      "goalsAgainst": 5,
+      "goalDifference": -4,
+      "points": 2,
+      "rank": 4
+    },
+    {
+      "group": "G",
+      "team": {
+        "id": "BEL",
+        "name": "Belgium",
+        "shortName": "BEL",
+        "flagEmoji": "🇧🇪"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 2,
+      "lost": 0,
+      "goalsFor": 6,
+      "goalsAgainst": 2,
+      "goalDifference": 4,
+      "points": 5,
+      "rank": 1
+    },
+    {
+      "group": "G",
+      "team": {
+        "id": "EGY",
+        "name": "Egypt",
+        "shortName": "EGY",
+        "flagEmoji": "🇪🇬"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 2,
+      "lost": 0,
+      "goalsFor": 5,
+      "goalsAgainst": 3,
+      "goalDifference": 2,
+      "points": 5,
+      "rank": 2
+    },
+    {
+      "group": "G",
+      "team": {
+        "id": "IRN",
+        "name": "Iran",
+        "shortName": "IRN",
+        "flagEmoji": "🇮🇷"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 3,
+      "lost": 0,
+      "goalsFor": 3,
+      "goalsAgainst": 3,
+      "goalDifference": 0,
+      "points": 3,
+      "rank": 3
+    },
+    {
+      "group": "G",
+      "team": {
+        "id": "NZL",
+        "name": "New Zealand",
+        "shortName": "NZL",
+        "flagEmoji": "🇳🇿"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 1,
+      "lost": 2,
+      "goalsFor": 4,
+      "goalsAgainst": 10,
+      "goalDifference": -6,
+      "points": 1,
+      "rank": 4
+    },
+    {
+      "group": "I",
+      "team": {
+        "id": "FRA",
+        "name": "France",
+        "shortName": "FRA",
+        "flagEmoji": "🇫🇷"
+      },
+      "played": 3,
+      "won": 3,
+      "drawn": 0,
+      "lost": 0,
+      "goalsFor": 10,
+      "goalsAgainst": 2,
+      "goalDifference": 8,
+      "points": 9,
+      "rank": 1
+    },
+    {
+      "group": "I",
+      "team": {
+        "id": "NOR",
+        "name": "Norway",
+        "shortName": "NOR",
+        "flagEmoji": "🇳🇴"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 0,
+      "lost": 1,
+      "goalsFor": 8,
+      "goalsAgainst": 7,
+      "goalDifference": 1,
+      "points": 6,
+      "rank": 2
+    },
+    {
+      "group": "I",
+      "team": {
+        "id": "SEN",
+        "name": "Senegal",
+        "shortName": "SEN",
+        "flagEmoji": "🇸🇳"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 0,
+      "lost": 2,
+      "goalsFor": 8,
+      "goalsAgainst": 6,
+      "goalDifference": 2,
+      "points": 3,
+      "rank": 3
+    },
+    {
+      "group": "I",
+      "team": {
+        "id": "IRQ",
+        "name": "Iraq",
+        "shortName": "IRQ",
+        "flagEmoji": "🇮🇶"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 0,
+      "lost": 3,
+      "goalsFor": 1,
+      "goalsAgainst": 12,
+      "goalDifference": -11,
+      "points": 0,
+      "rank": 4
+    },
+    {
+      "group": "J",
+      "team": {
+        "id": "ARG",
+        "name": "Argentina",
+        "shortName": "ARG",
+        "flagEmoji": "🇦🇷"
+      },
+      "played": 3,
+      "won": 3,
+      "drawn": 0,
+      "lost": 0,
+      "goalsFor": 8,
+      "goalsAgainst": 1,
+      "goalDifference": 7,
+      "points": 9,
+      "rank": 1
+    },
+    {
+      "group": "J",
+      "team": {
+        "id": "AUT",
+        "name": "Austria",
+        "shortName": "AUT",
+        "flagEmoji": "🇦🇹"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 6,
+      "goalsAgainst": 6,
+      "goalDifference": 0,
+      "points": 4,
+      "rank": 2
+    },
+    {
+      "group": "J",
+      "team": {
+        "id": "ALG",
+        "name": "Algeria",
+        "shortName": "ALG",
+        "flagEmoji": "🇩🇿"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 5,
+      "goalsAgainst": 7,
+      "goalDifference": -2,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "J",
+      "team": {
+        "id": "JOR",
+        "name": "Jordan",
+        "shortName": "JOR",
+        "flagEmoji": "🇯🇴"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 0,
+      "lost": 3,
+      "goalsFor": 3,
+      "goalsAgainst": 8,
+      "goalDifference": -5,
+      "points": 0,
+      "rank": 4
+    },
+    {
+      "group": "K",
+      "team": {
+        "id": "COL",
+        "name": "Colombia",
+        "shortName": "COL",
+        "flagEmoji": "🇨🇴"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 4,
+      "goalsAgainst": 1,
+      "goalDifference": 3,
+      "points": 7,
+      "rank": 1
+    },
+    {
+      "group": "K",
+      "team": {
+        "id": "POR",
+        "name": "Portugal",
+        "shortName": "POR",
+        "flagEmoji": "🇵🇹"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 2,
+      "lost": 0,
+      "goalsFor": 6,
+      "goalsAgainst": 1,
+      "goalDifference": 5,
+      "points": 5,
+      "rank": 2
+    },
+    {
+      "group": "K",
+      "team": {
+        "id": "COD",
+        "name": "Congo DR",
+        "shortName": "COD",
+        "flagEmoji": "🇨🇩"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 4,
+      "goalsAgainst": 3,
+      "goalDifference": 1,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "K",
+      "team": {
+        "id": "UZB",
+        "name": "Uzbekistan",
+        "shortName": "UZB",
+        "flagEmoji": "🇺🇿"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 0,
+      "lost": 3,
+      "goalsFor": 2,
+      "goalsAgainst": 11,
+      "goalDifference": -9,
+      "points": 0,
+      "rank": 4
+    },
+    {
+      "group": "L",
+      "team": {
+        "id": "ENG",
+        "name": "England",
+        "shortName": "ENG",
+        "flagEmoji": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 1,
+      "lost": 0,
+      "goalsFor": 6,
+      "goalsAgainst": 2,
+      "goalDifference": 4,
+      "points": 7,
+      "rank": 1
+    },
+    {
+      "group": "L",
+      "team": {
+        "id": "CRO",
+        "name": "Croatia",
+        "shortName": "CRO",
+        "flagEmoji": "🇭🇷"
+      },
+      "played": 3,
+      "won": 2,
+      "drawn": 0,
+      "lost": 1,
+      "goalsFor": 5,
+      "goalsAgainst": 5,
+      "goalDifference": 0,
+      "points": 6,
+      "rank": 2
+    },
+    {
+      "group": "L",
+      "team": {
+        "id": "GHA",
+        "name": "Ghana",
+        "shortName": "GHA",
+        "flagEmoji": "🇬🇭"
+      },
+      "played": 3,
+      "won": 1,
+      "drawn": 1,
+      "lost": 1,
+      "goalsFor": 2,
+      "goalsAgainst": 2,
+      "goalDifference": 0,
+      "points": 4,
+      "rank": 3
+    },
+    {
+      "group": "L",
+      "team": {
+        "id": "PAN",
+        "name": "Panama",
+        "shortName": "PAN",
+        "flagEmoji": "🇵🇦"
+      },
+      "played": 3,
+      "won": 0,
+      "drawn": 0,
+      "lost": 3,
+      "goalsFor": 0,
+      "goalsAgainst": 4,
+      "goalDifference": -4,
+      "points": 0,
+      "rank": 4
+    }
+  ]
+}
