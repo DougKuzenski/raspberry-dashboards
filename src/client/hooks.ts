@@ -64,7 +64,7 @@ export async function loadDashboardFeedOnce({
     setData(json);
     setError(null);
     setStale(Boolean(json.stale));
-    setLastUpdated(new Date());
+    setLastUpdated(new Date(json.generatedAtUtc));
   } catch (err) {
     if (!isActive()) return;
     setError(dashboardFetchErrorMessage(err));
