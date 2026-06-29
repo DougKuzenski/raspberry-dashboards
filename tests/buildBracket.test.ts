@@ -499,8 +499,15 @@ describe('buildKnockoutSkeleton — authoritative R32 pairing table', () => {
     }
     expect(byId.get('sf-1')!.winnerFeedsTo).toBe('final');
     expect(byId.get('sf-2')!.winnerFeedsTo).toBe('final');
-    expect(byId.get('third-place')!.winnerFeedsTo).toBeUndefined();
-    expect(byId.get('final')!.winnerFeedsTo).toBeUndefined();
+    // Final + third-place are terminal (no forward edge) and pull from the SF nodes.
+    const final = byId.get('final')!;
+    expect(final.winnerFeedsTo).toBeUndefined();
+    expect(final.homeSource).toBe('Winner SF-1');
+    expect(final.awaySource).toBe('Winner SF-2');
+    const thirdPlace = byId.get('third-place')!;
+    expect(thirdPlace.winnerFeedsTo).toBeUndefined();
+    expect(thirdPlace.homeSource).toBe('Loser SF-1');
+    expect(thirdPlace.awaySource).toBe('Loser SF-2');
   });
 });
 
@@ -593,11 +600,13 @@ describe('fixture-driven bracket — resolveBracket integration', () => {
 
   it('(regression) standings-aware merge prevents USA-vs-third misrender', () => {
     // Scenario: USA won Group D, BIH finished 3rd in Group E. The published
-    // fixture is USA vs BIH (fd-537421). Without standings awareness the merge
-    // sees structural ambiguity with r32-1 and may drop the fixture, leaving
-    // r32-7 without a matchId. The resolver then backfills Best 3rd #3 with the
-    // top-ranked third (here, SWE). With standings the ambiguity collapses and
-    // the fixture keeps its matchId -> resolver shows BIH.
+    // fixture is USA vs BIH (fd-537421). USA pins the "Winner Group D" home slot of
+    // r32-7 = [Winner Group D, Best 3rd #3] and BIH sits in its away Best-3rd slot.
+    // Without standings awareness the merge sees structural ambiguity with the rival
+    // node r32-1 = [Winner Group E, Best 3rd #1] (BIH could be Winner Group E there)
+    // and may drop the fixture, leaving r32-7 without a matchId. The resolver then
+    // backfills Best 3rd #3 with the top-ranked third (here, SWE). With standings the
+    // ambiguity collapses and the fixture keeps its matchId -> resolver shows BIH.
     const groupMatches: Match[] = [
       // Group D decided: USA winner
       { id: 'gd1', stage: 'group', group: 'D', homeTeam: team('USA'), awayTeam: team('DD'), kickoffUtc: '2026-06-11T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 0, winnerTeamId: 'USA' },
