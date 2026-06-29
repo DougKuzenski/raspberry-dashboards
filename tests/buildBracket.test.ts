@@ -514,15 +514,17 @@ describe('buildKnockoutSkeleton — authoritative R32 pairing table', () => {
 // ---------------------------------------------------------------------------
 // Live cache integration — every published R32 fixture attaches to its node
 //
-// This is the core acceptance test: against the real football-data cache, all 16
-// published R32 fixtures must map to exactly one node (zero dropped fixtures), and
-// the marquee matchups must land on the officially-correct slots. Under the OLD
+// This is the core acceptance test: against a committed snapshot of the real
+// football-data cache (tests/fixtures/r32-cache.json — the live cache itself is
+// git-ignored, so it is not available on a clean CI checkout), all 16 published
+// R32 fixtures must map to exactly one node (zero dropped fixtures), and the
+// marquee matchups must land on the officially-correct slots. Under the OLD
 // (transposed) table 8 of these fixtures dropped, stranding the away R16 feeders.
 // ---------------------------------------------------------------------------
 
 describe('mergeKnockoutFixtures — live cache (all 16 R32 fixtures attach)', () => {
   const cache = JSON.parse(
-    readFileSync(new URL('../data/cache/dashboard.json', import.meta.url), 'utf8'),
+    readFileSync(new URL('./fixtures/r32-cache.json', import.meta.url), 'utf8'),
   ) as { matches: Match[]; standings: Standing[] };
   const merged = mergeKnockoutFixtures(buildKnockoutSkeleton(), cache.matches, cache.standings);
   const byMatchId = new Map(cache.matches.map((m) => [m.id, m]));
