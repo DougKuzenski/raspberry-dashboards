@@ -92,6 +92,9 @@ export interface BracketSlot {
   score?: number;
   /** True when this slot's team won the node's match. */
   isWinner: boolean;
+  /** When the source is an undecided knockout reference and the upstream match
+   *  has two real teams, the two possible teams that could fill this slot. */
+  candidates?: TeamRef[];
 }
 
 export interface ResolvedBracketNode {

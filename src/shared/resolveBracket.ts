@@ -265,6 +265,20 @@ export function resolveBracket(
     }
   }
 
+  // Candidate pass: for undecided knockout slots whose upstream match has two
+  // real teams, annotate the two possible teams that could fill this slot.
+  for (const rnode of resolved) {
+    for (const slot of [rnode.home, rnode.away]) {
+      if (slot.team) continue;
+      const upstream = upstreamNodeFor(slot.source, nodes);
+      if (!upstream) continue;
+      const match = findMatch(upstream, undefined, undefined, matches, byId);
+      if (match && !isPlaceholderTeam(match.homeTeam) && !isPlaceholderTeam(match.awayTeam)) {
+        slot.candidates = [match.homeTeam, match.awayTeam];
+      }
+    }
+  }
+
   return resolved;
 }
 

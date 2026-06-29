@@ -19,9 +19,16 @@ export function SlotLine({ slot, base }: Props) {
   if (slot.team && isFavoriteTeam(slot.team.id)) classes.push(`${base}__slot--favorite`);
   if (!slot.team) classes.push(`${base}__slot--tbd`);
 
-  const label = slot.team
-    ? `${slot.team.flagEmoji ? `${slot.team.flagEmoji} ` : ''}${slot.team.shortName ?? slot.team.name}`
-    : formatBracketSource(slot.source);
+  let label: string;
+  if (slot.team) {
+    label = `${slot.team.flagEmoji ? `${slot.team.flagEmoji} ` : ''}${slot.team.shortName ?? slot.team.name}`;
+  } else if (slot.candidates?.length === 2) {
+    label = slot.candidates
+      .map((t) => `${t.flagEmoji ? `${t.flagEmoji} ` : ''}${t.shortName ?? t.name}`)
+      .join(' or ');
+  } else {
+    label = formatBracketSource(slot.source);
+  }
 
   return (
     <div className={classes.join(' ')}>

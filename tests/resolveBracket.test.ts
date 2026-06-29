@@ -286,3 +286,93 @@ describe('resolveBracket — third-place loser-pull vs final winner-feed', () =>
     expect(final.decided).toBe(true);
   });
 });
+
+describe('resolveBracket — candidate pairs for undecided knockout slots', () => {
+  const flagTeam = (id: string, flagEmoji: string, shortName: string) => ({
+    id, name: id, flagEmoji, shortName,
+  });
+
+  it('fills candidates for an R16 slot when the upstream R32 has two real teams', () => {
+    const nodes: BracketNode[] = [
+      { id: 'r32-1', stage: 'round_of_32', label: 'R32 1', homeSource: 'Winner Group A', awaySource: 'Runner-up Group A', matchId: 'k1', winnerFeedsTo: 'r16-1' },
+      { id: 'r16-1', stage: 'round_of_16', label: 'R16 1', homeSource: 'Winner R32-1', awaySource: 'Winner R32-2' },
+    ];
+    const matches: Match[] = [
+      {
+        id: 'k1', stage: 'round_of_32', homeTeam: flagTeam('USA', '🇺🇸', 'USA'), awayTeam: flagTeam('BIH', '🇧🇦', 'BIH'),
+        kickoffUtc: '2026-06-30T19:00:00Z', status: 'scheduled',
+      },
+    ];
+    const resolved = resolveBracket(matches, [], nodes);
+    const r16 = resolved.find((n) => n.id === 'r16-1')!;
+    expect(r16.home.team).toBeUndefined();
+    expect(r16.home.candidates).toHaveLength(2);
+    expect(r16.home.candidates![0].id).toBe('USA');
+    expect(r16.home.candidates![1].id).toBe('BIH');
+    expect(r16.home.candidates![0].flagEmoji).toBe('🇺🇸');
+    expect(r16.home.candidates![1].flagEmoji).toBe('🇧🇦');
+  });
+
+  it(' omits candidates when the upstream match has a placeholder team', () => {
+    const nodes: BracketNode[] = [
+      { id: 'r32-1', stage: 'round_of_32', label: 'R32 1', homeSource: 'Winner Group A', awaySource: 'Runner-up Group A', matchId: 'k1', winnerFeedsTo: 'r16-1' },
+      { id: 'r16-1', stage: 'round_of_16', label: 'R16 1', homeSource: 'Winner R32-1', awaySource: 'Winner R32-2' },
+    ];
+    const matches: Match[] = [
+      {
+        id: 'k1', stage: 'round_of_32', homeTeam: { id: 'USA', name: 'USA' }, awayTeam: { id: 'Winner Match 99', name: 'Winner Match 99' },
+        kickoffUtc: '2026-06-30T19:00:00Z', status: 'scheduled',
+      },
+    ];
+    const resolved = resolveBracket(matches, [], nodes);
+    const r16 = resolved.find((n) => n.id === 'r16-1')!;
+    expect(r16.home.team).toBeUndefined();
+    expect(r16.home.candidates).toBeUndefined();
+  });
+
+  it(' omits candidates for group-source slots', () => {
+    const nodes: BracketNode[] = [
+      { id: 'r32-1', stage: 'round_of_32', label: 'R32 1', homeSource: 'Winner Group A', awaySource: 'Runner-up Group A' },
+    ];
+    const resolved = resolveBracket([], [], nodes);
+    const r32 = resolved.find((n) => n.id === 'r32-1')!;
+    expect(r32.home.team).toBeUndefined();
+    expect(r32.home.candidates).toBeUndefined();
+  });
+
+  it(' omits candidates when the slot is already resolved to a single team', () => {
+    const nodes: BracketNode[] = [
+      { id: 'r32-1', stage: 'round_of_32', label: 'R32 1', homeSource: 'Winner Group A', awaySource: 'Runner-up Group A', matchId: 'k1', winnerFeedsTo: 'r16-1' },
+      { id: 'r16-1', stage: 'round_of_16', label: 'R16 1', homeSource: 'Winner R32-1', awaySource: 'Winner R32-2' },
+    ];
+    const matches: Match[] = [
+      {
+        id: 'k1', stage: 'round_of_32', homeTeam: flagTeam('USA', '🇺🇸', 'USA'), awayTeam: flagTeam('BIH', '🇧🇦', 'BIH'),
+        kickoffUtc: '2026-06-30T19:00:00Z', status: 'finished', homeScore: 2, awayScore: 1, winnerTeamId: 'USA',
+      },
+    ];
+    const resolved = resolveBracket(matches, [], nodes);
+    const r16 = resolved.find((n) => n.id === 'r16-1')!;
+    expect(r16.home.team?.id).toBe('USA');
+    expect(r16.home.candidates).toBeUndefined();
+  });
+
+  it('fills candidates for a third-place slot from an unfinished semifinal', () => {
+    const nodes: BracketNode[] = [
+      { id: 'sf-1', stage: 'semifinal', label: 'SF 1', homeSource: 'Winner QF-1', awaySource: 'Winner QF-2', matchId: 's1', winnerFeedsTo: 'final' },
+      { id: 'third-place', stage: 'third_place', label: '3rd', homeSource: 'Loser SF-1', awaySource: 'Loser SF-2' },
+    ];
+    const matches: Match[] = [
+      {
+        id: 's1', stage: 'semifinal', homeTeam: flagTeam('ARG', '🇦🇷', 'ARG'), awayTeam: flagTeam('BRA', '🇧🇷', 'BRA'),
+        kickoffUtc: '2026-07-14T19:00:00Z', status: 'scheduled',
+      },
+    ];
+    const resolved = resolveBracket(matches, [], nodes);
+    const third = resolved.find((n) => n.id === 'third-place')!;
+    expect(third.home.team).toBeUndefined();
+    expect(third.home.candidates).toHaveLength(2);
+    expect(third.home.candidates![0].id).toBe('ARG');
+    expect(third.home.candidates![1].id).toBe('BRA');
+  });
+});
