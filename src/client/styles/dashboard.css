@@ -340,7 +340,7 @@
 .pairings-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
   align-content: space-around;
   flex: 1;
   min-height: 0;
@@ -357,7 +357,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.4em;
-  padding: 0.2em 0.45em;
+  padding: 0.15em 0.45em;
   font-size: calc(var(--fs-base) * 0.72);
 }
 .pairing__slot + .pairing__slot { border-top: 1px solid var(--line); }
@@ -413,8 +413,8 @@
 .transition .group-card { padding: 3px 7px; border-radius: 6px; }
 .transition .group-card__title { font-size: calc(var(--fs-base) * 0.72); margin-bottom: 0.1em; }
 .transition .group-card__row { font-size: calc(var(--fs-base) * 0.68); line-height: 1.1; padding: 0.03em 0; }
-.transition .pairings-grid { grid-template-columns: repeat(2, 1fr); gap: 5px 8px; }
-.transition .pairing__slot { font-size: calc(var(--fs-base) * 0.72); line-height: 1.1; padding: 0.18em 0.5em; }
+.transition .pairings-grid { grid-template-columns: repeat(2, 1fr); gap: 4px 8px; }
+.transition .pairing__slot { font-size: calc(var(--fs-base) * 0.72); line-height: 1.1; padding: 0.15em 0.5em; }
 
 /* ---- Footer ticker ---- */
 .ticker {
