@@ -292,11 +292,19 @@
   min-height: 0;
   overflow: hidden;
 }
+/* Dense R32 (2 sub-cols × 8 rows): condense vertical metrics so a three-line
+   chip (two slots + penalty/AET tag) fits the row budget without clipping. */
+.kwindow__nodes[style*="repeat(2"] {
+  gap: 4px 10px;
+}
+.kwindow__nodes[style*="repeat(2"] .kwindow__slot {
+  padding: 0.15em 0.6em;
+}
 .kwindow__node {
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 .kwindow__slot {
   display: flex;
@@ -320,9 +328,10 @@
   font-size: calc(var(--fs-base) * 0.72);
   color: var(--text-dim);
   text-align: center;
-  padding: 0.1em 0.4em;
+  padding: 0.05em 0.4em;
   border-top: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 /* ---- Knockout pairings grid (transition R32 box) ---- */
@@ -331,7 +340,7 @@
 .pairings-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
   align-content: space-around;
   flex: 1;
   min-height: 0;
@@ -341,14 +350,14 @@
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 6px;
-  overflow: hidden;
+  overflow: visible;
 }
 .pairing__slot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.4em;
-  padding: 0.2em 0.45em;
+  padding: 0.15em 0.45em;
   font-size: calc(var(--fs-base) * 0.72);
 }
 .pairing__slot + .pairing__slot { border-top: 1px solid var(--line); }
@@ -364,9 +373,10 @@
   font-size: calc(var(--fs-base) * 0.72);
   color: var(--text-dim);
   text-align: center;
-  padding: 0.1em 0.4em;
+  padding: 0.05em 0.4em;
   border-top: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
+  line-height: 1.05;
 }
 
 /* ---- Group → knockout transition: rankings + R32 pairings together ---- */
@@ -403,8 +413,8 @@
 .transition .group-card { padding: 3px 7px; border-radius: 6px; }
 .transition .group-card__title { font-size: calc(var(--fs-base) * 0.72); margin-bottom: 0.1em; }
 .transition .group-card__row { font-size: calc(var(--fs-base) * 0.68); line-height: 1.1; padding: 0.03em 0; }
-.transition .pairings-grid { grid-template-columns: repeat(2, 1fr); gap: 5px 8px; }
-.transition .pairing__slot { font-size: calc(var(--fs-base) * 0.72); line-height: 1.1; padding: 0.18em 0.5em; }
+.transition .pairings-grid { grid-template-columns: repeat(2, 1fr); gap: 4px 8px; }
+.transition .pairing__slot { font-size: calc(var(--fs-base) * 0.72); line-height: 1.1; padding: 0.15em 0.5em; }
 
 /* ---- Footer ticker ---- */
 .ticker {
