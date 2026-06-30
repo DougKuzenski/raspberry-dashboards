@@ -118,7 +118,8 @@ function winnerOf(match: Match): TeamRef | undefined {
   if (
     match.decidedBy === 'PENALTY_SHOOTOUT' &&
     match.penaltyHome != null &&
-    match.penaltyAway != null
+    match.penaltyAway != null &&
+    match.penaltyHome !== match.penaltyAway
   ) {
     return match.penaltyHome > match.penaltyAway ? match.homeTeam : match.awayTeam;
   }
