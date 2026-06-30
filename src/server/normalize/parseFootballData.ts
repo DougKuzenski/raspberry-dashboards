@@ -115,24 +115,49 @@ export function parseFootballData(data: FootballDataResponse): Match[] {
     let penaltyAway: number | undefined;
     if (duration === 'PENALTY_SHOOTOUT') {
       decidedBy = 'PENALTY_SHOOTOUT';
-      penaltyHome = m.score?.penalties?.home ?? undefined;
-      penaltyAway = m.score?.penalties?.away ?? undefined;
+
+      // football-data's `score.penalties` is the well-formed shootout tally for
+      // most sources, BUT the WC2026 live feed leaves it equal & incomplete
+      // (it omits sudden-death kicks, e.g. 4-4 for GER-PAR, 3-3 for NED-MAR) and
+      // instead carries the decisive aggregate in `score.fullTime` (4-5, 3-4).
+      // Verified live (matches 537415, 537418): the side with the higher
+      // fullTime is the team that advanced. So pick whichever pair is DECISIVE
+      // (unequal) as the displayed shootout score: a complete `penalties` when
+      // present, else `fullTime`, which carries the real tally in the live shape.
+      const pen = m.score?.penalties;
+      const full = m.score?.fullTime;
+      const penDecisive = pen?.home != null && pen?.away != null && pen.home !== pen.away;
+      const fullDecisive =
+        full?.home != null && full?.away != null && full.home !== full.away;
+
+      if (penDecisive) {
+        penaltyHome = pen!.home!;
+        penaltyAway = pen!.away!;
+      } else if (fullDecisive) {
+        penaltyHome = full!.home!;
+        penaltyAway = full!.away!;
+      } else {
+        // Neither pair is decisive (genuinely incomplete data): show penalties
+        // as-is for transparency, but leave the winner underived below.
+        penaltyHome = pen?.home ?? undefined;
+        penaltyAway = pen?.away ?? undefined;
+      }
+
+      // Derive the winner when the source didn't already give an explicit
+      // HOME/AWAY winner (for shootouts it reports null or DRAW). Precedence:
+      // the verified fullTime-based rule first (authoritative final aggregate),
+      // else unequal penalties.
+      if (!winnerTeamId) {
+        if (fullDecisive) {
+          winnerTeamId = full!.home! > full!.away! ? home.id : away.id;
+        } else if (penDecisive) {
+          winnerTeamId = pen!.home! > pen!.away! ? home.id : away.id;
+        }
+      }
     } else if (duration === 'EXTRA_TIME') {
       decidedBy = 'EXTRA_TIME';
     } else if (duration === 'REGULAR') {
       decidedBy = 'REGULAR';
-    }
-
-    // football-data marks the 90/120-min result as DRAW for penalty matches,
-    // so derive winner from penalty scores when absent.
-    if (
-      !winnerTeamId &&
-      decidedBy === 'PENALTY_SHOOTOUT' &&
-      penaltyHome != null &&
-      penaltyAway != null &&
-      penaltyHome !== penaltyAway
-    ) {
-      winnerTeamId = penaltyHome > penaltyAway ? home.id : away.id;
     }
 
     return {
