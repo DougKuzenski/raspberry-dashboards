@@ -731,4 +731,65 @@ describe('fixture-driven bracket — resolveBracket integration', () => {
     expect(r16_1.away.team?.id).toBe('DDD'); // winner of r32-2
     expect(r16_1.decided).toBe(true);
   });
+
+  it('(regression) propagates a PENALTY_SHOOTOUT winner when winnerTeamId is absent but penalties differ', () => {
+    // football-data marks the 90/120-min result as DRAW for penalty matches,
+    // so winnerTeamId is absent. The resolver must still see it as decided
+    // and propagate the winner into the next round.
+    const gerPar: Match = {
+      id: 'fd-537415',
+      stage: 'round_of_32',
+      homeTeam: team('GER', 'Germany'),
+      awayTeam: team('PAR', 'Paraguay'),
+      kickoffUtc: '2026-07-01T18:00:00Z',
+      status: 'finished',
+      homeScore: 1,
+      awayScore: 1,
+      decidedBy: 'PENALTY_SHOOTOUT',
+      penaltyHome: 4,
+      penaltyAway: 5,
+      // winnerTeamId intentionally absent
+    };
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-1')!.matchId = 'fd-537415';
+
+    const resolved = resolveBracket([gerPar], [], skeleton);
+    const r32_1 = resolved.find((n) => n.id === 'r32-1')!;
+    expect(r32_1.matchId).toBe('fd-537415');
+    expect(r32_1.winner?.id).toBe('PAR');
+    expect(r32_1.home.isWinner).toBe(false);
+    expect(r32_1.away.isWinner).toBe(true);
+
+    // r32-1 feeds r16-1 home slot (Winner R32-1)
+    const r16_1 = resolved.find((n) => n.id === 'r16-1')!;
+    expect(r16_1.home.team?.id).toBe('PAR');
+  });
+
+  it('(regression) does NOT propagate when penalty shootout scores are equal', () => {
+    const gerPar: Match = {
+      id: 'fd-537415',
+      stage: 'round_of_32',
+      homeTeam: team('GER', 'Germany'),
+      awayTeam: team('PAR', 'Paraguay'),
+      kickoffUtc: '2026-07-01T18:00:00Z',
+      status: 'finished',
+      homeScore: 1,
+      awayScore: 1,
+      decidedBy: 'PENALTY_SHOOTOUT',
+      penaltyHome: 3,
+      penaltyAway: 3,
+    };
+    const skeleton = buildKnockoutSkeleton();
+    skeleton.find((n) => n.id === 'r32-1')!.matchId = 'fd-537415';
+
+    const resolved = resolveBracket([gerPar], [], skeleton);
+    const r32_1 = resolved.find((n) => n.id === 'r32-1')!;
+    expect(r32_1.winner).toBeUndefined();
+    expect(r32_1.home.isWinner).toBe(false);
+    expect(r32_1.away.isWinner).toBe(false);
+
+    // r16-1 should NOT receive a propagated winner
+    const r16_1 = resolved.find((n) => n.id === 'r16-1')!;
+    expect(r16_1.home.team).toBeUndefined();
+  });
 });

@@ -173,4 +173,56 @@ describe('parseFootballData — extra-time and penalty-shootout handling', () =>
     expect(m.decidedBy).toBe('REGULAR');
     expect(m.penaltyHome).toBeUndefined();
   });
+
+  it('derives winnerTeamId from penalties when score.winner is DRAW in a PENALTY_SHOOTOUT match', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 46,
+        utcDate: '2026-06-29T18:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_32',
+        group: null,
+        homeTeam: { id: 10, name: 'Germany', tla: 'GER' },
+        awayTeam: { id: 11, name: 'Paraguay', tla: 'PAR' },
+        score: {
+          winner: 'DRAW',
+          duration: 'PENALTY_SHOOTOUT',
+          regularTime: { home: 1, away: 1 },
+          fullTime: { home: 1, away: 1 },
+          penalties: { home: 4, away: 5 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.decidedBy).toBe('PENALTY_SHOOTOUT');
+    expect(m.winnerTeamId).toBe('PAR');
+    expect(m.penaltyHome).toBe(4);
+    expect(m.penaltyAway).toBe(5);
+  });
+
+  it('does NOT set winnerTeamId when penalty scores are equal', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 47,
+        utcDate: '2026-06-29T18:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_32',
+        group: null,
+        homeTeam: { id: 10, name: 'Germany', tla: 'GER' },
+        awayTeam: { id: 11, name: 'Paraguay', tla: 'PAR' },
+        score: {
+          winner: 'DRAW',
+          duration: 'PENALTY_SHOOTOUT',
+          regularTime: { home: 0, away: 0 },
+          fullTime: { home: 0, away: 0 },
+          penalties: { home: 3, away: 3 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.decidedBy).toBe('PENALTY_SHOOTOUT');
+    expect(m.winnerTeamId).toBeUndefined();
+    expect(m.penaltyHome).toBe(3);
+    expect(m.penaltyAway).toBe(3);
+  });
 });
