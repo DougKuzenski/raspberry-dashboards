@@ -292,11 +292,19 @@
   min-height: 0;
   overflow: hidden;
 }
+/* Dense R32 (2 sub-cols × 8 rows): condense vertical metrics so a three-line
+   chip (two slots + penalty/AET tag) fits the row budget without clipping. */
+.kwindow__nodes[style*="repeat(2"] {
+  gap: 4px 10px;
+}
+.kwindow__nodes[style*="repeat(2"] .kwindow__slot {
+  padding: 0.15em 0.6em;
+}
 .kwindow__node {
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 .kwindow__slot {
   display: flex;
@@ -320,9 +328,10 @@
   font-size: calc(var(--fs-base) * 0.72);
   color: var(--text-dim);
   text-align: center;
-  padding: 0.1em 0.4em;
+  padding: 0.05em 0.4em;
   border-top: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 /* ---- Knockout pairings grid (transition R32 box) ---- */
@@ -341,7 +350,7 @@
   background: var(--bg-panel-2);
   border: 1px solid var(--line);
   border-radius: 6px;
-  overflow: hidden;
+  overflow: visible;
 }
 .pairing__slot {
   display: flex;
@@ -364,9 +373,10 @@
   font-size: calc(var(--fs-base) * 0.72);
   color: var(--text-dim);
   text-align: center;
-  padding: 0.1em 0.4em;
+  padding: 0.05em 0.4em;
   border-top: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
+  line-height: 1.05;
 }
 
 /* ---- Group → knockout transition: rankings + R32 pairings together ---- */
