@@ -123,6 +123,18 @@ export function parseFootballData(data: FootballDataResponse): Match[] {
       decidedBy = 'REGULAR';
     }
 
+    // football-data marks the 90/120-min result as DRAW for penalty matches,
+    // so derive winner from penalty scores when absent.
+    if (
+      !winnerTeamId &&
+      decidedBy === 'PENALTY_SHOOTOUT' &&
+      penaltyHome != null &&
+      penaltyAway != null &&
+      penaltyHome !== penaltyAway
+    ) {
+      winnerTeamId = penaltyHome > penaltyAway ? home.id : away.id;
+    }
+
     return {
       id: `fd-${m.id}`,
       stage: mapStage(m.stage),

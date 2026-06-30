@@ -97,6 +97,14 @@ function sourceRefsNode(source: string, node: BracketNode): boolean {
 export function matchIsDecided(match: Match): boolean {
   if (match.status !== 'finished') return false;
   if (match.winnerTeamId) return true;
+  if (
+    match.decidedBy === 'PENALTY_SHOOTOUT' &&
+    match.penaltyHome != null &&
+    match.penaltyAway != null &&
+    match.penaltyHome !== match.penaltyAway
+  ) {
+    return true;
+  }
   return (
     match.homeScore != null && match.awayScore != null && match.homeScore !== match.awayScore
   );
@@ -106,6 +114,14 @@ function winnerOf(match: Match): TeamRef | undefined {
   if (!matchIsDecided(match)) return undefined;
   if (match.winnerTeamId) {
     return match.winnerTeamId === match.homeTeam.id ? match.homeTeam : match.awayTeam;
+  }
+  if (
+    match.decidedBy === 'PENALTY_SHOOTOUT' &&
+    match.penaltyHome != null &&
+    match.penaltyAway != null &&
+    match.penaltyHome !== match.penaltyAway
+  ) {
+    return match.penaltyHome > match.penaltyAway ? match.homeTeam : match.awayTeam;
   }
   return (match.homeScore ?? 0) > (match.awayScore ?? 0) ? match.homeTeam : match.awayTeam;
 }
