@@ -225,4 +225,96 @@ describe('parseFootballData — extra-time and penalty-shootout handling', () =>
     expect(m.penaltyHome).toBe(3);
     expect(m.penaltyAway).toBe(3);
   });
+
+  // --- WC2026 live-feed shape (regression for the real bug) ----------------
+  // The football-data.org v4 live feed reports finished shootouts with
+  // winner:null and an INCOMPLETE, EQUAL `penalties` object (it omits the
+  // sudden-death kicks). The decisive aggregate lives in `fullTime`. Verified
+  // against live matches 537415 (GER-PAR) and 537418 (NED-MAR).
+
+  it('LIVE WC2026 shape (537415 GER-PAR): winner:null, penalties 4-4, fullTime 4-5 -> away (PAR) wins, shows 4-5', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 537415,
+        utcDate: '2026-06-29T20:30:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_32',
+        group: null,
+        homeTeam: { id: 759, name: 'Germany', tla: 'GER' },
+        awayTeam: { id: 761, name: 'Paraguay', tla: 'PAR' },
+        score: {
+          winner: null,
+          duration: 'PENALTY_SHOOTOUT',
+          regularTime: { home: 1, away: 1 },
+          extraTime: { home: 0, away: 0 },
+          penalties: { home: 4, away: 4 }, // EQUAL + incomplete
+          fullTime: { home: 4, away: 5 },  // decisive carrier
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.status).toBe('finished');
+    expect(m.decidedBy).toBe('PENALTY_SHOOTOUT');
+    // 90/120-min displayed score stays the regulation 1-1.
+    expect(m.homeScore).toBe(1);
+    expect(m.awayScore).toBe(1);
+    // Decisive winner derived from fullTime: away (Paraguay) advanced.
+    expect(m.winnerTeamId).toBe('PAR');
+    // Displayed shootout score is the correct decisive 4-5, NOT the stale 4-4.
+    expect(m.penaltyHome).toBe(4);
+    expect(m.penaltyAway).toBe(5);
+  });
+
+  it('LIVE WC2026 shape (537418 NED-MAR): winner:null, penalties 3-3, fullTime 3-4 -> away (MAR) wins, shows 3-4', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 537418,
+        utcDate: '2026-06-29T16:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_32',
+        group: null,
+        homeTeam: { id: 8601, name: 'Netherlands', tla: 'NED' },
+        awayTeam: { id: 815, name: 'Morocco', tla: 'MAR' },
+        score: {
+          winner: null,
+          duration: 'PENALTY_SHOOTOUT',
+          regularTime: { home: 1, away: 1 },
+          extraTime: { home: 0, away: 0 },
+          penalties: { home: 3, away: 3 },
+          fullTime: { home: 3, away: 4 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.winnerTeamId).toBe('MAR');
+    expect(m.penaltyHome).toBe(3);
+    expect(m.penaltyAway).toBe(4);
+  });
+
+  it('GUARD: a genuinely undecided shootout (winner:null, penalties & fullTime both equal) derives no winner', () => {
+    const resp: FootballDataResponse = {
+      matches: [{
+        id: 999,
+        utcDate: '2026-06-29T18:00:00Z',
+        status: 'FINISHED',
+        stage: 'LAST_32',
+        group: null,
+        homeTeam: { id: 10, name: 'Germany', tla: 'GER' },
+        awayTeam: { id: 11, name: 'Paraguay', tla: 'PAR' },
+        score: {
+          winner: null,
+          duration: 'PENALTY_SHOOTOUT',
+          regularTime: { home: 1, away: 1 },
+          extraTime: { home: 0, away: 0 },
+          penalties: { home: 4, away: 4 },
+          fullTime: { home: 4, away: 4 },
+        },
+      }],
+    };
+    const [m] = parseFootballData(resp);
+    expect(m.decidedBy).toBe('PENALTY_SHOOTOUT');
+    expect(m.winnerTeamId).toBeUndefined();
+    expect(m.penaltyHome).toBe(4);
+    expect(m.penaltyAway).toBe(4);
+  });
 });
